@@ -1,0 +1,8 @@
+rootProject.name = 'cloud-mock'
+
+include 'cloudmock-core'
+include 'cloudmock-sqs'
+include 'cloudmock-secretsmanager'
+include 'cloudmock-s3'
+include 'cloudmock-dynamodb'
+include 'cloudmock-lambda'

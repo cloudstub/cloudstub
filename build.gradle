@@ -1,0 +1,63 @@
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    group = 'io.cloudmock'
+    version = '0.1.0-SNAPSHOT'
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        testImplementation platform(libs.junit.bom)
+        testImplementation libs.junit.jupiter
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                artifactId = project.name
+            }
+        }
+    }
+
+    // No cloudmock-* module may depend on another — checked at dependency declaration time.
+    // resolutionStrategy catches any transitive violation that slips through at resolve time.
+    afterEvaluate {
+        ['compileClasspath', 'runtimeClasspath', 'testCompileClasspath', 'testRuntimeClasspath'].each { cfgName ->
+            configurations.findByName(cfgName)?.allDependencies?.each { dep ->
+                if (dep.group == 'io.cloudmock') {
+                    throw new GradleException(
+                        "Module isolation violation in '${project.name}': " +
+                        "declared dependency on '${dep.group}:${dep.name}' is forbidden. " +
+                        "cloudmock-* modules must not depend on each other."
+                    )
+                }
+            }
+        }
+    }
+
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'io.cloudmock') {
+                throw new GradleException(
+                    "Module isolation violation in '${project.name}': " +
+                    "transitive dependency on '${details.requested.group}:${details.requested.name}' is forbidden. " +
+                    "cloudmock-* modules must not depend on each other."
+                )
+            }
+        }
+    }
+}
