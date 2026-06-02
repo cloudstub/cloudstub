@@ -108,6 +108,7 @@ public documentation site.
 CloudMock simulates the AWS API surface well enough to test application logic, but it is not a full reimplementation of
 AWS. The following are explicitly out of scope:
 
+- AWS SDK v1 — automatic endpoint redirection via `aws.endpoint-url` is v2-only; SDK v1 users can opt into the `cloudmock-sdk-v1` companion library (Phase 2) for a one-line client setup helper
 - SQS FIFO deduplication and ordering semantics
 - S3 multipart upload lifecycle and versioning
 - DynamoDB conditional expressions and transaction semantics
