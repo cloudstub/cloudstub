@@ -2,6 +2,7 @@
 wiremock = "3.13.1"
 awssdk   = "2.25.70"
 junit    = "5.10.2"
+slf4j    = "2.0.18"
 
 [libraries]
 wiremock           = { module = "org.wiremock:wiremock",                     version.ref = "wiremock" }
@@ -12,3 +13,4 @@ aws-dynamodb       = { module = "software.amazon.awssdk:dynamodb",           ver
 aws-lambda         = { module = "software.amazon.awssdk:lambda",             version.ref = "awssdk" }
 junit-bom          = { module = "org.junit:junit-bom",                       version.ref = "junit" }
 junit-jupiter      = { module = "org.junit.jupiter:junit-jupiter",           version.ref = "junit" }
+slf4j-simple       = { module = "org.slf4j:slf4j-simple",                    version.ref = "slf4j" }

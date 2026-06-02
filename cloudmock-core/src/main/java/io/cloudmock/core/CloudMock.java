@@ -2,11 +2,14 @@ package io.cloudmock.core;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.cloudmock.core.internal.Md5HandlebarsHelper;
 import io.cloudmock.core.exception.CloudMockAlreadyStartedException;
 import io.cloudmock.core.exception.CloudMockNotStartedException;
 import io.cloudmock.core.internal.WireMockStubRegistrar;
 import io.cloudmock.core.spi.CloudMockService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ServiceLoader;
 
 /**
@@ -38,12 +41,30 @@ public final class CloudMock implements AutoCloseable {
     private static final String ENDPOINT_PROPERTY = "aws.endpoint-url";
 
     private WireMockServer server;
+    private final List<CloudMockService> explicitServices = new ArrayList<>();
+
+    /**
+     * Registers a service module explicitly, in addition to any modules discovered via
+     * {@link ServiceLoader}. Must be called before {@link #start()}.
+     *
+     * <p>Useful in module-level tests where the test classpath structure may prevent
+     * ServiceLoader from discovering the module under test automatically.
+     *
+     * @throws CloudMockAlreadyStartedException if the instance is already started
+     */
+    public CloudMock withService(CloudMockService service) {
+        if (server != null) {
+            throw new CloudMockAlreadyStartedException();
+        }
+        explicitServices.add(service);
+        return this;
+    }
 
     /**
      * Starts the embedded server, registers all discovered service stubs, and injects
      * {@code aws.endpoint-url} so the AWS SDK v2 routes traffic locally.
      *
-     * @throws IllegalStateException if this instance is already started
+     * @throws CloudMockAlreadyStartedException if this instance is already started
      */
     public void start() {
         if (server != null) {
@@ -83,16 +104,15 @@ public final class CloudMock implements AutoCloseable {
 
     private void loadAndRegisterServices() {
         WireMockStubRegistrar registrar = new WireMockStubRegistrar(server);
-        ServiceLoader<CloudMockService> loader =
-                ServiceLoader.load(CloudMockService.class, Thread.currentThread().getContextClassLoader());
-        for (CloudMockService service : loader) {
-            service.register(registrar);
-        }
+        ServiceLoader.load(CloudMockService.class, Thread.currentThread().getContextClassLoader())
+                .forEach(s -> s.register(registrar));
+        explicitServices.forEach(s -> s.register(registrar));
     }
 
     private static WireMockConfiguration wireMockConfig() {
         return WireMockConfiguration.options()
                 .dynamicPort()
-                .globalTemplating(true);
+                .globalTemplating(true)
+                .extensions(new Md5HandlebarsHelper());
     }
 }
