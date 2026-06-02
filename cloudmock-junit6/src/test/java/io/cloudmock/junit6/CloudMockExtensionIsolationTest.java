@@ -1,21 +1,47 @@
 package io.cloudmock.junit6;
 
+import io.cloudmock.core.CloudMock;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import java.net.Socket;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * A second independent test class that verifies lifecycle isolation — each class gets
- * its own CloudMock instance and its own port, independent of any other running class.
+ * Verifies that two {@link CloudMockExtension} instances are fully independent — each
+ * binds its own port, and stopping one does not affect the other.
  */
 class CloudMockExtensionIsolationTest {
 
     @RegisterExtension
-    static CloudMockExtension cloudMock = new CloudMockExtension();
+    static CloudMockExtension first = new CloudMockExtension();
+
+    @RegisterExtension
+    static CloudMockExtension second = new CloudMockExtension();
 
     @Test
-    void hasItsOwnIndependentPort() {
-        assertTrue(cloudMock.port() > 0);
+    void eachInstanceBindsADistinctPort() {
+        assertTrue(first.port() > 0);
+        assertTrue(second.port() > 0);
+        assertNotEquals(first.port(), second.port(),
+                "Two CloudMockExtension instances must bind different ports");
+    }
+
+    @Test
+    void stoppingOneInstanceDoesNotStopTheOther() throws Exception {
+        int secondPort = second.port();
+
+        CloudMock transient_ = new CloudMock();
+        transient_.start();
+        int transientPort = transient_.port();
+        assertNotEquals(secondPort, transientPort);
+
+        transient_.stop();
+
+        // 'second' must still accept connections after an unrelated instance was stopped
+        try (Socket s = new Socket("localhost", secondPort)) {
+            assertTrue(s.isConnected());
+        }
     }
 }
