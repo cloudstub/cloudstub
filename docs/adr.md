@@ -326,13 +326,45 @@ the Docker dependency or startup time.
 
 ## Open questions
 
-| #     | Question                                                                                                     | Owner      | Target  |
-|-------|--------------------------------------------------------------------------------------------------------------|------------|---------|
-| 1     | Should `StubRegistrar` support raw WireMock `MappingBuilder` as an escape hatch for advanced module authors? | Core team  | Phase 1 |
-| 2     | What is the versioning and compatibility policy between core and module JARs?                                | Core team  | Phase 1 |
-| 3     | Which services should follow SQS and Secrets Manager in Phase 3? (Candidates: S3, DynamoDB, Lambda)          | Community  | Phase 2 |
-| 4     | Should the interaction capture agent be a separate Maven/Gradle plugin or bundled in core?                   | Agent team | Phase 3 |
-| ~~5~~ | ~~What is the minimum Java version target?~~ Resolved: Java 17 LTS. See decision record below.               | Core team  | Phase 1 |
+| #         | Question                                                                                                     | Owner      | Target  |
+|-----------|--------------------------------------------------------------------------------------------------------------|------------|---------|
+| ~~1~~     | ~~Should `StubRegistrar` support raw WireMock `MappingBuilder` as an escape hatch for advanced module authors?~~ Resolved: No. See decision record below. | Core team  | Phase 1 |
+| ~~2~~     | ~~What is the versioning and compatibility policy between core and module JARs?~~ Resolved: manifest attribute. See decision record below. | Core team  | Phase 1 |
+| 3         | Which services should follow SQS and Secrets Manager in Phase 3? (Candidates: S3, DynamoDB, Lambda)          | Community  | Phase 2 |
+| 4         | Should the interaction capture agent be a separate Maven/Gradle plugin or bundled in core?                   | Agent team | Phase 3 |
+| ~~5~~     | ~~What is the minimum Java version target?~~ Resolved: Java 17 LTS. See decision record below.               | Core team  | Phase 1 |
+
+### Decision: no WireMock escape hatch on StubRegistrar
+
+**Resolved:** `StubRegistrar` exposes no raw WireMock `MappingBuilder` method.
+
+The three routing methods (`registerXmlFormStub`, `registerJsonTargetStub`, `registerRestStub`) cover every AWS service
+protocol planned through Phase 3. Exposing `MappingBuilder` would permanently bind the public API to WireMock, making
+it impossible to swap the underlying networking driver without a breaking change. If a module author needs behaviour that
+`StubRegistrar` cannot express, the correct path is to open an issue requesting a new registration method — not to
+reach through to WireMock directly.
+
+If a genuine escape hatch becomes necessary in a future phase, it will be introduced as a separate, clearly marked
+interface with an explicit "not covered by stability guarantees" contract, and it will be gated behind an opt-in that
+keeps the default API surface clean.
+
+---
+
+### Decision: module compatibility via MANIFEST.MF attribute
+
+**Resolved:** Module JARs declare the minimum compatible `cloudmock-core` version using the `CloudMock-Core-Min-Version`
+entry in `MANIFEST.MF`. The core engine reads this attribute for each discovered module at startup and logs a warning if
+the running core version is older than the declared minimum.
+
+This approach requires no extra tooling or build machinery: the Gradle `jar` task populates the attribute, and the core
+reads it with `getClass().getModule()` / `JarFile` at runtime. `cloudmock-core` itself follows semantic versioning;
+any change to the `StubRegistrar` or `CloudMockService` interface constitutes a breaking change and requires a major
+version bump.
+
+Module authors should set `CloudMock-Core-Min-Version` to the oldest core release that contains all `StubRegistrar`
+methods their module calls. Consumers manage transitive version resolution through their own build tool as usual.
+
+---
 
 ### Decision: minimum Java version is Java 17 LTS
 
