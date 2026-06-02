@@ -91,6 +91,8 @@ public final class CloudMock implements AutoCloseable {
     }
 
     private static WireMockConfiguration wireMockConfig() {
-        return WireMockConfiguration.options().dynamicPort();
+        return WireMockConfiguration.options()
+                .dynamicPort()
+                .globalTemplating(true);
     }
 }

@@ -33,16 +33,17 @@ subprojects {
         }
     }
 
-    // No cloudmock-* module may depend on another — checked at dependency declaration time.
-    // resolutionStrategy catches any transitive violation that slips through at resolve time.
+    // Service modules may depend on cloudmock-core (the SPI lives there), but no service module
+    // may depend on another service module. The resolutionStrategy block catches any transitive
+    // violation that slips through at resolve time.
     afterEvaluate {
         ['compileClasspath', 'runtimeClasspath', 'testCompileClasspath', 'testRuntimeClasspath'].each { cfgName ->
             configurations.findByName(cfgName)?.allDependencies?.each { dep ->
-                if (dep.group == 'io.cloudmock') {
+                if (dep.group == 'io.cloudmock' && dep.name != 'cloudmock-core') {
                     throw new GradleException(
                         "Module isolation violation in '${project.name}': " +
                         "declared dependency on '${dep.group}:${dep.name}' is forbidden. " +
-                        "cloudmock-* modules must not depend on each other."
+                        "cloudmock-* service modules must not depend on each other."
                     )
                 }
             }
@@ -51,11 +52,11 @@ subprojects {
 
     configurations.all {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-            if (details.requested.group == 'io.cloudmock') {
+            if (details.requested.group == 'io.cloudmock' && details.requested.name != 'cloudmock-core') {
                 throw new GradleException(
                     "Module isolation violation in '${project.name}': " +
                     "transitive dependency on '${details.requested.group}:${details.requested.name}' is forbidden. " +
-                    "cloudmock-* modules must not depend on each other."
+                    "cloudmock-* service modules must not depend on each other."
                 )
             }
         }
