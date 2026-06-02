@@ -6,121 +6,53 @@ import io.cloudmock.core.spi.StubRegistrar;
 /**
  * CloudMock service module for Amazon SQS.
  *
- * <p>Registers stateless XML/Form URL stubs for the core SQS operations. Responses are
- * well-formed enough for the AWS SDK v2 {@code SqsClient} to parse without error. Queue
- * state is not simulated — {@code ReceiveMessage} always returns a synthetic message
- * regardless of prior {@code SendMessage} calls.
+ * <p>Registers stateless JSON stubs for the core SQS operations. AWS SDK v2 (≥2.20)
+ * uses the JSON/X-Amz-Target protocol for SQS — requests carry an {@code X-Amz-Target}
+ * header (e.g. {@code AmazonSQS.CreateQueue}) and a JSON body. Responses are well-formed
+ * JSON that the SDK can parse without error.
  *
- * <p>This module is the reference implementation for the XML/Form URL routing protocol.
- * All Handlebars templates here serve as the canonical pattern for future Form URL modules.
+ * <p>Queue state is not simulated — {@code ReceiveMessage} always returns a synthetic
+ * message regardless of prior {@code SendMessage} calls. This is Stage 1 contract mocking.
  *
  * <p>Discovered automatically via {@code ServiceLoader} from
  * {@code META-INF/services/io.cloudmock.core.spi.CloudMockService}.
  */
 public class CloudMockSqsService implements CloudMockService {
 
-    private static final String NS = "http://queue.amazonaws.com/doc/2012-11-05/";
+    private static final String PREFIX = "AmazonSQS.";
 
-    // --- Response templates -------------------------------------------------
-    // {{randomValue type='UUID'}} is evaluated by WireMock's Handlebars engine
-    // at request time, so every response gets a fresh correlation identifier.
-    // Queue URLs are synthetic placeholders; the SDK accepts any valid URL.
+    // {{randomValue type='UUID'}} generates a fresh UUID per request.
+    // {{jsonPath request.body '$.QueueName'}} echoes the queue name from the JSON body.
 
-    private static final String CREATE_QUEUE = String.format("""
-            <?xml version="1.0"?>
-            <CreateQueueResponse xmlns="%s">
-              <CreateQueueResult>
-                <QueueUrl>http://localhost/000000000000/queue</QueueUrl>
-              </CreateQueueResult>
-              <ResponseMetadata>
-                <RequestId>{{randomValue type='UUID'}}</RequestId>
-              </ResponseMetadata>
-            </CreateQueueResponse>""", NS);
+    private static final String CREATE_QUEUE =
+            """
+            {"QueueUrl":"http://localhost/000000000000/{{jsonPath request.body '$.QueueName'}}"}""";
 
-    private static final String GET_QUEUE_URL = String.format("""
-            <?xml version="1.0"?>
-            <GetQueueUrlResponse xmlns="%s">
-              <GetQueueUrlResult>
-                <QueueUrl>http://localhost/000000000000/queue</QueueUrl>
-              </GetQueueUrlResult>
-              <ResponseMetadata>
-                <RequestId>{{randomValue type='UUID'}}</RequestId>
-              </ResponseMetadata>
-            </GetQueueUrlResponse>""", NS);
+    private static final String GET_QUEUE_URL =
+            """
+            {"QueueUrl":"http://localhost/000000000000/{{jsonPath request.body '$.QueueName'}}"}""";
 
-    // MD5OfMessageBody is a fixed valid MD5; the SDK does not verify it against the body.
-    private static final String SEND_MESSAGE = String.format("""
-            <?xml version="1.0"?>
-            <SendMessageResponse xmlns="%s">
-              <SendMessageResult>
-                <MD5OfMessageBody>d41d8cd98f00b204e9800998ecf8427e</MD5OfMessageBody>
-                <MessageId>{{randomValue type='UUID'}}</MessageId>
-              </SendMessageResult>
-              <ResponseMetadata>
-                <RequestId>{{randomValue type='UUID'}}</RequestId>
-              </ResponseMetadata>
-            </SendMessageResponse>""", NS);
+    // {{md5 ...}} is a custom CloudMock Handlebars helper that computes MD5 at request time,
+    // so the checksum always matches whatever body is actually sent or returned.
+    private static final String SEND_MESSAGE =
+            """
+            {"MessageId":"{{randomValue type='UUID'}}","MD5OfMessageBody":"{{md5 (jsonPath request.body '$.MessageBody')}}"}""";
 
-    private static final String RECEIVE_MESSAGE = String.format("""
-            <?xml version="1.0"?>
-            <ReceiveMessageResponse xmlns="%s">
-              <ReceiveMessageResult>
-                <Message>
-                  <MessageId>{{randomValue type='UUID'}}</MessageId>
-                  <ReceiptHandle>{{randomValue type='UUID'}}</ReceiptHandle>
-                  <MD5OfBody>d41d8cd98f00b204e9800998ecf8427e</MD5OfBody>
-                  <Body>cloudmock-synthetic-message</Body>
-                </Message>
-              </ReceiveMessageResult>
-              <ResponseMetadata>
-                <RequestId>{{randomValue type='UUID'}}</RequestId>
-              </ResponseMetadata>
-            </ReceiveMessageResponse>""", NS);
+    private static final String RECEIVE_MESSAGE =
+            """
+            {"Messages":[{"MessageId":"{{randomValue type='UUID'}}","ReceiptHandle":"{{randomValue type='UUID'}}","Body":"cloudmock-synthetic-message","MD5OfBody":"{{md5 'cloudmock-synthetic-message'}}"}]}""";
 
-    private static final String DELETE_MESSAGE = String.format("""
-            <?xml version="1.0"?>
-            <DeleteMessageResponse xmlns="%s">
-              <ResponseMetadata>
-                <RequestId>{{randomValue type='UUID'}}</RequestId>
-              </ResponseMetadata>
-            </DeleteMessageResponse>""", NS);
+    private static final String DELETE_MESSAGE = "{}";
 
-    private static final String DELETE_QUEUE = String.format("""
-            <?xml version="1.0"?>
-            <DeleteQueueResponse xmlns="%s">
-              <ResponseMetadata>
-                <RequestId>{{randomValue type='UUID'}}</RequestId>
-              </ResponseMetadata>
-            </DeleteQueueResponse>""", NS);
+    private static final String DELETE_QUEUE = "{}";
 
-    private static final String GET_QUEUE_ATTRIBUTES = String.format("""
-            <?xml version="1.0"?>
-            <GetQueueAttributesResponse xmlns="%s">
-              <GetQueueAttributesResult>
-                <Attribute><Name>VisibilityTimeout</Name><Value>30</Value></Attribute>
-                <Attribute><Name>ApproximateNumberOfMessages</Name><Value>0</Value></Attribute>
-                <Attribute><Name>ApproximateNumberOfMessagesNotVisible</Name><Value>0</Value></Attribute>
-                <Attribute><Name>MaximumMessageSize</Name><Value>262144</Value></Attribute>
-                <Attribute><Name>MessageRetentionPeriod</Name><Value>345600</Value></Attribute>
-                <Attribute><Name>ReceiveMessageWaitTimeSeconds</Name><Value>0</Value></Attribute>
-              </GetQueueAttributesResult>
-              <ResponseMetadata>
-                <RequestId>{{randomValue type='UUID'}}</RequestId>
-              </ResponseMetadata>
-            </GetQueueAttributesResponse>""", NS);
+    private static final String LIST_QUEUES =
+            """
+            {"QueueUrls":["http://localhost/000000000000/queue"]}""";
 
-    private static final String LIST_QUEUES = String.format("""
-            <?xml version="1.0"?>
-            <ListQueuesResponse xmlns="%s">
-              <ListQueuesResult>
-                <QueueUrl>http://localhost/000000000000/queue</QueueUrl>
-              </ListQueuesResult>
-              <ResponseMetadata>
-                <RequestId>{{randomValue type='UUID'}}</RequestId>
-              </ResponseMetadata>
-            </ListQueuesResponse>""", NS);
-
-    // ------------------------------------------------------------------------
+    private static final String GET_QUEUE_ATTRIBUTES =
+            """
+            {"Attributes":{"VisibilityTimeout":"30","ApproximateNumberOfMessages":"0","ApproximateNumberOfMessagesNotVisible":"0","MaximumMessageSize":"262144","MessageRetentionPeriod":"345600","ReceiveMessageWaitTimeSeconds":"0"}}""";
 
     @Override
     public String serviceId() {
@@ -129,13 +61,13 @@ public class CloudMockSqsService implements CloudMockService {
 
     @Override
     public void register(StubRegistrar registrar) {
-        registrar.registerXmlFormStub("CreateQueue",    CREATE_QUEUE);
-        registrar.registerXmlFormStub("GetQueueUrl",    GET_QUEUE_URL);
-        registrar.registerXmlFormStub("SendMessage",    SEND_MESSAGE);
-        registrar.registerXmlFormStub("ReceiveMessage", RECEIVE_MESSAGE);
-        registrar.registerXmlFormStub("DeleteMessage",  DELETE_MESSAGE);
-        registrar.registerXmlFormStub("DeleteQueue",    DELETE_QUEUE);
-        registrar.registerXmlFormStub("GetQueueAttributes", GET_QUEUE_ATTRIBUTES);
-        registrar.registerXmlFormStub("ListQueues",          LIST_QUEUES);
+        registrar.registerJsonTargetStub(PREFIX + "CreateQueue",        CREATE_QUEUE);
+        registrar.registerJsonTargetStub(PREFIX + "GetQueueUrl",        GET_QUEUE_URL);
+        registrar.registerJsonTargetStub(PREFIX + "SendMessage",        SEND_MESSAGE);
+        registrar.registerJsonTargetStub(PREFIX + "ReceiveMessage",     RECEIVE_MESSAGE);
+        registrar.registerJsonTargetStub(PREFIX + "DeleteMessage",      DELETE_MESSAGE);
+        registrar.registerJsonTargetStub(PREFIX + "DeleteQueue",        DELETE_QUEUE);
+        registrar.registerJsonTargetStub(PREFIX + "ListQueues",         LIST_QUEUES);
+        registrar.registerJsonTargetStub(PREFIX + "GetQueueAttributes", GET_QUEUE_ATTRIBUTES);
     }
 }

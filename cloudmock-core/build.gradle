@@ -1,3 +1,4 @@
 dependencies {
     implementation libs.wiremock
+    testImplementation libs.slf4j.simple
 }
