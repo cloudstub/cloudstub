@@ -1,1 +1,5 @@
-// Phase 2 — stub; implementation pending issue #0005
+dependencies {
+    compileOnly project(':cloudmock-core')
+    testImplementation project(':cloudmock-core')
+    testImplementation libs.aws.sqs
+}
