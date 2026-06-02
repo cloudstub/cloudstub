@@ -1,0 +1,14 @@
+[versions]
+wiremock = "3.13.1"
+awssdk   = "2.25.70"
+junit    = "5.10.2"
+
+[libraries]
+wiremock           = { module = "org.wiremock:wiremock",                     version.ref = "wiremock" }
+aws-sqs            = { module = "software.amazon.awssdk:sqs",                version.ref = "awssdk" }
+aws-secretsmanager = { module = "software.amazon.awssdk:secretsmanager",     version.ref = "awssdk" }
+aws-s3             = { module = "software.amazon.awssdk:s3",                 version.ref = "awssdk" }
+aws-dynamodb       = { module = "software.amazon.awssdk:dynamodb",           version.ref = "awssdk" }
+aws-lambda         = { module = "software.amazon.awssdk:lambda",             version.ref = "awssdk" }
+junit-bom          = { module = "org.junit:junit-bom",                       version.ref = "junit" }
+junit-jupiter      = { module = "org.junit.jupiter:junit-jupiter",           version.ref = "junit" }
