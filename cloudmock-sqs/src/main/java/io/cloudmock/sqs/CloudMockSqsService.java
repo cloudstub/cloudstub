@@ -19,7 +19,8 @@ import io.cloudmock.core.spi.StubRegistrar;
  */
 public class CloudMockSqsService implements CloudMockService {
 
-    private static final String PREFIX = "AmazonSQS.";
+    private static final String SERVICE_ID = "sqs";
+    private static final String PREFIX     = "AmazonSQS.";
 
     // {{randomValue type='UUID'}} generates a fresh UUID per request.
     // {{jsonPath request.body '$.QueueName'}} echoes the queue name from the JSON body.
@@ -56,7 +57,7 @@ public class CloudMockSqsService implements CloudMockService {
 
     @Override
     public String serviceId() {
-        return "sqs";
+        return SERVICE_ID;
     }
 
     @Override
