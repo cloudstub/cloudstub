@@ -8,38 +8,58 @@ Every feature must be developed on a dedicated branch created from `main` before
 
 ## Current state
 
-Pre-Phase 1. Only `src/Main.java` (Hello World) exists. No build file, no git history. The next step is setting up a
-Gradle multi-project monorepo.
+**Phase 2 complete.** The full multi-project Gradle monorepo is in place. The SPI contract is frozen, the core engine is
+running, both Phase 2 reference modules are implemented and tested, the JUnit 6 extension with fault injection is live,
+the codegen tool exists, and a Spring Boot example application demonstrates end-to-end usage. A documentation site
+(MkDocs Material) is built and wired to GitHub Pages.
+
+Phase 3 work remaining: `cloudmock-s3`, `cloudmock-dynamodb`, `cloudmock-lambda` module implementations (scaffolding
+exists), and additional AWS service modules (tomorrow's session).
 
 ## Build system
 
-Use **Gradle** (not Maven) with a multi-project layout. Module isolation must be enforced: no module may take a
-transitive compile dependency on another module. CI must validate this.
+Gradle multi-project monorepo. Module isolation is enforced by the root `build.gradle`: no service module may take a
+compile or runtime dependency on another service module. CI validates this on every push.
 
-Planned subprojects:
-
-- `cloudmock-core` — orchestration engine, SPI interfaces, WireMock bootstrap
-- `cloudmock-sqs` — Phase 2 reference module (XML/Form URL protocol)
-- `cloudmock-secretsmanager` — Phase 2 reference module (JSON/X-Amz-Target protocol)
-- `cloudmock-s3`, `cloudmock-dynamodb`, `cloudmock-lambda` — Phase 3
-
-Target Java 17 LTS minimum.
-
-Once the build is set up, standard commands will be:
+Standard commands:
 
 ```
-./gradlew build          # compile + test all subprojects
-./gradlew :cloudmock-core:test   # single subproject tests
-./gradlew publishToMavenLocal    # publish for local smoke testing
+./gradlew build                      # compile + test all subprojects
+./gradlew :cloudmock-core:test       # single subproject tests
+./gradlew publishToMavenLocal        # publish for local smoke testing
+./gradlew :cloudmock-codegen:run --args="<model.smithy> <output-dir>"  # stub generation
 ```
+
+### Subprojects
+
+| Module | Status | Notes |
+|---|---|---|
+| `cloudmock-core` | Done | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage) |
+| `cloudmock-junit6` | Done | `@ExtendWith` + `@RegisterExtension`, fault injection annotations |
+| `cloudmock-sqs` | Done | Phase 2 reference — JSON/X-Amz-Target protocol |
+| `cloudmock-secretsmanager` | Done | Phase 2 reference — JSON/X-Amz-Target protocol |
+| `cloudmock-s3` | Scaffolding only | Phase 3 — REST path protocol |
+| `cloudmock-dynamodb` | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol |
+| `cloudmock-lambda` | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol |
+| `cloudmock-codegen` | Done | Smithy → CloudMockService stub generator |
+| `cloudmock-example` | Done | Spring Boot app + integration tests (CloudMockExtension) |
+
+### Key dependency versions
+
+- Java 17 LTS minimum
+- AWS SDK v2: `2.25.70`
+- WireMock: `3.13.1` (shaded inside `cloudmock-core`)
+- JUnit: `6.1.0`
+- Smithy: `1.50.0`
 
 ## Architecture
 
 Three layers, strictly in order of dependency:
 
-1. **`cloudmock-core`** — boots an embedded WireMock server, injects `aws.endpoint-url` system property to redirect AWS
-   SDK v2 traffic, runs `ServiceLoader.load(CloudMockService.class)` to discover and initialise all installed modules.
-   Zero compile-time knowledge of any AWS service.
+1. **`cloudmock-core`** — boots an embedded WireMock server (shaded, invisible to consumers), injects `aws.endpoint-url`
+   system property to redirect AWS SDK v2 traffic, runs `ServiceLoader.load(CloudMockService.class)` to discover and
+   initialise all installed modules. Published as a fat JAR with WireMock and Jetty relocated to `io.cloudmock.shaded.*`
+   so it does not conflict with the user's own Jetty or Spring Boot BOM.
 
 2. **`cloudmock-*` modules** — each is an independently installable JAR that implements the `CloudMockService` SPI and
    registers stubs through the `StubRegistrar` facade. Strict isolation: a module cannot depend on another module.
@@ -47,44 +67,60 @@ Three layers, strictly in order of dependency:
 3. **WireMock (embedded)** — handles all networking, request matching, and Handlebars template processing. Completely
    hidden; no WireMock type is ever exposed in CloudMock's public API.
 
-## SPI contract (must be frozen before any module is written)
+## SPI contract (frozen)
 
 ```java
 public interface CloudMockService {
     String serviceId();                    // e.g. "sqs", "secretsmanager"
-
     void register(StubRegistrar registrar);
 }
 
 public interface StubRegistrar {
     void registerXmlFormStub(String actionName, String responseTemplate);
-
     void registerJsonTargetStub(String target, String responseTemplate);
-
     void registerRestStub(HttpMethod method, String pathPattern, String responseTemplate);
 }
 ```
 
-Modules register themselves via `META-INF/services/CloudMockService`.
+Modules register themselves via `META-INF/services/io.cloudmock.core.spi.CloudMockService`.
 
 ## Request routing protocols
 
-Each module implements exactly one of:
+AWS SDK v2 uses JSON/X-Amz-Target for SQS (confirmed in implementation — the CLAUDE.md table was outdated).
 
-| Protocol            | Services                  | Matching rule                |
-|---------------------|---------------------------|------------------------------|
-| XML / Form URL      | SQS, SNS                  | `Action` form body parameter |
-| JSON / X-Amz-Target | Secrets Manager, DynamoDB | `X-Amz-Target` header        |
-| REST path           | S3                        | HTTP method + path regex     |
+| Protocol            | Services                          | Matching rule                |
+|---------------------|-----------------------------------|------------------------------|
+| JSON / X-Amz-Target | SQS, Secrets Manager, DynamoDB    | `X-Amz-Target` header        |
+| XML / Form URL      | SNS (legacy)                      | `Action` form body parameter |
+| REST path           | S3                                | HTTP method + path regex     |
 
-Response templates use Handlebars to echo back correlation identifiers (`MessageId`, `RequestId`, etc.) from the request
-so the AWS SDK parses responses without error.
+Response templates use Handlebars. Available helpers:
 
-## Open questions (resolve during Phase 1)
+- `{{randomValue type='UUID'}}` — fresh UUID per request (WireMock built-in)
+- `{{jsonPath request.body '$.Field'}}` — extract field from JSON body (WireMock built-in)
+- `{{md5 '...'}}` — MD5 hex digest (CloudMock custom helper, used for SQS checksums)
+
+## Fault injection
+
+Three annotations in `cloudmock-junit6`, applied at test-method level:
+
+- `@SimulateThrottle(service = "sqs")` — HTTP 400 ThrottlingException
+- `@SimulateTimeout(service = "sqs")` — 30 s server-side delay
+- `@SimulateNetworkBrownout(service = "sqs", rate = 0.5)` — connection reset at given rate
+
+`CloudMockExtension` clears all faults after every test method automatically.
+
+## Spring Boot integration note
+
+`cloudmock-core` shades WireMock and Jetty internally. Users can freely use `platform('org.springframework.boot:spring-boot-dependencies:...')` without any Jetty version conflict.
+
+Inside the monorepo, `cloudmock-example` uses explicit Spring Boot versions (not the BOM) because project-path
+dependencies bypass the shadow JAR. This is a development-only constraint — published artifacts have no such limitation.
+
+## Open questions
 
 1. Should `StubRegistrar` expose a raw WireMock `MappingBuilder` escape hatch for advanced module authors?
 2. Versioning and compatibility policy between `cloudmock-core` versions and module JAR versions.
-3. ~~Minimum Java version~~ — resolved: Java 17 LTS.
 
 ## Out of scope
 
