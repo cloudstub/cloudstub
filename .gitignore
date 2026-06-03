@@ -2,6 +2,7 @@
 .idea/
 out/
 !.idea/vcs.xml
+!.idea/misc.xml
 !**/src/main/**/out/
 !**/src/test/**/out/
 
