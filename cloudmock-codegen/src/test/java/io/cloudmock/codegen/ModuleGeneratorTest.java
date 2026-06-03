@@ -75,15 +75,15 @@ class ModuleGeneratorTest {
 
         GenerationResult result = new ModuleGenerator().generate(modelPath, "0.1.0-SNAPSHOT");
 
-        assertEquals("widgetservice", result.serviceId());
-        assertEquals("cloudmock-widgetservice", result.moduleName());
+        assertEquals("widget", result.serviceId());
+        assertEquals("cloudmock-widget", result.moduleName());
 
         Map<String, String> files = result.files().stream()
                 .collect(Collectors.toMap(GeneratedFile::relativePath, GeneratedFile::content));
 
         assertEquals(6, files.size(), "unexpected number of generated files");
 
-        String serviceKey = "src/main/java/io/cloudmock/widgetservice/CloudMockWidgetServiceService.java";
+        String serviceKey = "src/main/java/io/cloudmock/widget/CloudMockWidgetService.java";
         assertTrue(files.containsKey(serviceKey), "service class missing");
         assertTrue(files.get(serviceKey).contains("registerJsonTargetStub"),
                 "service class must use JSON target protocol");
