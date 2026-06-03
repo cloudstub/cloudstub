@@ -2,7 +2,7 @@
 wiremock = "3.13.1"
 smithy   = "1.50.0"
 awssdk   = "2.25.70"
-junit    = "5.10.2"
+junit    = "6.1.0"
 slf4j    = "2.0.18"
 
 [libraries]

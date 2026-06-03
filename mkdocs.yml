@@ -1,0 +1,55 @@
+site_name: CloudMock
+site_description: Embedded, containerless AWS mock for JVM integration tests
+site_url: https://bnmosria.github.io/cloud-mock/
+repo_url: https://github.com/bnmosria/cloud-mock
+repo_name: bnmosria/cloud-mock
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Guides:
+      - JUnit 6 Extension: junit6-extension.md
+      - Spring Boot Integration: spring-boot.md
+      - Fault Injection: fault-injection.md
+  - Module Authoring: module-authoring.md
+  - CloudMock Codegen: codegen.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.inlinehilite
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
