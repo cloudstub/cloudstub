@@ -98,4 +98,35 @@ class ModuleGeneratorTest {
         assertTrue(files.get("src/main/resources/templates/DeleteWidget.hbs").contains("{}"),
                 "DeleteWidget.hbs must produce an empty JSON object for Unit output");
     }
+
+    @Test
+    void generatesXmlTemplatesAndRestRoutingForRestXmlProtocol() throws Exception {
+        URL fixture = getClass().getResource("/fixtures/photo-service.smithy");
+        assertNotNull(fixture, "photo-service.smithy fixture not found on classpath");
+        Path modelPath = Path.of(fixture.toURI());
+
+        GenerationResult result = new ModuleGenerator().generate(modelPath, "0.1.0-SNAPSHOT");
+
+        assertEquals("photo", result.serviceId());
+
+        Map<String, String> files = result.files().stream()
+                .collect(Collectors.toMap(GeneratedFile::relativePath, GeneratedFile::content));
+
+        String serviceClass = files.get("src/main/java/io/cloudmock/photo/CloudMockPhotoService.java");
+        assertNotNull(serviceClass, "service class missing");
+        assertTrue(serviceClass.contains("registerRestStub"),
+                "restXml service must route via REST path stubs");
+        // Greedy label {key+} must span path segments; normal label {key} must not.
+        assertTrue(serviceClass.contains("/photos/.+"),
+                "GetPhoto {key+} greedy label must compile to .+ so object keys with slashes match");
+        assertTrue(serviceClass.contains("/photos/[^/]+"),
+                "PutPhoto {key} normal label must compile to [^/]+");
+
+        String getPhoto = files.get("src/main/resources/templates/GetPhoto.hbs");
+        assertNotNull(getPhoto, "GetPhoto.hbs template missing");
+        assertTrue(getPhoto.contains("<GetPhotoOutput>") && getPhoto.contains("<photoId>"),
+                "restXml template must produce an XML body");
+        assertFalse(getPhoto.contains("\"photoId\""),
+                "restXml template must not produce a JSON body");
+    }
 }

@@ -31,8 +31,11 @@ class ProtocolDetector {
         if (service.hasTrait(AwsQueryTrait.class)) {
             return Protocol.FORM_URL;
         }
-        if (service.hasTrait(RestXmlTrait.class) || service.hasTrait(RestJson1Trait.class)) {
-            return Protocol.REST;
+        if (service.hasTrait(RestXmlTrait.class)) {
+            return Protocol.REST_XML;
+        }
+        if (service.hasTrait(RestJson1Trait.class)) {
+            return Protocol.REST_JSON;
         }
         System.err.println("WARNING: no known protocol trait found on "
                 + service.getId() + " — defaulting to JSON_TARGET. "

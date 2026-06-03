@@ -113,7 +113,7 @@ public class ModuleGenerator {
         sb.append("package ").append(pkg).append(";\n\n");
         sb.append("import io.cloudmock.core.spi.CloudMockService;\n");
         sb.append("import io.cloudmock.core.spi.StubRegistrar;\n");
-        if (protocol == Protocol.REST) {
+        if (protocol.isRest()) {
             sb.append("import io.cloudmock.core.spi.HttpMethod;\n");
         }
         sb.append("import java.io.IOException;\n");
@@ -162,7 +162,7 @@ public class ModuleGenerator {
                 case FORM_URL -> sb.append(
                         "        registrar.registerXmlFormStub(\"")
                         .append(opName).append("\", loadTemplate(\"").append(opName).append("\"));\n");
-                case REST -> {
+                case REST_JSON, REST_XML -> {
                     String[] mp = httpMethodAndPath(op);
                     sb.append("        registrar.registerRestStub(HttpMethod.")
                             .append(mp[0]).append(", \"").append(mp[1]).append("\", loadTemplate(\"")
@@ -279,13 +279,20 @@ public class ModuleGenerator {
                     + "<RequestId>{{randomValue type='UUID'}}</RequestId>"
                     + "</ResponseMetadata></" + name + "Response>";
         }
-        return op.getOutput()
+
+        StructureShape output = op.getOutput()
                 .map(model::expectShape)
                 .filter(s -> s instanceof StructureShape)
                 .map(s -> (StructureShape) s)
                 .filter(s -> !s.getAllMembers().isEmpty())
-                .map(s -> buildJsonTemplate(model, s))
-                .orElse("{}");
+                .orElse(null);
+
+        if (protocol == Protocol.REST_XML) {
+            // restXml services (e.g. S3) expect XML bodies, not JSON. Empty output → empty body.
+            return output == null ? "" : buildXmlTemplate(model, output);
+        }
+        // JSON_TARGET and REST_JSON
+        return output == null ? "{}" : buildJsonTemplate(model, output);
     }
 
     private String buildJsonTemplate(Model model, StructureShape output) {
@@ -300,6 +307,19 @@ public class ModuleGenerator {
         return "{" + fields + "}";
     }
 
+    private String buildXmlTemplate(Model model, StructureShape output) {
+        String root = output.getId().getName();
+        String body = output.getAllMembers().entrySet().stream()
+                .limit(8)
+                .map(e -> {
+                    String name   = e.getKey();
+                    Shape  target = model.expectShape(e.getValue().getTarget());
+                    return "<" + name + ">" + xmlPlaceholder(target) + "</" + name + ">";
+                })
+                .collect(Collectors.joining());
+        return "<" + root + ">" + body + "</" + root + ">";
+    }
+
     private String jsonPlaceholder(Shape shape) {
         return switch (shape.getType()) {
             case STRING  -> "\"{{randomValue type='UUID'}}\"";
@@ -311,20 +331,25 @@ public class ModuleGenerator {
         };
     }
 
+    private String xmlPlaceholder(Shape shape) {
+        return switch (shape.getType()) {
+            case STRING  -> "{{randomValue type='UUID'}}";
+            case INTEGER, LONG, SHORT, BYTE, BIG_INTEGER -> "0";
+            case FLOAT, DOUBLE, BIG_DECIMAL             -> "0.0";
+            case BOOLEAN                                 -> "false";
+            default                                      -> "";
+        };
+    }
+
     private String[] httpMethodAndPath(OperationShape op) {
         return op.getTrait(HttpTrait.class)
                 .map(h -> new String[]{
                         h.getMethod().toUpperCase(),
-                        h.getUri().toString().replaceAll("\\{[^}+][^}]*}", "[^/]+")
-                                              .replaceAll("\\{\\+[^}]*}", ".+")
+                        // Greedy labels {key+} span path segments (.+); normal labels {id} stay within one ([^/]+).
+                        // Replace greedy labels first so the normal-label rule doesn't consume them.
+                        h.getUri().toString().replaceAll("\\{[^}]*\\+}", ".+")
+                                              .replaceAll("\\{[^}]+}", "[^/]+")
                 })
                 .orElse(new String[]{"POST", "/.*"});
-    }
-
-    private String toScreamingSnake(String camelCase) {
-        return camelCase
-                .replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2")
-                .replaceAll("([a-z])([A-Z])", "$1_$2")
-                .toUpperCase();
     }
 }
