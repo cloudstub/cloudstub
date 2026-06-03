@@ -2,4 +2,9 @@ dependencies {
     implementation project(':cloudmock-core')
     compileOnly  libs.junit.jupiter
     testImplementation libs.junit.jupiter
+    testImplementation project(':cloudmock-sqs')
+    testImplementation project(':cloudmock-secretsmanager')
+    testImplementation libs.aws.sqs
+    testImplementation libs.aws.secretsmanager
+    testRuntimeOnly libs.slf4j.simple
 }
