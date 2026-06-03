@@ -14,7 +14,7 @@ Add a self-contained example project (Gradle subproject `cloudmock-example`) tha
 - [ ] At least one integration test per Phase 2 module is included:
   - SQS: `CreateQueue`, `SendMessage`, `ReceiveMessage` round-trip
   - Secrets Manager: `CreateSecret`, `GetSecretValue` round-trip
-- [ ] Tests use the JUnit 5 extension (`@ExtendWith(CloudMockExtension.class)`) if available, or start/stop CloudMock manually otherwise
+- [ ] Tests use the Junit 6 extension (`@ExtendWith(CloudMockExtension.class)`) if available, or start/stop CloudMock manually otherwise
 - [ ] All tests pass with `./gradlew :cloudmock-example:test`
 - [ ] The module isolation constraint still holds — `cloudmock-example` does not bypass it
 - [ ] A short README section (or inline test Javadoc) shows the minimal setup needed to use CloudMock in a user project

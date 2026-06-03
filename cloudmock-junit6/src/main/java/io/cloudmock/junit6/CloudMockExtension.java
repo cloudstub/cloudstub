@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JUnit 5 extension that manages the {@link CloudMock} lifecycle around a test class.
+ * Junit 6 extension that manages the {@link CloudMock} lifecycle around a test class.
  *
  * <h2>Usage - zero-boilerplate ({@code @ExtendWith})</h2>
  * <pre>

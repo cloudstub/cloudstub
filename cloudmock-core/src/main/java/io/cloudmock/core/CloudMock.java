@@ -19,7 +19,7 @@ import java.util.ServiceLoader;
  * traffic to that port via the {@code aws.endpoint-url} system property, and invokes
  * every {@link CloudMockService} discovered on the classpath to register their stubs.
  *
- * <p>Typical usage in a JUnit 5 test:
+ * <p>Typical usage in a Junit 6 test:
  * <pre>
  * {@literal @}BeforeAll
  * static void start() { cloudMock = new CloudMock(); cloudMock.start(); }

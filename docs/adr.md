@@ -115,7 +115,7 @@ The core engine is responsible for:
 - Starting and stopping the embedded WireMock server.
 - Injecting the `aws.endpoint-url` system property so AWS SDK v2 clients route traffic locally.
 - Running `ServiceLoader.load(CloudMockService.class)` to discover and initialise all installed modules.
-- Providing the JUnit 5 `@ExtendWith(CloudMockExtension.class)` lifecycle hook so tests require no manual setup.
+- Providing the Junit 6 `@ExtendWith(CloudMockExtension.class)` lifecycle hook so tests require no manual setup.
 
 The core has **zero compile-time dependencies on any AWS service module** and no knowledge of SQS, S3, DynamoDB, or any
 other service.
@@ -270,7 +270,7 @@ on WireMock internals.
 
 ### Phase 3 — Developer experience
 
-- JUnit 5 `@ExtendWith(CloudMockExtension.class)` — zero-boilerplate test lifecycle management.
+- Junit 6 `@ExtendWith(CloudMockExtension.class)` — zero-boilerplate test lifecycle management.
 - Fault injection API: `@SimulateThrottle`, `@SimulateTimeout`, `@SimulateNetworkBrownout` annotations for resilience
   testing.
 - First pass of the stub generation agent (Smithy model → module skeleton).

@@ -98,7 +98,7 @@ CloudMock's clean module contract makes it a natural platform for AI-assisted to
 **Phase 2 — Reference modules:** `cloudmock-sqs` (XML/Form standard) and `cloudmock-secretsmanager`
 (JSON/Target standard) — canonical reference implementations for all future module authors.
 
-**Phase 3 — Developer experience:** JUnit 5 `@ExtendWith` extension, fault injection API, stub generation agent,
+**Phase 3 — Developer experience:** Junit 6 `@ExtendWith` extension, fault injection API, stub generation agent,
 public documentation site.
 
 ---
