@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(':cloudmock-core')
+    compileOnly  libs.junit.jupiter
+    testImplementation libs.junit.jupiter
+}
