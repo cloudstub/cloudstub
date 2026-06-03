@@ -3,14 +3,18 @@ package io.cloudmock.junit6;
 import io.cloudmock.core.CloudMock;
 import io.cloudmock.core.spi.CloudMockService;
 import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Junit 6 extension that manages the {@link CloudMock} lifecycle around a test class.
+ * JUnit 6 extension that manages the {@link CloudMock} lifecycle around a test class and
+ * applies fault injection annotations ({@link SimulateThrottle}, {@link SimulateTimeout},
+ * {@link SimulateNetworkBrownout}) to individual test methods.
  *
  * <h2>Usage - zero-boilerplate ({@code @ExtendWith})</h2>
  * <pre>
@@ -30,10 +34,20 @@ import java.util.List;
  * }
  * </pre>
  *
- * <p>Each test class gets an independent {@code CloudMock} instance — one class stopping
+ * <h2>Fault injection</h2>
+ * <pre>
+ * {@literal @}SimulateThrottle(service = "sqs")
+ * {@literal @}Test
+ * void throttledTest() { ... }
+ * </pre>
+ *
+ * <p>Fault state is always cleaned up after each test method, even if the test throws.
+ * Each test class gets an independent {@code CloudMock} instance — one class stopping
  * never affects another class's running instance.
  */
-public final class CloudMockExtension implements BeforeAllCallback, AfterAllCallback {
+public final class CloudMockExtension
+        implements BeforeAllCallback, AfterAllCallback,
+                   BeforeTestExecutionCallback, AfterTestExecutionCallback {
 
     private final List<CloudMockService> services = new ArrayList<>();
     private CloudMock cloudMock;
@@ -62,6 +76,16 @@ public final class CloudMockExtension implements BeforeAllCallback, AfterAllCall
             cloudMock.stop();
             cloudMock = null;
         }
+    }
+
+    @Override
+    public void beforeTestExecution(ExtensionContext context) {
+        FaultInjectionExtension.applyFaults(context.getRequiredTestMethod(), cloudMock);
+    }
+
+    @Override
+    public void afterTestExecution(ExtensionContext context) {
+        cloudMock.clearAllFaults();
     }
 
     /**

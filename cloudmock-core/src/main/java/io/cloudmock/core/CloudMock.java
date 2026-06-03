@@ -2,9 +2,11 @@ package io.cloudmock.core;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import io.cloudmock.core.internal.Md5HandlebarsHelper;
 import io.cloudmock.core.exception.CloudMockAlreadyStartedException;
 import io.cloudmock.core.exception.CloudMockNotStartedException;
+import io.cloudmock.core.internal.BrownoutTransformer;
+import io.cloudmock.core.internal.FaultEngine;
+import io.cloudmock.core.internal.Md5HandlebarsHelper;
 import io.cloudmock.core.internal.WireMockStubRegistrar;
 import io.cloudmock.core.spi.CloudMockService;
 
@@ -19,7 +21,7 @@ import java.util.ServiceLoader;
  * traffic to that port via the {@code aws.endpoint-url} system property, and invokes
  * every {@link CloudMockService} discovered on the classpath to register their stubs.
  *
- * <p>Typical usage in a Junit 6 test:
+ * <p>Typical usage in a JUnit 6 test:
  * <pre>
  * {@literal @}BeforeAll
  * static void start() { cloudMock = new CloudMock(); cloudMock.start(); }
@@ -41,6 +43,7 @@ public final class CloudMock implements AutoCloseable {
     private static final String ENDPOINT_PROPERTY = "aws.endpoint-url";
 
     private WireMockServer server;
+    private FaultEngine faultEngine;
     private final List<CloudMockService> explicitServices = new ArrayList<>();
 
     /**
@@ -86,15 +89,77 @@ public final class CloudMock implements AutoCloseable {
         }
         server.stop();
         server = null;
+        faultEngine = null;
         System.clearProperty(ENDPOINT_PROPERTY);
     }
 
     /** Returns the port the server is listening on. Only valid after {@link #start()}. */
     public int port() {
-        if (server == null) {
-            throw new CloudMockNotStartedException();
-        }
+        requireStarted();
         return server.port();
+    }
+
+    /**
+     * Causes all stubs for {@code serviceId} to return an AWS-style throttling error
+     * (HTTP 400, {@code ThrottlingException}) for the duration of the current test.
+     *
+     * <p>Call {@link #clearFaults(String)} or {@link #clearAllFaults()} to restore normal
+     * behaviour.
+     *
+     * @throws CloudMockNotStartedException if not yet started
+     */
+    public void simulateThrottle(String serviceId) {
+        requireStarted();
+        faultEngine.injectThrottle(serviceId);
+    }
+
+    /**
+     * Causes all stubs for {@code serviceId} to respond after a long fixed delay, triggering
+     * the AWS SDK's call timeout exception.
+     *
+     * @throws CloudMockNotStartedException if not yet started
+     */
+    public void simulateTimeout(String serviceId) {
+        requireStarted();
+        faultEngine.injectTimeout(serviceId);
+    }
+
+    /**
+     * Causes approximately {@code rate} fraction of requests to {@code serviceId} to fail with
+     * a connection reset; the remainder are served normally.
+     *
+     * <p>Use {@code rate = 0.0} or {@code rate = 1.0} for deterministic test assertions.
+     * Fractional rates are statistical and unsuitable for exact-count assertions.
+     *
+     * @param rate fraction of requests to fault, in [0.0, 1.0]
+     * @throws CloudMockNotStartedException if not yet started
+     */
+    public void simulateNetworkBrownout(String serviceId, double rate) {
+        requireStarted();
+        faultEngine.injectBrownout(serviceId, rate);
+    }
+
+    /**
+     * Removes all active fault stubs for {@code serviceId}, restoring normal stub behaviour.
+     *
+     * @throws CloudMockNotStartedException if not yet started
+     */
+    public void clearFaults(String serviceId) {
+        requireStarted();
+        faultEngine.clearFaults(serviceId);
+    }
+
+    /**
+     * Removes all active fault stubs for every service. Safe to call even when no faults
+     * are active.
+     *
+     * <p>Called automatically by {@code CloudMockExtension} after each test method.
+     */
+    public void clearAllFaults() {
+        if (faultEngine == null) {
+            return;
+        }
+        faultEngine.clearAllFaults();
     }
 
     @Override
@@ -102,17 +167,30 @@ public final class CloudMock implements AutoCloseable {
         stop();
     }
 
+    private void requireStarted() {
+        if (server == null) {
+            throw new CloudMockNotStartedException();
+        }
+    }
+
     private void loadAndRegisterServices() {
         WireMockStubRegistrar registrar = new WireMockStubRegistrar(server);
+        faultEngine = registrar.newFaultEngine();
         ServiceLoader.load(CloudMockService.class, Thread.currentThread().getContextClassLoader())
-                .forEach(s -> s.register(registrar));
-        explicitServices.forEach(s -> s.register(registrar));
+                .forEach(s -> {
+                    registrar.setCurrentService(s.serviceId());
+                    s.register(registrar);
+                });
+        explicitServices.forEach(s -> {
+            registrar.setCurrentService(s.serviceId());
+            s.register(registrar);
+        });
     }
 
     private static WireMockConfiguration wireMockConfig() {
         return WireMockConfiguration.options()
                 .dynamicPort()
                 .globalTemplating(true)
-                .extensions(new Md5HandlebarsHelper());
+                .extensions(new Md5HandlebarsHelper(), new BrownoutTransformer());
     }
 }

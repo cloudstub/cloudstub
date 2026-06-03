@@ -34,10 +34,10 @@ subprojects {
     }
 
     // Service modules may depend on cloudmock-core (the SPI lives there), but no service module
-    // may depend on another service module. The resolutionStrategy block catches any transitive
-    // violation that slips through at resolve time.
+    // may depend on another service module at compile or runtime. Test code is exempt so that
+    // integration test modules (e.g. cloudmock-junit6 tests) can combine multiple modules.
     afterEvaluate {
-        ['compileClasspath', 'runtimeClasspath', 'testCompileClasspath', 'testRuntimeClasspath'].each { cfgName ->
+        ['compileClasspath', 'runtimeClasspath'].each { cfgName ->
             configurations.findByName(cfgName)?.allDependencies?.each { dep ->
                 if (dep.group == 'io.cloudmock' && dep.name != 'cloudmock-core') {
                     throw new GradleException(
@@ -50,7 +50,7 @@ subprojects {
         }
     }
 
-    configurations.all {
+    configurations.matching { !it.name.toLowerCase().contains('test') }.all {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
             if (details.requested.group == 'io.cloudmock' && details.requested.name != 'cloudmock-core') {
                 throw new GradleException(

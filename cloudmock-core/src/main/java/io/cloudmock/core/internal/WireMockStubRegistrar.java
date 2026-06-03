@@ -12,13 +12,28 @@ import static io.cloudmock.core.internal.HttpConstants.*;
 /**
  * Internal {@link StubRegistrar} implementation that delegates to a live WireMock server.
  * Never exposed outside {@code io.cloudmock.core.internal}.
+ *
+ * <p>Each registration is also recorded in the {@link ServiceRegistry} under the current
+ * service ID so that {@link FaultEngine} can later generate matching fault stubs.
  */
 public final class WireMockStubRegistrar implements StubRegistrar {
 
     private final WireMockServer server;
+    private final ServiceRegistry registry = new ServiceRegistry();
+    private String currentServiceId;
 
     public WireMockStubRegistrar(WireMockServer server) {
         this.server = server;
+    }
+
+    /** Creates a {@link FaultEngine} backed by this registrar's stub registry. */
+    public FaultEngine newFaultEngine() {
+        return new FaultEngine(server, registry);
+    }
+
+    /** Called by {@code CloudMock} before each service module registers its stubs. */
+    public void setCurrentService(String serviceId) {
+        this.currentServiceId = serviceId;
     }
 
     @Override
@@ -29,6 +44,11 @@ public final class WireMockStubRegistrar implements StubRegistrar {
                         .withStatus(HttpURLConnection.HTTP_OK)
                         .withHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_XML_UTF8)
                         .withBody(responseTemplate)));
+        if (currentServiceId != null) {
+            registry.record(currentServiceId, new StubRecord(
+                    StubProtocol.FORM_URL, actionName, responseTemplate,
+                    CONTENT_TYPE_XML_UTF8, HttpURLConnection.HTTP_OK));
+        }
     }
 
     @Override
@@ -39,6 +59,11 @@ public final class WireMockStubRegistrar implements StubRegistrar {
                         .withStatus(HttpURLConnection.HTTP_OK)
                         .withHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_AMZ_JSON_1_1)
                         .withBody(responseTemplate)));
+        if (currentServiceId != null) {
+            registry.record(currentServiceId, new StubRecord(
+                    StubProtocol.JSON_TARGET, target, responseTemplate,
+                    CONTENT_TYPE_AMZ_JSON_1_1, HttpURLConnection.HTTP_OK));
+        }
     }
 
     @Override
@@ -47,5 +72,10 @@ public final class WireMockStubRegistrar implements StubRegistrar {
                 .willReturn(aResponse()
                         .withStatus(HttpURLConnection.HTTP_OK)
                         .withBody(responseTemplate)));
+        if (currentServiceId != null) {
+            registry.record(currentServiceId, new StubRecord(
+                    StubProtocol.REST, method.name() + " " + pathPattern, responseTemplate,
+                    "application/octet-stream", HttpURLConnection.HTTP_OK));
+        }
     }
 }
