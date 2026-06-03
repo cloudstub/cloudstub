@@ -1,0 +1,20 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
+dependencies {
+    implementation libs.smithy.model
+    implementation libs.smithy.aws.traits
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'io.cloudmock.codegen.Main'
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    archiveBaseName.set('cloudmock-codegen')
+    archiveVersion.set('')
+    mergeServiceFiles()                    // merges META-INF/services/* (Smithy trait registrations)
+    append('META-INF/smithy/manifest')     // merges Smithy model manifests so discoverModels() works
+}

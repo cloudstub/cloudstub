@@ -1,5 +1,6 @@
 [versions]
 wiremock = "3.13.1"
+smithy   = "1.50.0"
 awssdk   = "2.25.70"
 junit    = "5.10.2"
 slf4j    = "2.0.18"
@@ -14,3 +15,5 @@ aws-lambda         = { module = "software.amazon.awssdk:lambda",             ver
 junit-bom          = { module = "org.junit:junit-bom",                       version.ref = "junit" }
 junit-jupiter      = { module = "org.junit.jupiter:junit-jupiter",           version.ref = "junit" }
 slf4j-simple       = { module = "org.slf4j:slf4j-simple",                    version.ref = "slf4j" }
+smithy-model       = { module = "software.amazon.smithy:smithy-model",       version.ref = "smithy" }
+smithy-aws-traits  = { module = "software.amazon.smithy:smithy-aws-traits",  version.ref = "smithy" }
