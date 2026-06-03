@@ -9,7 +9,7 @@
         { "target": "com.example#DeleteWidget" }
       ],
       "traits": {
-        "aws.api#service": { "sdkId": "Widget Service" },
+        "aws.api#service": { "sdkId": "Widget" },
         "aws.protocols#awsJson1_0": {}
       }
     },
