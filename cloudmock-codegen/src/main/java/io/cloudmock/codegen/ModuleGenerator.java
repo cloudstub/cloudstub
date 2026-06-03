@@ -57,8 +57,6 @@ public class ModuleGenerator {
         return new GenerationResult(serviceId, moduleName, files);
     }
 
-    // ── model loading ─────────────────────────────────────────────────────────
-
     private Model loadModel(Path modelPath) {
         ValidatedResult<Model> result = Model.assembler()
                 .discoverModels()
@@ -69,7 +67,7 @@ public class ModuleGenerator {
                 .forEach(e -> System.err.println("  [" + e.getSeverity() + "] " + e.getMessage()));
         List<ValidationEvent> fatalErrors = result.getValidationEvents().stream()
                 .filter(e -> e.getSeverity().ordinal() >= 4)
-                .collect(Collectors.toList());
+                .toList();
         if (!fatalErrors.isEmpty()) {
             throw new IllegalArgumentException(
                     fatalErrors.size() + " model error(s) — fix them before generating.");
@@ -77,8 +75,6 @@ public class ModuleGenerator {
         return result.getResult().orElseThrow(
                 () -> new IllegalArgumentException("Model produced no output."));
     }
-
-    // ── name derivation ───────────────────────────────────────────────────────
 
     private String deriveServiceId(ServiceShape service) {
         return service.getTrait(ServiceTrait.class)
@@ -95,8 +91,6 @@ public class ModuleGenerator {
                 .map(w -> Character.toUpperCase(w.charAt(0)) + w.substring(1))
                 .collect(Collectors.joining());
     }
-
-    // ── file generators ───────────────────────────────────────────────────────
 
     private GeneratedFile buildGradle(String serviceId, String coreVersion) {
         String content = """
@@ -278,8 +272,6 @@ public class ModuleGenerator {
         return new GeneratedFile(path, sb.toString());
     }
 
-    // ── template helpers ──────────────────────────────────────────────────────
-
     private String templateBody(Model model, OperationShape op, Protocol protocol) {
         if (protocol == Protocol.FORM_URL) {
             String name = op.getId().getName();
@@ -288,7 +280,7 @@ public class ModuleGenerator {
                     + "</ResponseMetadata></" + name + "Response>";
         }
         return op.getOutput()
-                .map(outId -> model.expectShape(outId))
+                .map(model::expectShape)
                 .filter(s -> s instanceof StructureShape)
                 .map(s -> (StructureShape) s)
                 .filter(s -> !s.getAllMembers().isEmpty())
