@@ -111,6 +111,30 @@ with no further configuration. For full JUnit 6 lifecycle management, fault inje
 
 ---
 
+## Standalone mode
+
+Besides running embedded in tests, CloudMock ships as a long-lived standalone server for local development — start it
+once, leave it running, and point any application that reads `AWS_ENDPOINT_URL` at it. No Docker, no daemon.
+
+```
+./gradlew :cloudmock-standalone:shadowJar
+java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar
+```
+
+The server binds to port `4566` by default (override with `--port=<n>` or `CLOUDMOCK_PORT`). All bundled modules are
+enabled unless you select a subset with `--modules=sqs,secretsmanager` (or `CLOUDMOCK_MODULES`). `Ctrl-C` shuts it down
+cleanly.
+
+```
+export AWS_ENDPOINT_URL=http://localhost:4566
+./gradlew bootRun
+```
+
+> Standalone mode serves the same stateless, templated responses as embedded mode — it does not persist state across
+> calls. See the [Standalone Mode guide](https://bnmosria.github.io/cloud-mock/standalone/) for full details.
+
+---
+
 ## Supported services
 
 | Module                     | Service         |
