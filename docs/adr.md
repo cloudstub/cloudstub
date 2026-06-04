@@ -36,7 +36,7 @@ running a local mock.
 The dominant local mock solution, LocalStack, works by running a full Docker container with a Python-based
 reimplementation of AWS services. While comprehensive, this model introduces meaningful friction:
 
-- Container startup adds 15–60 seconds to every CI run.
+- Container startup adds 5–30 seconds on a modern machine, and 60+ seconds under CI resource constraints, to every test run.
 - Docker must be available in the test environment — a constraint that breaks lightweight CI runners and local setups
   without Docker Desktop.
 - The free tier of LocalStack has feature gaps; the Pro tier requires an online license check.
@@ -282,7 +282,7 @@ on WireMock internals.
 
 ### Positive
 
-- Test suite startup time drops from 15–60 seconds (LocalStack) to under 100 milliseconds.
+- Test suite startup time drops from 5–30 seconds (LocalStack typical; 60+ seconds under CI constraints) to under 100 milliseconds.
 - No Docker dependency removes a major CI environment constraint.
 - Modular dependency model means unused service code is never on the classpath.
 - No license verification — works fully offline and in air-gapped environments.
