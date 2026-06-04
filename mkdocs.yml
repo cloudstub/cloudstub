@@ -35,6 +35,7 @@ nav:
       - JUnit 6 Extension: junit6-extension.md
       - Spring Boot Integration: spring-boot.md
       - Fault Injection: fault-injection.md
+      - Standalone Mode: standalone.md
   - Module Authoring: module-authoring.md
   - CloudMock Codegen: codegen.md
 

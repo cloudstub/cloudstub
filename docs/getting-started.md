@@ -111,3 +111,4 @@ CloudMock starts in under 200 ms. No containers, no credentials, no network.
 - [JUnit 6 Extension](junit6-extension.md) — learn the `@RegisterExtension` pattern for port access and explicit service registration
 - [Spring Boot Integration](spring-boot.md) — use CloudMock with a full Spring Boot application context
 - [Fault Injection](fault-injection.md) — simulate throttling, timeouts, and network brownouts
+- [Standalone Mode](standalone.md) — run CloudMock as a long-lived local development server instead of embedding it in tests
