@@ -13,7 +13,7 @@ Publish a documentation site covering the three audiences for CloudMock: end use
 - [ ] **JUnit 6 extension guide** covers both `@ExtendWith` and `@RegisterExtension` usage patterns with working code examples
 - [ ] **Module authoring guide** walks through building a new module from scratch: choosing the right protocol family, writing Handlebars response templates, registering via `META-INF/services`, and structuring the test suite — using `cloudmock-sqs` and `cloudmock-secretsmanager` as reference examples
 - [ ] **Fault injection guide** documents all three annotations (`@SimulateThrottle`, `@SimulateTimeout`, `@SimulateNetworkBrownout`) with usage examples and an explanation of the stateless cleanup contract
-- [ ] **Stub generation agent guide** explains how to run the agent against a Smithy model file, what output to expect, and what manual review steps are required after generation
+- [ ] **Stub generation agent guide** explains how to run the codegen against a Smithy model file, what output to expect, and what manual review steps are required after generation
 - [ ] All code examples in the documentation compile and run against the published release artifacts; a `docs-examples` Gradle subproject enforces this in CI
 - [ ] Site is publicly accessible at a stable URL before the Phase 3 announcement
 
