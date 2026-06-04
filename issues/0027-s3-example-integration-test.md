@@ -19,8 +19,8 @@ The `S3Client` bean must therefore be configured exactly as a production app wou
 vanilla, virtual-hosted-style client whose only CloudMock touch-point is the `aws.endpoint-url` redirect
 that SQS and Secrets Manager already rely on. No `pathStyleAccessEnabled`, no `checksumValidationEnabled`,
 no other mock-specific settings may leak into application code; transparent virtual-hosted-style handling
-is delivered by the interceptor in #0027. If the app needs S3-specific test config to pass, this issue is
-not yet done — that's the signal #0027 is incomplete.
+is delivered by the interceptor in #0026. If the app needs S3-specific test config to pass, this issue is
+not yet done — that's the signal #0026 is incomplete.
 
 ## Acceptance criteria
 
@@ -29,7 +29,7 @@ not yet done — that's the signal #0027 is incomplete.
 - [ ] `AwsConfig` provides an `S3Client` bean following **exactly** the existing
       `@Value("${aws.endpoint-url:}")` redirect pattern used for SQS/Secrets Manager — a vanilla
       virtual-hosted-style client with **no** `pathStyleAccessEnabled` and **no** `checksumValidationEnabled`
-      override (production-faithful; transparency comes from #0027, not from the app)
+      override (production-faithful; transparency comes from #0026, not from the app)
 - [ ] A new `@Service` (e.g. `ObjectStore`) wraps `S3Client` with a small realistic API
       (e.g. `createBucket`, `put(key, body)`, `get(key)`, `list()`)
 - [ ] A `@SpringBootTest` integration test using `@RegisterExtension CloudMockExtension` exercises a
@@ -41,7 +41,7 @@ not yet done — that's the signal #0027 is incomplete.
 
 ## Dependencies
 
-- #0027 (transparent virtual-hosted-style S3 support — without it a vanilla app client misroutes)
+- #0026 (transparent virtual-hosted-style S3 support — without it a vanilla app client misroutes)
 - #0019 (cloudmock-s3 must be implemented)
 - #0015 (example project scaffolding)
 
@@ -51,7 +51,7 @@ not yet done — that's the signal #0027 is incomplete.
   business logic beyond what's needed to exercise the public API.
 - The `S3Client` bean is deliberately vanilla. The `cloudmock-s3` **module** tests use
   `pathStyleAccessEnabled(true)` because the test owns its client; the **example app** must not, because
-  it represents production code. Transparent virtual-hosted-style handling is #0027's job.
+  it represents production code. Transparent virtual-hosted-style handling is #0026's job.
 - Keep assertions focused: verify the SDK parses responses without throwing and that key fields
   (e.g. the object body is non-null/parseable, `listObjectsV2` returns a non-null result) are plausible.
   Object state is not simulated (Stage 1 contract mocking), so `get` returns CloudMock's synthetic body,

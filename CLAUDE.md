@@ -37,9 +37,10 @@ java -jar cloudmock-codegen/build/libs/cloudmock-codegen.jar --model <path-or-ur
 |---|---|---|
 | `cloudmock-core` | Done | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage) |
 | `cloudmock-junit6` | Done | `@ExtendWith` + `@RegisterExtension`, fault injection annotations |
+| `cloudmock-sns` | Done | Phase 3 — XML/Form protocol; reference implementation for `registerXmlFormStub` |
 | `cloudmock-sqs` | Done | Phase 2 reference — JSON/X-Amz-Target protocol |
 | `cloudmock-secretsmanager` | Done | Phase 2 reference — JSON/X-Amz-Target protocol |
-| `cloudmock-s3` | Scaffolding only | Phase 3 — REST path protocol |
+| `cloudmock-s3` | Done | Phase 3 — REST path protocol; generated from real AWS Smithy model |
 | `cloudmock-dynamodb` | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol |
 | `cloudmock-lambda` | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol |
 | `cloudmock-codegen` | Done | Smithy → CloudMockService stub generator |
@@ -93,6 +94,8 @@ existing methods, the correct path is to add a new method to `StubRegistrar` via
 ## Request routing protocols
 
 AWS SDK v2 uses JSON/X-Amz-Target for SQS (confirmed in implementation — the CLAUDE.md table was outdated).
+All three `StubRegistrar` routing methods are now exercised by real modules: JSON/X-Amz-Target by `cloudmock-sqs` and
+`cloudmock-secretsmanager`, XML/Form by `cloudmock-sns`, and REST path by `cloudmock-s3`.
 
 | Protocol            | Services                          | Matching rule                |
 |---------------------|-----------------------------------|------------------------------|

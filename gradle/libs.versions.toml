@@ -10,6 +10,7 @@ slf4j    = "2.0.18"
 wiremock           = { module = "org.wiremock:wiremock",                     version.ref = "wiremock" }
 aws-v1-core        = { module = "com.amazonaws:aws-java-sdk-core",           version.ref = "awssdkv1" }
 aws-v1-sqs         = { module = "com.amazonaws:aws-java-sdk-sqs",            version.ref = "awssdkv1" }
+aws-sns            = { module = "software.amazon.awssdk:sns",                version.ref = "awssdk" }
 aws-sqs            = { module = "software.amazon.awssdk:sqs",                version.ref = "awssdk" }
 aws-secretsmanager = { module = "software.amazon.awssdk:secretsmanager",     version.ref = "awssdk" }
 aws-s3             = { module = "software.amazon.awssdk:s3",                 version.ref = "awssdk" }

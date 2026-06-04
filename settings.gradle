@@ -2,6 +2,7 @@ rootProject.name = 'cloud-mock'
 
 include 'cloudmock-core'
 include 'cloudmock-junit6'
+include 'cloudmock-sns'
 include 'cloudmock-sqs'
 include 'cloudmock-secretsmanager'
 include 'cloudmock-s3'
