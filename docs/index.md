@@ -14,7 +14,7 @@ CloudMock answers a simpler question: what if the mock ran inside the JVM itself
 
 | | CloudMock | LocalStack (free) | Mockito / SDK mocks |
 |---|---|---|---|
-| Startup time | ~100 ms | 15–60 s | Instant |
+| Startup time | ~100 ms | 5–30 s | Instant |
 | Docker required | No | Yes | No |
 | Tests HTTP layer | Yes | Yes | No |
 | Modular footprint | Yes | No | N/A |

@@ -13,14 +13,14 @@ roadmap content to the issues directory or CLAUDE.md.
 
 ## Acceptance criteria
 
-- [ ] The README contains no phase descriptions, roadmaps, "planned" module statuses, or open questions
-- [ ] A **What is CloudMock?** section explains the project in two to three sentences aimed at a developer who has never heard of it
-- [ ] An **Installation** section provides copy-paste Gradle and Maven dependency snippets for `cloudmock-core` and at least one service module
-- [ ] A **Quickstart** section shows the minimal test that starts CloudMock, sends a request, and asserts the response — under twenty lines of code
-- [ ] A **Supported services** section lists only the modules that are currently released and functional, with no "coming soon" or "planned" entries
-- [ ] A **Limitations / out of scope** section is present and matches the "Out of scope" block in CLAUDE.md
-- [ ] A **Contributing** section links to the issues directory and describes how to open a new module or report a bug
-- [ ] All planning content removed from the README is either already captured in an issue or moved to one before the README is changed
+- [x] The README contains no phase descriptions, roadmaps, "planned" module statuses, or open questions
+- [x] A **What is CloudMock?** section explains the project in two to three sentences aimed at a developer who has never heard of it
+- [x] An **Installation** section provides copy-paste Gradle and Maven dependency snippets for `cloudmock-core` and at least one service module
+- [x] A **Quickstart** section shows the minimal test that starts CloudMock, sends a request, and asserts the response — under twenty lines of code
+- [x] A **Supported services** section lists only the modules that are currently released and functional, with no "coming soon" or "planned" entries
+- [x] A **Limitations / out of scope** section is present and matches the "Out of scope" block in CLAUDE.md
+- [x] A **Contributing** section links to the issues directory and describes how to open a new module or report a bug
+- [x] All planning content removed from the README is either already captured in an issue or moved to one before the README is changed
 
 ## Dependencies
 
