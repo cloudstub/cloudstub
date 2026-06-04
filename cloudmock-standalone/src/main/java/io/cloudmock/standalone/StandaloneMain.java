@@ -2,21 +2,27 @@ package io.cloudmock.standalone;
 
 import io.cloudmock.core.CloudMock;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public final class StandaloneMain {
 
     public static void main(String[] args) throws InterruptedException {
         int port = PortResolver.resolve(args);
+        List<String> available = ServiceDiscovery.discoverServiceIds();
+        Set<String> requested = ModuleSelector.resolve(args);
+        List<String> enabled = resolveEnabled(available, requested);
 
-        List<String> modules = ServiceDiscovery.discoverServiceIds();
-        if (modules.isEmpty()) {
-            System.out.println("[CloudMock] No service modules found on classpath.");
-        } else {
-            System.out.println("[CloudMock] Discovered modules: " + String.join(", ", modules));
+        System.out.println("[CloudMock] Available modules: " + join(available));
+        System.out.println("[CloudMock] Enabled modules: " + join(enabled));
+
+        CloudMock cloudMock = new CloudMock().withPort(port);
+        if (requested != null) {
+            cloudMock.withEnabledServices(enabled);
         }
 
-        try (CloudMock cloudMock = new CloudMock().withPort(port)) {
+        try (cloudMock) {
             cloudMock.start();
             System.out.println("CloudMock started on port " + cloudMock.port());
             System.out.flush();
@@ -28,5 +34,30 @@ public final class StandaloneMain {
 
             Thread.currentThread().join();
         }
+    }
+
+    /**
+     * Resolves the effective set of modules to enable. When no filter is requested, all
+     * discovered modules are enabled. When a filter names a module that is not on the
+     * classpath, the process fails fast with a clear message rather than silently serving
+     * nothing for that module.
+     */
+    private static List<String> resolveEnabled(List<String> available, Set<String> requested) {
+        if (requested == null) {
+            return available;
+        }
+        List<String> unknown = requested.stream()
+                .filter(id -> !available.contains(id))
+                .toList();
+        if (!unknown.isEmpty()) {
+            System.err.println("[CloudMock] Unknown module(s): " + join(unknown)
+                    + ". Available: " + join(available));
+            System.exit(1);
+        }
+        return requested.stream().toList();
+    }
+
+    private static String join(Collection<String> ids) {
+        return ids.isEmpty() ? "(none)" : String.join(", ", ids);
     }
 }
