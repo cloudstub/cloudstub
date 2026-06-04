@@ -13,10 +13,10 @@ Remove the open question from CLAUDE.md and record the rationale so the question
 
 ## Acceptance criteria
 
-- [ ] The open question is removed from the "Open questions" section of CLAUDE.md
-- [ ] A brief rationale is added to the SPI contract section of CLAUDE.md explaining why the escape hatch was explicitly rejected
-- [ ] No change is made to the `StubRegistrar` interface or any implementing class
-- [ ] All existing SPI and module tests continue to pass after the documentation change
+- [x] The open question is removed from the "Open questions" section of CLAUDE.md
+- [x] A brief rationale is added to the SPI contract section of CLAUDE.md explaining why the escape hatch was explicitly rejected
+- [x] No change is made to the `StubRegistrar` interface or any implementing class
+- [x] All existing SPI and module tests continue to pass after the documentation change
 
 ## Dependencies
 

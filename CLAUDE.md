@@ -85,6 +85,11 @@ public interface StubRegistrar {
 
 Modules register themselves via `META-INF/services/io.cloudmock.core.spi.CloudMockService`.
 
+The three `StubRegistrar` methods cover all AWS protocol families in scope. No raw WireMock `MappingBuilder` escape
+hatch will be added: exposing a WireMock type in the public SPI would make it impossible to swap the underlying HTTP
+engine without a breaking change. If a future service requires routing logic that cannot be expressed through the three
+existing methods, the correct path is to add a new method to `StubRegistrar` via the normal issue flow.
+
 ## Request routing protocols
 
 AWS SDK v2 uses JSON/X-Amz-Target for SQS (confirmed in implementation — the CLAUDE.md table was outdated).
@@ -120,8 +125,7 @@ dependencies bypass the shadow JAR. This is a development-only constraint — pu
 
 ## Open questions
 
-1. Should `StubRegistrar` expose a raw WireMock `MappingBuilder` escape hatch for advanced module authors?
-2. Versioning and compatibility policy between `cloudmock-core` versions and module JAR versions.
+1. Versioning and compatibility policy between `cloudmock-core` versions and module JAR versions.
 
 ## Out of scope
 
