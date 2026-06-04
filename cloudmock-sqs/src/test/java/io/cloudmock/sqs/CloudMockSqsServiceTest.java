@@ -50,19 +50,18 @@ class CloudMockSqsServiceTest {
     /** Sends a raw JSON request with X-Amz-Target — verifies stub registration and JSON matching. */
     @Test
     void rawJsonRequestMatchesStub() throws Exception {
-        try (HttpClient http = HttpClient.newHttpClient()) {
-            HttpResponse<String> response = http.send(
-                    HttpRequest.newBuilder()
-                            .uri(URI.create("http://localhost:" + cloudMock.port() + "/"))
-                            .POST(HttpRequest.BodyPublishers.ofString("{}"))
-                            .header("Content-Type", "application/x-amz-json-1.0")
-                            .header("X-Amz-Target", "AmazonSQS.ListQueues")
-                            .build(),
-                    HttpResponse.BodyHandlers.ofString());
+        HttpClient http = HttpClient.newHttpClient();
+        HttpResponse<String> response = http.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:" + cloudMock.port() + "/"))
+                        .POST(HttpRequest.BodyPublishers.ofString("{}"))
+                        .header("Content-Type", "application/x-amz-json-1.0")
+                        .header("X-Amz-Target", "AmazonSQS.ListQueues")
+                        .build(),
+                HttpResponse.BodyHandlers.ofString());
 
-            assertEquals(200, response.statusCode(),
-                    "JSON stub did not match — check stub registration");
-        }
+        assertEquals(200, response.statusCode(),
+                "JSON stub did not match — check stub registration");
     }
 
     @Test

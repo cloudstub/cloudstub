@@ -38,10 +38,8 @@ class CloudMockSmokeTest {
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .build();
 
-        HttpResponse<Void> response;
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            response = client.send(request, HttpResponse.BodyHandlers.discarding());
-        }
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
 
         // Any HTTP response means the server is reachable; 404 from WireMock is expected and fine.
         assertTrue(response.statusCode() > 0);
