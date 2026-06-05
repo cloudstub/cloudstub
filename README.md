@@ -133,7 +133,7 @@ export AWS_ENDPOINT_URL=http://localhost:4566
 
 ## Scope and limitations
 
-CloudMock validates that your application calls AWS correctly and handles responses properly. It is not a full reimplementation of AWS. Service-level behaviours like FIFO ordering, multipart upload lifecycle, conditional expressions, and IAM policy evaluation are out of scope. Tests that depend on these behaviours should run against a real AWS environment.
+CloudMock validates that your application calls AWS correctly and handles responses properly. It is not a reimplementation of AWS. Service-level behaviours like FIFO ordering, multipart upload lifecycle, conditional expressions, and IAM policy evaluation are out of scope. Tests that depend on these behaviours should run against a real AWS environment.
 
 AWS SDK v2 is fully supported with automatic zero-config redirection. SDK v1 users can use cloudmock-sdk-v1 for a one-line per-client redirect.
 

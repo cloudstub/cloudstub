@@ -2,7 +2,7 @@
 
 | Field             | Value               |
 |-------------------|---------------------|
-| **Status**        | Proposed            |
+| **Status**        | Accepted            |
 | **Date**          | 2026-06-01          |
 | **Authors**       | CloudMock Core Team |
 | **Supersedes**    | —                   |
@@ -36,7 +36,8 @@ running a local mock.
 The dominant local mock solution, LocalStack, works by running a full Docker container with a Python-based
 reimplementation of AWS services. While comprehensive, this model introduces meaningful friction:
 
-- Container startup adds 5–30 seconds on a modern machine, and 60+ seconds under CI resource constraints, to every test run.
+- Container startup adds 5–30 seconds on a modern machine, and 60+ seconds under CI resource constraints, to every test
+  run.
 - Docker must be available in the test environment — a constraint that breaks lightweight CI runners and local setups
   without Docker Desktop.
 - The free tier of LocalStack has feature gaps; the Pro tier requires an online license check.
@@ -282,7 +283,8 @@ on WireMock internals.
 
 ### Positive
 
-- Test suite startup time drops from 5–30 seconds (LocalStack typical; 60+ seconds under CI constraints) to under 100 milliseconds.
+- Test suite startup time drops from 5–30 seconds (LocalStack typical; 60+ seconds under CI constraints) to under 100
+  milliseconds.
 - No Docker dependency removes a major CI environment constraint.
 - Modular dependency model means unused service code is never on the classpath.
 - No license verification — works fully offline and in air-gapped environments.
@@ -326,13 +328,13 @@ the Docker dependency or startup time.
 
 ## Open questions
 
-| #         | Question                                                                                                     | Owner      | Target  |
-|-----------|--------------------------------------------------------------------------------------------------------------|------------|---------|
-| ~~1~~     | ~~Should `StubRegistrar` support raw WireMock `MappingBuilder` as an escape hatch for advanced module authors?~~ Resolved: No. See decision record below. | Core team  | Phase 1 |
-| ~~2~~     | ~~What is the versioning and compatibility policy between core and module JARs?~~ Resolved: manifest attribute. See decision record below. | Core team  | Phase 1 |
-| 3         | Which services should follow SQS and Secrets Manager in Phase 3? (Candidates: S3, DynamoDB, Lambda)          | Community  | Phase 2 |
-| 4         | Should the interaction capture agent be a separate Maven/Gradle plugin or bundled in core?                   | Agent team | Phase 3 |
-| ~~5~~     | ~~What is the minimum Java version target?~~ Resolved: Java 17 LTS. See decision record below.               | Core team  | Phase 1 |
+| #     | Question                                                                                                                                                  | Owner      | Target  |
+|-------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|------------|---------|
+| ~~1~~ | ~~Should `StubRegistrar` support raw WireMock `MappingBuilder` as an escape hatch for advanced module authors?~~ Resolved: No. See decision record below. | Core team  | Phase 1 |
+| ~~2~~ | ~~What is the versioning and compatibility policy between core and module JARs?~~ Resolved: manifest attribute. See decision record below.                | Core team  | Phase 1 |
+| 3     | Which services should follow SQS and Secrets Manager in Phase 3? (Candidates: S3, DynamoDB, Lambda)                                                       | Community  | Phase 2 |
+| 4     | Should the interaction capture agent be a separate Maven/Gradle plugin or bundled in core?                                                                | Agent team | Phase 3 |
+| ~~5~~ | ~~What is the minimum Java version target?~~ Resolved: Java 17 LTS. See decision record below.                                                            | Core team  | Phase 1 |
 
 ### Decision: no WireMock escape hatch on StubRegistrar
 
@@ -340,7 +342,8 @@ the Docker dependency or startup time.
 
 The three routing methods (`registerXmlFormStub`, `registerJsonTargetStub`, `registerRestStub`) cover every AWS service
 protocol planned through Phase 3. Exposing `MappingBuilder` would permanently bind the public API to WireMock, making
-it impossible to swap the underlying networking driver without a breaking change. If a module author needs behaviour that
+it impossible to swap the underlying networking driver without a breaking change. If a module author needs behaviour
+that
 `StubRegistrar` cannot express, the correct path is to open an issue requesting a new registration method — not to
 reach through to WireMock directly.
 
@@ -370,8 +373,16 @@ methods their module calls. Consumers manage transitive version resolution throu
 
 **Resolved:** Java 17 LTS.
 
-CloudMock is a library that runs inside the consumer's JVM. The minimum version is not a constraint on CloudMock's own development environment — it is a constraint on every project that wants to adopt CloudMock. Setting the floor too high at launch would exclude a significant portion of the target audience before the project has established itself.
+CloudMock is a library that runs inside the consumer's JVM. The minimum version is not a constraint on CloudMock's own
+development environment — it is a constraint on every project that wants to adopt CloudMock. Setting the floor too high
+at launch would exclude a significant portion of the target audience before the project has established itself.
 
-Java 17 remains the dominant LTS in enterprise and Spring Boot 3.x ecosystems as of the time this decision was made, even though Java 21 is the current LTS. None of the features introduced in Java 21 — virtual threads, finalised pattern matching for switch, sequenced collections — are meaningful for CloudMock's core implementation: an embedded WireMock server, a `ServiceLoader` loop, and Handlebars response templates. The upgrade would carry adoption cost with no technical benefit at this stage.
+Java 17 remains the dominant LTS in enterprise and Spring Boot 3.x ecosystems as of the time this decision was made,
+even though Java 21 is the current LTS. None of the features introduced in Java 21 — virtual threads, finalised pattern
+matching for switch, sequenced collections — are meaningful for CloudMock's core implementation: an embedded WireMock
+server, a `ServiceLoader` loop, and Handlebars response templates. The upgrade would carry adoption cost with no
+technical benefit at this stage.
 
-**Build target:** compile against Java 17; run CI against both Java 17 and Java 21 to validate compatibility. When Java 17 adoption in the target ecosystem drops below a meaningful threshold, bumping the minimum is a one-line change in the root `build.gradle`.
+**Build target:** compile against Java 17; run CI against both Java 17 and Java 21 to validate compatibility. When Java
+17 adoption in the target ecosystem drops below a meaningful threshold, bumping the minimum is a one-line change in the
+root `build.gradle`.
