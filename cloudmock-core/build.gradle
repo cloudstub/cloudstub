@@ -19,7 +19,9 @@ shadowJar {
     }
 }
 
-// The shadow JAR is the primary artifact; disable the empty regular JAR.
+// Give the regular JAR an 'original' classifier so the shadow JAR (no classifier)
+// becomes the primary published artifact. The regular JAR must still be built so
+// Gradle can resolve project-to-project compile dependencies via class directories.
 jar {
-    enabled = false
+    archiveClassifier.set('original')
 }
