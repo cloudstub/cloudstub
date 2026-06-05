@@ -1,7 +1,7 @@
 package io.cloudmock.core;
 
+import io.cloudmock.core.spi.CloudMockContext;
 import io.cloudmock.core.spi.CloudMockService;
-import io.cloudmock.core.spi.StubRegistrar;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,8 +34,8 @@ class XmlFormRoutingTest {
     /** Registers ONLY the {@code Publish} action — deliberately not {@code PublishBatch}. */
     private static final class PublishOnlyService implements CloudMockService {
         @Override public String serviceId() { return "publish-only"; }
-        @Override public void register(StubRegistrar registrar) {
-            registrar.registerXmlFormStub("Publish", "<PublishResponse/>");
+        @Override public void register(CloudMockContext context) {
+            context.registrar().registerXmlFormStub("Publish", "<PublishResponse/>");
         }
     }
 

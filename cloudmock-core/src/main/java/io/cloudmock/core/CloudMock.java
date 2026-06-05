@@ -5,11 +5,16 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.cloudmock.core.exception.CloudMockAlreadyStartedException;
 import io.cloudmock.core.exception.CloudMockNotStartedException;
 import io.cloudmock.core.internal.BrownoutTransformer;
+import io.cloudmock.core.internal.CloudMockContextImpl;
 import io.cloudmock.core.internal.FaultEngine;
+import io.cloudmock.core.internal.store.InMemoryStateStore;
+import io.cloudmock.core.internal.store.JsonFileStateStore;
 import io.cloudmock.core.internal.Md5HandlebarsHelper;
 import io.cloudmock.core.internal.WireMockStubRegistrar;
 import io.cloudmock.core.spi.CloudMockService;
+import io.cloudmock.core.spi.StateStore;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,9 +51,28 @@ public final class CloudMock implements AutoCloseable {
 
     private WireMockServer server;
     private FaultEngine faultEngine;
+    private StateStore stateStore;
     private final List<CloudMockService> explicitServices = new ArrayList<>();
     private int fixedPort = 0;
     private Set<String> enabledServiceIds; // null = register every discovered module
+    private Path storeDirectory; // null = in-memory store
+
+    /**
+     * Configures a directory for persistent state storage. State written to the store will
+     * survive a CloudMock restart. When not set, an in-memory store is used (state lost on stop).
+     *
+     * <p>Must be called before {@link #start()}.
+     *
+     * @param directory directory where {@code cloudmock-state.json} will be written
+     * @throws CloudMockAlreadyStartedException if already started
+     */
+    public CloudMock withStoreDirectory(Path directory) {
+        if (server != null) {
+            throw new CloudMockAlreadyStartedException();
+        }
+        this.storeDirectory = directory;
+        return this;
+    }
 
     /**
      * Binds the server to a specific port instead of a random available one.
@@ -113,6 +137,9 @@ public final class CloudMock implements AutoCloseable {
         server = new WireMockServer(wireMockConfig());
         server.start();
         System.setProperty(ENDPOINT_PROPERTY, "http://localhost:" + server.port());
+        stateStore = storeDirectory != null
+                ? new JsonFileStateStore(storeDirectory)
+                : new InMemoryStateStore();
         loadAndRegisterServices();
     }
 
@@ -127,7 +154,19 @@ public final class CloudMock implements AutoCloseable {
         server.stop();
         server = null;
         faultEngine = null;
+        stateStore = null;
         System.clearProperty(ENDPOINT_PROPERTY);
+    }
+
+    /**
+     * Returns the shared state store. Only valid after {@link #start()}.
+     * Exposed for direct state inspection in tests and for the admin REST API.
+     *
+     * @throws CloudMockNotStartedException if not yet started
+     */
+    public StateStore stateStore() {
+        requireStarted();
+        return stateStore;
     }
 
     /** Returns the port the server is listening on. Only valid after {@link #start()}. */
@@ -213,17 +252,18 @@ public final class CloudMock implements AutoCloseable {
     private void loadAndRegisterServices() {
         WireMockStubRegistrar registrar = new WireMockStubRegistrar(server);
         faultEngine = registrar.newFaultEngine();
+        CloudMockContextImpl context = new CloudMockContextImpl(registrar, stateStore);
         ServiceLoader.load(CloudMockService.class, Thread.currentThread().getContextClassLoader())
                 .forEach(s -> {
                     if (enabledServiceIds != null && !enabledServiceIds.contains(s.serviceId())) {
                         return;
                     }
                     registrar.setCurrentService(s.serviceId());
-                    s.register(registrar);
+                    s.register(context);
                 });
         explicitServices.forEach(s -> {
             registrar.setCurrentService(s.serviceId());
-            s.register(registrar);
+            s.register(context);
         });
     }
 

@@ -2,6 +2,7 @@ package io.cloudmock.standalone;
 
 import io.cloudmock.core.CloudMock;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -13,13 +14,19 @@ public final class StandaloneMain {
         List<String> available = ServiceDiscovery.discoverServiceIds();
         Set<String> requested = ModuleSelector.resolve(args);
         List<String> enabled = resolveEnabled(available, requested);
+        Path storeDir = StoreDirectoryResolver.resolve(args);
 
         System.out.println("[CloudMock] Available modules: " + join(available));
         System.out.println("[CloudMock] Enabled modules: " + join(enabled));
+        System.out.println("[CloudMock] State storage: "
+                + (storeDir != null ? "persistent (" + storeDir + ")" : "in-memory (not persisted)"));
 
         CloudMock cloudMock = new CloudMock().withPort(port);
         if (requested != null) {
             cloudMock.withEnabledServices(enabled);
+        }
+        if (storeDir != null) {
+            cloudMock.withStoreDirectory(storeDir);
         }
 
         try (cloudMock) {

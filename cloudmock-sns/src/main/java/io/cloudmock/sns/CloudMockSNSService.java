@@ -1,5 +1,6 @@
 package io.cloudmock.sns;
 
+import io.cloudmock.core.spi.CloudMockContext;
 import io.cloudmock.core.spi.CloudMockService;
 import io.cloudmock.core.spi.StubRegistrar;
 import java.io.IOException;
@@ -25,7 +26,8 @@ public class CloudMockSNSService implements CloudMockService {
     }
 
     @Override
-    public void register(StubRegistrar registrar) {
+    public void register(CloudMockContext context) {
+        StubRegistrar registrar = context.registrar();
         registrar.registerXmlFormStub("AddPermission", loadTemplate("AddPermission"));
         registrar.registerXmlFormStub("CheckIfPhoneNumberIsOptedOut", loadTemplate("CheckIfPhoneNumberIsOptedOut"));
         registrar.registerXmlFormStub("ConfirmSubscription", loadTemplate("ConfirmSubscription"));

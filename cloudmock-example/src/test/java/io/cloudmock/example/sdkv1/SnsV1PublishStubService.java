@@ -1,5 +1,6 @@
 package io.cloudmock.example.sdkv1;
 
+import io.cloudmock.core.spi.CloudMockContext;
 import io.cloudmock.core.spi.CloudMockService;
 import io.cloudmock.core.spi.StubRegistrar;
 
@@ -36,7 +37,7 @@ public final class SnsV1PublishStubService implements CloudMockService {
     }
 
     @Override
-    public void register(StubRegistrar registrar) {
-        registrar.registerXmlFormStub("Publish", PUBLISH_RESPONSE);
+    public void register(CloudMockContext context) {
+        context.registrar().registerXmlFormStub("Publish", PUBLISH_RESPONSE);
     }
 }

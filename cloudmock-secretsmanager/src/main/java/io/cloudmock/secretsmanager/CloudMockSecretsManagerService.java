@@ -1,5 +1,6 @@
 package io.cloudmock.secretsmanager;
 
+import io.cloudmock.core.spi.CloudMockContext;
 import io.cloudmock.core.spi.CloudMockService;
 import io.cloudmock.core.spi.StubRegistrar;
 
@@ -61,7 +62,8 @@ public class CloudMockSecretsManagerService implements CloudMockService {
     }
 
     @Override
-    public void register(StubRegistrar registrar) {
+    public void register(CloudMockContext context) {
+        StubRegistrar registrar = context.registrar();
         registrar.registerJsonTargetStub(PREFIX + "CreateSecret",    CREATE_SECRET);
         registrar.registerJsonTargetStub(PREFIX + "GetSecretValue",  GET_SECRET_VALUE);
         registrar.registerJsonTargetStub(PREFIX + "PutSecretValue",  PUT_SECRET_VALUE);

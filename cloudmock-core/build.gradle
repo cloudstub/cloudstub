@@ -2,16 +2,18 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
     implementation libs.wiremock
+    implementation libs.jackson.databind
     testImplementation libs.slf4j.simple
 }
 
 shadowJar {
     archiveClassifier.set('')
 
-    // Relocate Jetty and WireMock into a private package so they never
-    // conflict with whatever version the user's project depends on.
+    // Relocate Jetty, WireMock, and Jackson into private packages so they never
+    // conflict with whatever versions the user's project depends on.
     relocate 'org.eclipse.jetty',                'io.cloudmock.shaded.jetty'
     relocate 'com.github.tomakehurst.wiremock',  'io.cloudmock.shaded.wiremock'
+    relocate 'com.fasterxml.jackson',            'io.cloudmock.shaded.jackson'
 
     // Keep SLF4J API unshaded so the user's logging configuration applies.
     dependencies {

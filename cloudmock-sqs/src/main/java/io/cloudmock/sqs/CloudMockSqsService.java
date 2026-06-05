@@ -1,5 +1,6 @@
 package io.cloudmock.sqs;
 
+import io.cloudmock.core.spi.CloudMockContext;
 import io.cloudmock.core.spi.CloudMockService;
 import io.cloudmock.core.spi.StubRegistrar;
 
@@ -61,7 +62,8 @@ public class CloudMockSqsService implements CloudMockService {
     }
 
     @Override
-    public void register(StubRegistrar registrar) {
+    public void register(CloudMockContext context) {
+        StubRegistrar registrar = context.registrar();
         registrar.registerJsonTargetStub(PREFIX + "CreateQueue",        CREATE_QUEUE);
         registrar.registerJsonTargetStub(PREFIX + "GetQueueUrl",        GET_QUEUE_URL);
         registrar.registerJsonTargetStub(PREFIX + "SendMessage",        SEND_MESSAGE);

@@ -143,6 +143,7 @@ public class ModuleGenerator {
         String simpleClassName = "CloudMock" + className + "Service";
         StringBuilder sb = new StringBuilder();
         sb.append("package ").append(pkg).append(";\n\n");
+        sb.append("import io.cloudmock.core.spi.CloudMockContext;\n");
         sb.append("import io.cloudmock.core.spi.CloudMockService;\n");
         sb.append("import io.cloudmock.core.spi.StubRegistrar;\n");
         if (protocol.isRest()) {
@@ -184,7 +185,8 @@ public class ModuleGenerator {
         sb.append("    }\n\n");
 
         sb.append("    @Override\n");
-        sb.append("    public void register(StubRegistrar registrar) {\n");
+        sb.append("    public void register(CloudMockContext context) {\n");
+        sb.append("        StubRegistrar registrar = context.registrar();\n");
         for (OperationShape op : operations) {
             String opName = op.getId().getName();
             switch (protocol) {

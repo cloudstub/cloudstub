@@ -1,5 +1,6 @@
 package io.cloudmock.s3;
 
+import io.cloudmock.core.spi.CloudMockContext;
 import io.cloudmock.core.spi.CloudMockService;
 import io.cloudmock.core.spi.StubRegistrar;
 import io.cloudmock.core.spi.HttpMethod;
@@ -24,7 +25,8 @@ public class CloudMockS3Service implements CloudMockService {
     }
 
     @Override
-    public void register(StubRegistrar registrar) {
+    public void register(CloudMockContext context) {
+        StubRegistrar registrar = context.registrar();
         // ListObjects (v1) is the bucket-level GET catch-all (GET /<bucket> with no list-type=2).
         // Register it FIRST so every more specific single-segment GET below (GetBucket*, CreateSession,
         // ListObjectsV2, …) overrides it via WireMock's last-registered-wins tie-break — otherwise this

@@ -10,17 +10,17 @@ service that returns live data — what a user sends in one call comes back in t
 
 ## Acceptance criteria
 
-- [ ] `StateStore` interface implemented as designed in [0024](0024-design-state-store-interface.md)
-- [ ] Store is instantiated and lifecycle-managed by the core engine
-- [ ] Store is injected into each module at registration time alongside the `StubRegistrar`
-- [ ] Store is scoped by service ID — modules write and read under their own prefix
-- [ ] Store supports `put`, `get`, `list`, and `clear` operations
-- [ ] `clear()` with no arguments clears all state across all services
-- [ ] `clear(serviceId)` clears state for a single service only
-- [ ] Store has no dependency on WireMock types
-- [ ] Store is persistent — state survives a CloudMock restart
-- [ ] Store is thread-safe
-- [ ] Core exposes the store to the admin REST API for read queries
+- [x] `StateStore` interface implemented as designed in [0024](0024-design-state-store-interface.md)
+- [x] Store is instantiated and lifecycle-managed by the core engine
+- [x] Store is injected into each module at registration time alongside the `StubRegistrar`
+- [x] Store is scoped by service ID — modules write and read under their own prefix
+- [x] Store supports `put`, `get`, `list`, and `clear` operations
+- [x] `clear()` with no arguments clears all state across all services
+- [x] `clear(serviceId)` clears state for a single service only
+- [x] Store has no dependency on WireMock types
+- [x] Store is persistent — state survives a CloudMock restart
+- [x] Store is thread-safe
+- [x] Core exposes the store to the admin REST API for read queries
 
 ## Dependencies
 
