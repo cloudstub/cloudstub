@@ -1,6 +1,8 @@
 # Module Authoring Guide
 
-This guide walks through building a CloudMock service module from scratch. At the end you will have a working module that integrates with the core engine via `ServiceLoader`, registers its stubs through `StubRegistrar`, and is tested with real AWS SDK v2 clients.
+This guide walks through building a CloudMock service module from scratch. At the end you will have a working module
+that integrates with the core engine via `ServiceLoader`, registers its stubs through `StubRegistrar`, and is tested
+with real AWS SDK v2 clients.
 
 Use `cloudmock-sqs` and `cloudmock-secretsmanager` as reference implementations throughout.
 
@@ -10,11 +12,11 @@ Use `cloudmock-sqs` and `cloudmock-secretsmanager` as reference implementations 
 
 Every AWS service uses one of three wire protocols. Your module implements whichever one its service uses.
 
-| Protocol | Services | Matched on | `StubRegistrar` method |
-|---|---|---|---|
+| Protocol            | Services                       | Matched on                    | `StubRegistrar` method   |
+|---------------------|--------------------------------|-------------------------------|--------------------------|
 | JSON / X-Amz-Target | SQS, Secrets Manager, DynamoDB | `X-Amz-Target` request header | `registerJsonTargetStub` |
-| XML / Form URL | SNS (legacy SDK v1) | `Action` form body parameter | `registerXmlFormStub` |
-| REST path | S3 | HTTP method + URL path regex | `registerRestStub` |
+| XML / Form URL      | SNS (legacy SDK v1)            | `Action` form body parameter  | `registerXmlFormStub`    |
+| REST path           | S3                             | HTTP method + URL path regex  | `registerRestStub`       |
 
 Check the AWS SDK v2 source or Smithy model for your target service to confirm which protocol it uses.
 
@@ -42,7 +44,8 @@ dependencies {
 }
 ```
 
-`compileOnly` keeps `cloudmock-core` off the module's runtime classpath. The core engine loads the module at runtime, not the other way around.
+`compileOnly` keeps `cloudmock-core` off the module's runtime classpath. The core engine loads the module at runtime,
+not the other way around.
 
 Register the new subproject in `settings.gradle`:
 
@@ -70,27 +73,30 @@ public class CloudMockMyServiceService implements CloudMockService {
     @Override
     public void register(StubRegistrar registrar) {
         registrar.registerJsonTargetStub(
-                "MyService.DescribeWidget",  // (2)!
-                DESCRIBE_WIDGET_RESPONSE
+            "MyService.DescribeWidget",  // (2)!
+            DESCRIBE_WIDGET_RESPONSE
         );
         // register one stub per operation
     }
 
     private static final String DESCRIBE_WIDGET_RESPONSE = """
-            {"Widget":{"WidgetId":"{{jsonPath request.body '$.WidgetId'}}","Status":"ACTIVE"}}
-            """; // (3)!
+        {"Widget":{"WidgetId":"{{jsonPath request.body '$.WidgetId'}}","Status":"ACTIVE"}}
+        """; // (3)!
 }
 ```
 
-1. Lowercase identifier used in logging and fault injection annotations (e.g. `@SimulateThrottle(service = "myservice")`).
-2. The full `X-Amz-Target` header value. Find it in the SDK's generated request class or by capturing a real SDK call with a proxy.
+1. Lowercase identifier used in logging and fault injection annotations (e.g.
+   `@SimulateThrottle(service = "myservice")`).
+2. The full `X-Amz-Target` header value. Find it in the SDK's generated request class or by capturing a real SDK call
+   with a proxy.
 3. A Handlebars template. The engine evaluates it at request time for each incoming call.
 
 ---
 
 ## 4. Write response templates
 
-Templates are [Handlebars](https://handlebarsjs.com/) strings evaluated per request. CloudMock provides helpers on top of WireMock's built-in set.
+Templates are [Handlebars](https://handlebarsjs.com/) strings evaluated per request. CloudMock provides helpers on top
+of WireMock's built-in set.
 
 ### Built-in WireMock helpers
 
@@ -131,25 +137,29 @@ private static final String CREATE_SECRET = """
 ```
 
 !!! tip "Validate your templates"
-    Use the WireMock standalone JAR locally to test Handlebars templates interactively before adding them to your module. The `{{jsonPath}}` syntax is the same.
+Use the WireMock standalone JAR locally to test Handlebars templates interactively before adding them to your module.
+The `{{jsonPath}}` syntax is the same.
 
 ---
 
 ## 5. Register via `META-INF/services`
 
-Create the file `src/main/resources/META-INF/services/io.cloudmock.core.spi.CloudMockService` containing the fully qualified class name of your implementation:
+Create the file `src/main/resources/META-INF/services/io.cloudmock.core.spi.CloudMockService` containing the fully
+qualified class name of your implementation:
 
 ```
 io.cloudmock.myservice.CloudMockMyServiceService
 ```
 
-This is standard Java `ServiceLoader` registration. When the module JAR is on the classpath, `CloudMock.start()` discovers and calls `register()` automatically.
+This is standard Java `ServiceLoader` registration. When the module JAR is on the classpath, `CloudMock.start()`
+discovers and calls `register()` automatically.
 
 ---
 
 ## 6. Write the module test
 
-Test your module by driving real AWS SDK v2 clients against a live `CloudMock` instance. The goal is to verify that the SDK can parse your responses without error — not to reproduce AWS semantics.
+Test your module by driving real AWS SDK v2 clients against a live `CloudMock` instance. The goal is to verify that the
+SDK can parse your responses without error — not to reproduce AWS semantics.
 
 ```java
 class CloudMockMyServiceTest {
@@ -162,10 +172,10 @@ class CloudMockMyServiceTest {
         cloudMock = new CloudMock().withService(new CloudMockMyServiceService()); // (1)!
         cloudMock.start();
         client = MyServiceClient.builder()
-                .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
-                .credentialsProvider(AnonymousCredentialsProvider.create())
-                .region(Region.US_EAST_1)
-                .build();
+            .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+            .credentialsProvider(AnonymousCredentialsProvider.create())
+            .region(Region.US_EAST_1)
+            .build();
     }
 
     @AfterAll
@@ -182,13 +192,15 @@ class CloudMockMyServiceTest {
 }
 ```
 
-1. Use `.withService()` in module tests rather than relying on `ServiceLoader`. Classpath structure inside the Gradle multi-project build may prevent auto-discovery during module-level test runs.
+1. Use `.withService()` in module tests rather than relying on `ServiceLoader`. Classpath structure inside the Gradle
+   multi-project build may prevent auto-discovery during module-level test runs.
 
 ---
 
 ## 7. Module isolation
 
-A module **must not** depend on another module at compile or runtime. All inter-module calls go through the core SPI. This is enforced by Gradle:
+A module **must not** depend on another module at compile or runtime. All inter-module calls go through the core SPI.
+This is enforced by Gradle:
 
 ```groovy
 // This will fail the build:
@@ -203,7 +215,9 @@ dependencies {
 
 ## Reference implementations
 
-| Module | Protocol used | Reference for |
-|---|---|---|
-| `cloudmock-sqs` | JSON / X-Amz-Target | Header-matched stubs, UUID + MD5 helpers, array responses |
-| `cloudmock-secretsmanager` | JSON / X-Amz-Target | ARN construction, nested JSON responses |
+| Module                     | Protocol used       | Reference for                                             |
+|----------------------------|---------------------|-----------------------------------------------------------|
+| `cloudmock-sqs`            | JSON / X-Amz-Target | Header-matched stubs, UUID + MD5 helpers, array responses |
+| `cloudmock-secretsmanager` | JSON / X-Amz-Target | ARN construction, nested JSON responses                   |
+| `cloudmock-sns`            | XML / Form URL      | `Action`-matched stubs, XML responses                     |
+| `cloudmock-s3`             | REST path           | HTTP method + path-regex stubs, XML responses             |

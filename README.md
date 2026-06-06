@@ -54,6 +54,7 @@ dependencies {
 **Maven**
 
 ```xml
+
 <dependencies>
     <dependency>
         <groupId>io.cloudmock</groupId>
@@ -85,18 +86,20 @@ import io.cloudmock.core.CloudMock;
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
+
 import java.net.URI;
 
 CloudMock cloudMock = new CloudMock();
 cloudMock.start();
 
 SqsClient sqs = SqsClient.builder()
-        .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
-        .credentialsProvider(AnonymousCredentialsProvider.create())
-        .region(Region.US_EAST_1)
-        .build();
+    .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+    .credentialsProvider(AnonymousCredentialsProvider.create())
+    .region(Region.US_EAST_1)
+    .build();
 
 String queueUrl = sqs.createQueue(b -> b.queueName("my-queue")).queueUrl();
+
 assertNotNull(queueUrl);
 
 cloudMock.stop();
@@ -110,18 +113,20 @@ with no further configuration. For full JUnit 6 lifecycle management, fault inje
 
 ## Supported services
 
-| Module                        | Service           |
-|-------------------------------|-------------------|
-| `cloudmock-sqs`               | Amazon SQS        |
-| `cloudmock-secretsmanager`    | Secrets Manager   |
+| Module                     | Service         |
+|----------------------------|-----------------|
+| `cloudmock-sqs`            | Amazon SQS      |
+| `cloudmock-secretsmanager` | Secrets Manager |
+| `cloudmock-s3`             | Amazon S3       |
+| `cloudmock-sns`            | Amazon SNS      |
 
 **Tooling**
 
-| Module                | Purpose                                                  |
-|-----------------------|----------------------------------------------------------|
-| `cloudmock-junit6`    | JUnit 6 extension — `@ExtendWith` + fault injection      |
-| `cloudmock-codegen`   | Stub generator — produces a module skeleton from a Smithy model |
-| `cloudmock-sdk-v1`    | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |
+| Module              | Purpose                                                                        |
+|---------------------|--------------------------------------------------------------------------------|
+| `cloudmock-junit6`  | JUnit 6 extension — `@ExtendWith` + fault injection                            |
+| `cloudmock-codegen` | Stub generator — produces a module skeleton from a Smithy model                |
+| `cloudmock-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |
 
 ---
 
@@ -130,7 +135,8 @@ with no further configuration. For full JUnit 6 lifecycle management, fault inje
 CloudMock simulates the AWS API surface well enough to test application logic, but it is not a full reimplementation of
 AWS. The following are explicitly out of scope:
 
-- AWS SDK v1 automatic zero-config redirection — `aws.endpoint-url` is SDK v2 only; SDK v1 users use `cloudmock-sdk-v1` for a one-line per-client redirect
+- AWS SDK v1 automatic zero-config redirection — `aws.endpoint-url` is SDK v2 only; SDK v1 users use `cloudmock-sdk-v1`
+  for a one-line per-client redirect
 - SQS FIFO deduplication and ordering semantics
 - S3 multipart upload lifecycle and versioning
 - DynamoDB conditional expressions and transaction semantics
@@ -147,6 +153,7 @@ two-method SPI (`CloudMockService` + `StubRegistrar`).
 
 - **New module:** follow the [Module Authoring Guide](https://bnmosria.github.io/cloud-mock/module-authoring/)
 - **New feature or bug:** open an issue in the [`issues/`](issues/) directory following the existing format
-- **Stub generation:** use the [codegen tool](https://bnmosria.github.io/cloud-mock/codegen/) to generate a module skeleton from a Smithy model
+- **Stub generation:** use the [codegen tool](https://bnmosria.github.io/cloud-mock/codegen/) to generate a module
+  skeleton from a Smithy model
 
 Full documentation: **[bnmosria.github.io/cloud-mock](https://bnmosria.github.io/cloud-mock/)**
