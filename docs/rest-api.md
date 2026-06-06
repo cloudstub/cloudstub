@@ -84,16 +84,25 @@ stubs, and the full list of available API routes.
       "description": "Clear all state (or ?service=X for one service)"
     },
     {
-      "method": "GET",
-      "path": "/api/history",
-      "description": "Captured request log (or ?service=X to filter)"
+      "method": "POST",
+      "path": "/api/sqs/send-message",
+      "service": "sqs",
+      "command": "send-message",
+      "description": "Send a message to an SQS queue",
+      "params": [
+        { "name": "queue", "required": true, "description": "Queue name" },
+        { "name": "body", "required": true, "description": "Message body" }
+      ]
     }
   ]
 }
 ```
 
 Use `GET /api/status` as the discovery endpoint — the `routes` array tells you exactly what
-operations are available without consulting documentation.
+operations are available without consulting documentation. Module routes additionally carry a
+`service`, a `command` name, and a `params` list (each with `name`, `required`, and `description`).
+That metadata is what lets the [CLI](cli.md) build `clm <service> <command>` with typed options at
+runtime, with no hardcoded knowledge of any module.
 
 ---
 
@@ -197,7 +206,13 @@ The spec updates automatically when modules are added or removed — no manual m
 ## Module routes
 
 Modules can expose their own routes under `/api/<serviceId>/…` by implementing the
-`CloudMockApiService` SPI interface. If a module JAR is not on the classpath its routes do not
-exist; adding it to the classpath makes them available automatically.
+`CloudMockApiService` SPI interface. If a module JAR is not on the classpath — or the module is
+disabled with `--modules` — its routes do not exist; loading the module makes them available
+automatically. Each route may advertise a `command` name and `params`, which the [CLI](cli.md)
+turns into a `clm <service> <command>` subcommand.
 
-See [Module Authoring](module-authoring.md) for details on implementing `CloudMockApiService`.
+Parameters are passed as query-string values (`POST /api/sqs/send-message?queue=q&body=hello`);
+the request body is not read.
+
+See [Module Authoring](module-authoring.md#8-exposing-cli-commands-via-the-rest-api) for details on
+implementing `CloudMockApiService`.

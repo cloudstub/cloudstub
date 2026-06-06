@@ -213,6 +213,68 @@ dependencies {
 
 ---
 
+## 8. Exposing CLI commands via the REST API
+
+`CloudMockService` registers the AWS wire-protocol stubs your module serves on the mock port. A
+module may *also* expose a small REST surface under `/api/<serviceId>/…` by implementing the
+optional `CloudMockApiService` SPI. This is what the [CLI](cli.md) drives: each route you register
+advertises a command name and parameters in `/api/status`, and the CLI turns it into
+`clm <serviceId> <command>` automatically — no change to the CLI is needed.
+
+`CloudMockApiService` depends only on core SPI types (no WireMock, no AWS SDK, no picocli). Handlers
+return an `ApiResponse(statusCode, body)` whose `body` map is serialised to JSON. Parameters arrive
+as query-string values via `ApiRequest.queryParams()`; the request body is not read.
+
+```java
+package io.cloudmock.myservice;
+
+import io.cloudmock.core.spi.CloudMockApiService;
+import io.cloudmock.core.spi.HttpMethod;
+import io.cloudmock.core.spi.restapi.ApiParam;
+import io.cloudmock.core.spi.restapi.ApiRouteRegistrar;
+
+import java.util.List;
+import java.util.Map;
+
+public class CloudMockMyServiceApiService implements CloudMockApiService {
+
+    @Override
+    public String serviceId() {
+        return "myservice"; // must match CloudMockService.serviceId()
+    }
+
+    @Override
+    public void registerRoutes(ApiRouteRegistrar r) {
+        r.register(
+            HttpMethod.POST,                                  // HTTP method
+            "/describe-widget",                               // path under /api/myservice
+            "describe-widget",                                // CLI command name
+            "Describe a widget",                              // help text
+            List.of(new ApiParam("id", true, "Widget id")),  // params → CLI options
+            req -> new io.cloudmock.core.spi.restapi.ApiResponse(200, Map.of(
+                "id", req.queryParams().getOrDefault("id", ""),
+                "status", "ACTIVE")));
+    }
+}
+```
+
+Register it alongside the stub service with a second `ServiceLoader` file,
+`src/main/resources/META-INF/services/io.cloudmock.core.spi.CloudMockApiService`:
+
+```
+io.cloudmock.myservice.CloudMockMyServiceApiService
+```
+
+Now `clm myservice describe-widget --id w-123` works against any standalone instance that has the
+module loaded. Routes (and therefore CLI commands) for a module that is disabled with `--modules`
+are not registered, keeping the stub view and the API view consistent.
+
+!!! note "Keep responses stateless"
+    These handlers return synthetic, stateless data — the same contract the stubs follow. They
+    are for inspection and test-data injection, not for reproducing AWS semantics.
+
+---
+
 ## Reference implementations
 
 | Module                     | Protocol used       | Reference for                                             |
@@ -221,3 +283,6 @@ dependencies {
 | `cloudmock-secretsmanager` | JSON / X-Amz-Target | ARN construction, nested JSON responses                   |
 | `cloudmock-sns`            | XML / Form URL      | `Action`-matched stubs, XML responses                     |
 | `cloudmock-s3`             | REST path           | HTTP method + path-regex stubs, XML responses             |
+
+For `CloudMockApiService` (§8), `CloudMockSqsApiService`, `CloudMockS3ApiService`, and
+`CloudMockSecretsManagerApiService` are the reference implementations.

@@ -90,7 +90,7 @@ cloudMock.stop();
 
 `CloudMock.start()` sets `aws.endpoint-url` automatically, so all AWS SDK v2 clients in the same JVM are redirected
 with no further configuration. For full JUnit 6 lifecycle management, fault injection, and `@ExtendWith` usage, see the
-[Getting Started guide](https://cloud-mock.github.io/cloud-mock/getting-started/).
+[Getting Started guide](https://cloud-mock.github.io/cloudmockgetting-started/).
 
 ## Standalone mode
 
@@ -111,8 +111,18 @@ export AWS_ENDPOINT_URL=http://localhost:4566
 ./gradlew bootRun
 ```
 
+A companion CLI (`clm` / `cloudmock`) drives a running instance from the terminal — inspect status, send test data,
+reset services — without the AWS CLI. It is a thin HTTP client that discovers its commands from the server at runtime.
+
+```
+./gradlew :cloudmock-cli:shadowJar
+./cloudmock-cli/bin/clm status
+./cloudmock-cli/bin/clm sqs send-message --queue orders --body "hello"
+```
+
 > Standalone mode serves the same stateless, templated responses as embedded mode — it does not persist state across
-> calls. See the [Standalone Mode guide](https://cloud-mock.github.io/cloud-mock/standalone/) for full details.
+> calls. See the [Standalone Mode guide](https://cloud-mock.github.io/cloudmock/standalone/) and
+> [CLI guide](https://cloud-mock.github.io/cloudmock/cli/) for full details.
 
 ## Supported services
 
@@ -130,6 +140,7 @@ export AWS_ENDPOINT_URL=http://localhost:4566
 | `cloudmock-junit6`  | JUnit 6 extension — `@ExtendWith` + fault injection                            |
 | `cloudmock-codegen` | Stub generator — produces a module skeleton from a Smithy model                |
 | `cloudmock-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |
+| `cloudmock-cli`     | Command-line client (`clm` / `cloudmock`) for a running standalone instance    |
 
 ## Scope and limitations
 
@@ -143,9 +154,9 @@ If a module you need doesn't exist yet, you can build it. Each AWS service is an
 simple
 two-method SPI (`CloudMockService` + `StubRegistrar`).
 
-- **New module:** follow the [Module Authoring Guide](https://cloud-mock.github.io/cloud-mock/module-authoring/)
+- **New module:** follow the [Module Authoring Guide](https://cloud-mock.github.io/cloudmock/module-authoring/)
 - **New feature or bug:** open an issue in the [`issues/`](issues/) directory following the existing format
-- **Stub generation:** use the [codegen tool](https://cloud-mock.github.io/cloud-mock/codegen/) to generate a module
+- **Stub generation:** use the [codegen tool](https://cloud-mock.github.io/cloudmock/codegen/) to generate a module
   skeleton from a Smithy model
 
-Full documentation: **[CloudMock](https://cloud-mock.github.io/cloud-mock/)**
+Full documentation: **[CloudMock](https://cloud-mock.github.io/cloudmock/)**

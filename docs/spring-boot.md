@@ -28,7 +28,7 @@ public class AwsConfig {
 
 1. The `:` default means the property is optional. In production `aws.endpoint-url` is absent and the SDK uses real AWS endpoints. In tests CloudMock sets it before the context starts.
 
-Your services are plain Spring `@Service` classes with no CloudMock imports — see [`EventPublisher`](https://github.com/cloud-mock/cloud-mock/blob/main/cloudmock-example/src/main/java/io/cloudmock/example/service/EventPublisher.java) and [`SecretLoader`](https://github.com/cloud-mock/cloud-mock/blob/main/cloudmock-example/src/main/java/io/cloudmock/example/service/SecretLoader.java) in `cloudmock-example` for the full code.
+Your services are plain Spring `@Service` classes with no CloudMock imports — see [`EventPublisher`](https://github.com/cloud-mock/cloudmock/blob/main/cloudmock-example/src/main/java/io/cloudmock/example/service/EventPublisher.java) and [`SecretLoader`](https://github.com/cloud-mock/cloudmock/blob/main/cloudmock-example/src/main/java/io/cloudmock/example/service/SecretLoader.java) in `cloudmock-example` for the full code.
 
 ## Integration tests
 
@@ -56,8 +56,8 @@ class EventPublisherIntegrationTest {
 
 See the full working tests in `cloudmock-example`:
 
-- [`EventPublisherIntegrationTest`](https://github.com/cloud-mock/cloud-mock/blob/main/cloudmock-example/src/test/java/io/cloudmock/example/EventPublisherIntegrationTest.java)
-- [`SecretLoaderIntegrationTest`](https://github.com/cloud-mock/cloud-mock/blob/main/cloudmock-example/src/test/java/io/cloudmock/example/SecretLoaderIntegrationTest.java)
+- [`EventPublisherIntegrationTest`](https://github.com/cloud-mock/cloudmock/blob/main/cloudmock-example/src/test/java/io/cloudmock/example/EventPublisherIntegrationTest.java)
+- [`SecretLoaderIntegrationTest`](https://github.com/cloud-mock/cloudmock/blob/main/cloudmock-example/src/test/java/io/cloudmock/example/SecretLoaderIntegrationTest.java)
 
 ## Dependencies
 

@@ -36,7 +36,7 @@ subprojects {
         publishing {
             publications {
                 mavenJava(MavenPublication) {
-                    from(components.named('shadow') ?: components.java)
+                    from(components.findByName('shadow') ?: components.java)
                     artifactId = project.name
                 }
             }
@@ -51,7 +51,7 @@ subprojects {
     afterEvaluate {
         if (project.name == 'cloudmock-standalone') return
         ['compileClasspath', 'runtimeClasspath'].each { cfgName ->
-            configurations.named(cfgName)?.allDependencies?.each { dep ->
+            configurations.findByName(cfgName)?.allDependencies?.each { dep ->
                 if (dep.group == 'io.cloudmock' && dep.name != 'cloudmock-core') {
                     throw new GradleException(
                         "Module isolation violation in '${project.name}': " +

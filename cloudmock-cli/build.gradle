@@ -1,15 +1,11 @@
 apply plugin: 'com.github.johnrengelman.shadow'
 
+// cloudmock-cli is a standalone HTTP client. It has NO dependency on cloudmock-core,
+// WireMock, or any service module: it discovers all service commands at runtime from the
+// running instance's /api/status endpoint. Keep it that way.
 dependencies {
-    implementation project(':cloudmock-core')
     implementation libs.picocli
     implementation libs.jackson.databind
-
-    // Service module CLI plugins discovered at runtime via ServiceLoader
-    runtimeOnly project(':cloudmock-sqs')
-    runtimeOnly project(':cloudmock-s3')
-    runtimeOnly project(':cloudmock-secretsmanager')
-    runtimeOnly project(':cloudmock-sns')
 }
 
 jar {
@@ -25,3 +21,6 @@ shadowJar {
     archiveVersion.set('')
     mergeServiceFiles()
 }
+
+// Ensure `./gradlew build` produces the runnable fat JAR the bin/ launchers point at.
+assemble.dependsOn shadowJar

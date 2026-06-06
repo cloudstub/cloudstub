@@ -36,7 +36,11 @@ public final class StandaloneMain {
             cloudMock.withStoreDirectory(storeDir);
         }
 
-        List<CloudMockApiService> apiServices = discoverApiServices();
+        // API routes must track the enabled modules: a disabled service has no stubs, so it must
+        // not advertise REST routes (or CLI commands) either, otherwise the two views disagree.
+        List<CloudMockApiService> apiServices = discoverApiServices().stream()
+                .filter(svc -> enabled.contains(svc.serviceId()))
+                .toList();
 
         try (cloudMock; ApiServer apiServer = new ApiServer(cloudMock, apiPort, apiServices)) {
             cloudMock.start();
