@@ -6,12 +6,9 @@ import com.sun.net.httpserver.HttpServer;
 import io.cloudmock.core.CloudMock;
 import io.cloudmock.core.restapi.ModuleStatus;
 import io.cloudmock.core.restapi.RequestRecord;
-import io.cloudmock.core.spi.restapi.ApiHandler;
 import io.cloudmock.core.spi.restapi.ApiRequest;
 import io.cloudmock.core.spi.restapi.ApiResponse;
-import io.cloudmock.core.spi.restapi.ApiRouteRegistrar;
 import io.cloudmock.core.spi.CloudMockApiService;
-import io.cloudmock.core.spi.HttpMethod;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -91,8 +88,12 @@ public final class ApiServer implements Closeable {
         stop();
     }
 
+    /**
+     * The port the API is listening on. When constructed with port {@code 0}, this returns the
+     * ephemeral port the OS assigned at {@link #start()} time rather than {@code 0}.
+     */
     public int port() {
-        return port;
+        return server != null ? server.getAddress().getPort() : port;
     }
 
     // -------------------------------------------------------------------------
@@ -115,14 +116,9 @@ public final class ApiServer implements Closeable {
 
     private void registerModuleRoutes() {
         for (CloudMockApiService svc : moduleServices) {
-            svc.registerRoutes(new ApiRouteRegistrar() {
-                @Override
-                public void register(HttpMethod method, String path, String description,
-                                     ApiHandler handler) {
-                    String fullPath = "/api/" + svc.serviceId() + path;
-                    addRoute(method.name(), fullPath, description, List.of(),
-                            req -> handler.handle(req));
-                }
+            svc.registerRoutes((method, path, description, handler) -> {
+                String fullPath = "/api/" + svc.serviceId() + path;
+                addRoute(method.name(), fullPath, description, List.of(), handler::handle);
             });
         }
     }
@@ -162,7 +158,7 @@ public final class ApiServer implements Closeable {
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("port", cloudMock.port());
-        body.put("apiPort", port);
+        body.put("apiPort", port());
         body.put("startedAt", started.toString());
         body.put("uptime", Duration.between(started, now).toString());
         body.put("modules", serializeModules(cloudMock.modules()));

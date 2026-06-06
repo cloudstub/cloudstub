@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -35,11 +34,11 @@ class ApiServerIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        apiPort = freePort();
         cloudMock = new CloudMock();
         cloudMock.start();
-        apiServer = new ApiServer(cloudMock, apiPort, List.of());
+        apiServer = new ApiServer(cloudMock, 0, List.of()); // 0 = ephemeral port, no bind race
         apiServer.start();
+        apiPort = apiServer.port();
     }
 
     @AfterEach
@@ -214,9 +213,9 @@ class ApiServerIntegrationTest {
 
     private void restartApiWith(CloudMockApiService... services) throws IOException {
         apiServer.stop();
-        apiPort = freePort();
-        apiServer = new ApiServer(cloudMock, apiPort, List.of(services));
+        apiServer = new ApiServer(cloudMock, 0, List.of(services));
         apiServer.start();
+        apiPort = apiServer.port();
     }
 
     private void sendSqsSendMessage() throws IOException, InterruptedException {
@@ -251,12 +250,6 @@ class ApiServerIntegrationTest {
 
     private URI uri(String path) {
         return URI.create("http://localhost:" + apiPort + path);
-    }
-
-    private static int freePort() throws IOException {
-        try (ServerSocket s = new ServerSocket(0)) {
-            return s.getLocalPort();
-        }
     }
 
     /** Minimal module that exposes routes under {@code /api/test/…} for SPI coverage. */
