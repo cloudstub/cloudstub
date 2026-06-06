@@ -3,11 +3,15 @@ package io.cloudmock.codegen;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.HttpTrait;
+import software.amazon.smithy.model.traits.JsonNameTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.model.traits.XmlNameTrait;
 import software.amazon.smithy.model.validation.ValidatedResult;
 import software.amazon.smithy.model.validation.ValidationEvent;
 
@@ -16,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -74,6 +80,12 @@ public class ModuleGenerator {
         for (OperationShape op : operations) {
             files.add(templateFile(model, op, protocol));
         }
+        boolean isXml = (protocol == Protocol.FORM_URL || protocol == Protocol.REST_XML);
+        for (OperationShape op : operations) {
+            files.add(builderClass(model, op, protocol, pkg, isXml));
+        }
+        // One shared serialisation helper per module, rather than copying the helpers into every builder.
+        files.add(responseSupportClass(pkg, isXml));
 
         return new GenerationResult(serviceId, moduleName, files);
     }
@@ -252,6 +264,221 @@ public class ModuleGenerator {
         sb.append(templateBody(model, op, protocol));
 
         return new GeneratedFile("src/main/resources/templates/" + name + ".hbs", sb.toString());
+    }
+
+    private GeneratedFile builderClass(Model model, OperationShape op, Protocol protocol, String pkg, boolean isXml) {
+        String opName = op.getId().getName();
+        String className = opName + "ResponseBuilder";
+
+        // Validation is disabled during model assembly (see loadModel), so an operation's output
+        // may resolve to something other than a structure in a malformed model. Degrade gracefully
+        // to an empty builder rather than throwing, mirroring the defensive handling in templateBody.
+        List<MemberShape> requiredMembers = new ArrayList<>();
+        List<MemberShape> optionalMembers = new ArrayList<>();
+        op.getOutput()
+                .map(model::expectShape)
+                .filter(s -> s instanceof StructureShape)
+                .map(s -> (StructureShape) s)
+                .ifPresent(output -> {
+                    for (var member : output.getAllMembers().values()) {
+                        if (member.hasTrait(RequiredTrait.class)) {
+                            requiredMembers.add(member);
+                        } else {
+                            optionalMembers.add(member);
+                        }
+                    }
+                });
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("package ").append(pkg).append(".response;\n\n");
+        sb.append("/**\n");
+        sb.append(" * GENERATED — builds a ").append(isXml ? "XML" : "JSON")
+          .append(" response body for {@code ").append(opName).append("}.\n");
+        sb.append(" *\n");
+        sb.append(" * <p>Populate fields from your state store, then call {@link #build()} to get the\n");
+        sb.append(" * wire-format string to return from a stub.\n");
+        if (!requiredMembers.isEmpty()) {
+            sb.append(" * Required fields are enforced via the constructor.\n");
+        }
+        sb.append(" */\n");
+        sb.append("public final class ").append(className).append(" {\n\n");
+        sb.append("    private final java.util.Map<String, Object> _fields = new java.util.LinkedHashMap<>();\n\n");
+
+        if (!requiredMembers.isEmpty()) {
+            String params = requiredMembers.stream()
+                    .map(m -> toJavaType(model, m) + " " + sanitizeIdentifier(m.getMemberName()))
+                    .collect(Collectors.joining(", "));
+            sb.append("    public ").append(className).append("(").append(params).append(") {\n");
+            for (var m : requiredMembers) {
+                sb.append("        _fields.put(\"").append(wireName(m, isXml)).append("\", ")
+                  .append(sanitizeIdentifier(m.getMemberName())).append(");\n");
+            }
+            sb.append("    }\n\n");
+        } else {
+            sb.append("    public ").append(className).append("() {}\n\n");
+        }
+
+        for (var m : optionalMembers) {
+            String javaType = toJavaType(model, m);
+            sb.append("    public ").append(className).append(" ").append(sanitizeIdentifier(m.getMemberName()))
+              .append("(").append(javaType).append(" value) {\n");
+            sb.append("        _fields.put(\"").append(wireName(m, isXml)).append("\", value);\n");
+            sb.append("        return this;\n");
+            sb.append("    }\n\n");
+        }
+
+        sb.append("    /** @return ").append(isXml ? "XML" : "JSON")
+          .append(" wire-format string for the {@code ").append(opName).append("} response. */\n");
+        sb.append("    public String build() {\n");
+        if (protocol == Protocol.FORM_URL) {
+            sb.append("        return \"<").append(opName).append("Response>\"\n");
+            sb.append("                + ResponseSupport.toXml(\"").append(opName).append("Result\", _fields)\n");
+            sb.append("                + \"<ResponseMetadata><RequestId>\" + java.util.UUID.randomUUID() + \"</RequestId></ResponseMetadata>\"\n");
+            sb.append("                + \"</").append(opName).append("Response>\";\n");
+        } else if (protocol == Protocol.REST_XML) {
+            String xmlRoot = op.getOutput()
+                    .map(id -> model.expectShape(id).getId().getName())
+                    .orElse(opName + "Output");
+            sb.append("        return ResponseSupport.toXml(\"").append(xmlRoot).append("\", _fields);\n");
+        } else {
+            sb.append("        return ResponseSupport.toJson(_fields);\n");
+        }
+        sb.append("    }\n");
+
+        sb.append("}\n");
+
+        String path = "src/main/java/" + pkg.replace('.', '/') + "/response/" + className + ".java";
+        return new GeneratedFile(path, sb.toString());
+    }
+
+    /**
+     * Maps a Smithy output member to the Java type exposed on the generated builder. Numeric, temporal,
+     * and enum shapes get precise types; nested aggregates (structure/union/map/list) are surfaced as
+     * generic collections that the shared serialiser understands.
+     */
+    private String toJavaType(Model model, MemberShape member) {
+        Shape target = model.expectShape(member.getTarget());
+        return switch (target.getType()) {
+            case STRING, ENUM, BLOB -> "String";
+            case BOOLEAN            -> "Boolean";
+            case BYTE               -> "Byte";
+            case SHORT              -> "Short";
+            case INTEGER, INT_ENUM  -> "Integer";
+            case LONG               -> "Long";
+            case FLOAT              -> "Float";
+            case DOUBLE             -> "Double";
+            case BIG_INTEGER        -> "java.math.BigInteger";
+            case BIG_DECIMAL        -> "java.math.BigDecimal";
+            case TIMESTAMP          -> "java.time.Instant";
+            case DOCUMENT           -> "Object";
+            case LIST, SET          -> "java.util.List<Object>";
+            case MAP, STRUCTURE, UNION -> "java.util.Map<String, Object>";
+            default                 -> "java.util.Map<String, Object>";
+        };
+    }
+
+    /**
+     * The serialised wire name for a member: {@code @jsonName}/{@code @xmlName} override the member
+     * name when present, matching how the real AWS SDK marshals the field. The member name itself is
+     * still used for the Java-side builder identifier (see {@link #sanitizeIdentifier(String)}).
+     */
+    private String wireName(MemberShape member, boolean isXml) {
+        if (isXml) {
+            return member.getTrait(XmlNameTrait.class).map(XmlNameTrait::getValue).orElse(member.getMemberName());
+        }
+        return member.getTrait(JsonNameTrait.class).map(JsonNameTrait::getValue).orElse(member.getMemberName());
+    }
+
+    /** Java reserved words and literals that cannot be used verbatim as identifiers. */
+    private static final Set<String> JAVA_RESERVED = Set.of(
+            "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
+            "const", "continue", "default", "do", "double", "else", "enum", "extends", "final",
+            "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
+            "interface", "long", "native", "new", "package", "private", "protected", "public",
+            "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this",
+            "throw", "throws", "transient", "try", "void", "volatile", "while",
+            "true", "false", "null", "_");
+
+    /**
+     * Turns a Smithy member name into a legal Java identifier. Smithy member names already match
+     * {@code [a-zA-Z_][a-zA-Z0-9_]*}, so the only collision with the Java grammar is reserved words;
+     * those get a trailing underscore (e.g. {@code default} → {@code default_}). The original member
+     * name is still used as the serialised wire key, so this rename never affects the response body.
+     */
+    private static String sanitizeIdentifier(String memberName) {
+        return JAVA_RESERVED.contains(memberName) ? memberName + "_" : memberName;
+    }
+
+    private GeneratedFile responseSupportClass(String pkg, boolean isXml) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package ").append(pkg).append(".response;\n\n");
+        sb.append("/**\n");
+        sb.append(" * GENERATED — shared ").append(isXml ? "XML" : "JSON")
+          .append(" serialisation helpers for this module's response builders.\n");
+        sb.append(" */\n");
+        sb.append("final class ResponseSupport {\n\n");
+        sb.append("    private ResponseSupport() {}\n\n");
+        if (isXml) {
+            appendXmlHelpers(sb);
+        } else {
+            appendJsonHelpers(sb);
+        }
+        sb.append("}\n");
+
+        String path = "src/main/java/" + pkg.replace('.', '/') + "/response/ResponseSupport.java";
+        return new GeneratedFile(path, sb.toString());
+    }
+
+    private void appendJsonHelpers(StringBuilder sb) {
+        sb.append("    static String toJson(Object value) {\n");
+        sb.append("        if (value == null) return \"null\";\n");
+        sb.append("        if (value instanceof String s)\n");
+        sb.append("            return \"\\\"\" + s.replace(\"\\\\\", \"\\\\\\\\\").replace(\"\\\"\", \"\\\\\\\"\").replace(\"\\n\", \"\\\\n\").replace(\"\\r\", \"\\\\r\").replace(\"\\t\", \"\\\\t\") + \"\\\"\";\n");
+        sb.append("        if (value instanceof Number || value instanceof Boolean) return value.toString();\n");
+        sb.append("        if (value instanceof java.util.Map<?, ?> map) {\n");
+        sb.append("            var sb = new StringBuilder(\"{\");\n");
+        sb.append("            boolean first = true;\n");
+        sb.append("            for (var entry : map.entrySet()) {\n");
+        sb.append("                if (!first) sb.append(\",\");\n");
+        sb.append("                sb.append(\"\\\"\").append(entry.getKey()).append(\"\\\":\").append(toJson(entry.getValue()));\n");
+        sb.append("                first = false;\n");
+        sb.append("            }\n");
+        sb.append("            return sb.append(\"}\").toString();\n");
+        sb.append("        }\n");
+        sb.append("        if (value instanceof Iterable<?> list) {\n");
+        sb.append("            var sb = new StringBuilder(\"[\");\n");
+        sb.append("            boolean first = true;\n");
+        sb.append("            for (var item : list) {\n");
+        sb.append("                if (!first) sb.append(\",\");\n");
+        sb.append("                sb.append(toJson(item));\n");
+        sb.append("                first = false;\n");
+        sb.append("            }\n");
+        sb.append("            return sb.append(\"]\").toString();\n");
+        sb.append("        }\n");
+        sb.append("        return toJson(value.toString());\n");
+        sb.append("    }\n");
+    }
+
+    private void appendXmlHelpers(StringBuilder sb) {
+        sb.append("    static String toXml(String root, java.util.Map<?, ?> fields) {\n");
+        sb.append("        var sb = new StringBuilder(\"<\").append(root).append(\">\");\n");
+        sb.append("        for (var e : fields.entrySet()) { appendXml(sb, String.valueOf(e.getKey()), e.getValue()); }\n");
+        sb.append("        return sb.append(\"</\").append(root).append(\">\").toString();\n");
+        sb.append("    }\n\n");
+        sb.append("    private static void appendXml(StringBuilder sb, String tag, Object value) {\n");
+        sb.append("        if (value instanceof Iterable<?> list) {\n");
+        sb.append("            for (var item : list) { appendXml(sb, tag, item); }\n");
+        sb.append("        } else if (value instanceof java.util.Map<?, ?> map) {\n");
+        sb.append("            sb.append(\"<\").append(tag).append(\">\");\n");
+        sb.append("            for (var e : map.entrySet()) { appendXml(sb, String.valueOf(e.getKey()), e.getValue()); }\n");
+        sb.append("            sb.append(\"</\").append(tag).append(\">\");\n");
+        sb.append("        } else if (value != null) {\n");
+        sb.append("            sb.append(\"<\").append(tag).append(\">\").append(xmlEscape(String.valueOf(value))).append(\"</\").append(tag).append(\">\");\n");
+        sb.append("        }\n");
+        sb.append("    }\n\n");
+        sb.append("    private static String xmlEscape(String s) {\n");
+        sb.append("        return s.replace(\"&\", \"&amp;\").replace(\"<\", \"&lt;\").replace(\">\", \"&gt;\").replace(\"\\\"\", \"&quot;\");\n");
+        sb.append("    }\n");
     }
 
     private GeneratedFile testClass(List<OperationShape> operations, String pkg, String className) {

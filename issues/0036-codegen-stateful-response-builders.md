@@ -20,13 +20,13 @@ consumer code that module authors compile and extend.
 
 ## Acceptance criteria
 
-- [ ] Existing stub template generation is unchanged — contract-level modules are not affected
-- [ ] Each operation gets a generated typed response builder matching its Smithy output shape
-- [ ] Response builders handle serialisation to the correct wire format (JSON or XML) automatically
-- [ ] Required fields are enforced at compile time — module authors cannot forget them
-- [ ] Optional fields have sensible defaults where Smithy defines them
-- [ ] Generated builders have no dependency on WireMock types
-- [ ] Existing generated modules compile without changes after the refactor
+- [x] Existing stub template generation is unchanged — contract-level modules are not affected
+- [x] Each operation gets a generated typed response builder matching its Smithy output shape
+- [x] Response builders handle serialisation to the correct wire format (JSON or XML) automatically
+- [x] Required fields are enforced at compile time — module authors cannot forget them
+- [x] Optional fields have sensible defaults where Smithy defines them
+- [x] Generated builders have no dependency on WireMock types
+- [x] Existing generated modules compile without changes after the refactor
 
 ## Dependencies
 
