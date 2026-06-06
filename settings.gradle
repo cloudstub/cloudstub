@@ -1,4 +1,4 @@
-rootProject.name = 'cloud-mock'
+rootProject.name = 'cloudmock'
 
 include 'cloudmock-core'
 include 'cloudmock-junit6'
