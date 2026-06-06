@@ -82,7 +82,12 @@ single runnable fat JAR. It is the drop-in replacement for LocalStack in local d
 - **Default port:** `4566` (matches LocalStack, so `AWS_ENDPOINT_URL=http://localhost:4566` works without changes)
 - **Port override:** `--port=<n>` CLI argument or `CLOUDMOCK_PORT` environment variable
 - **Module discovery:** `ServiceLoader` — the same mechanism as embedded mode; printed to stdout at startup
+- **Module selection:** `--modules=<a,b>` CLI argument or `CLOUDMOCK_MODULES` env var enables only the listed service
+  IDs (default: all bundled modules). Backed by `CloudMock.withEnabledServices(Collection<String>)` in core, which
+  filters `ServiceLoader` discovery. Naming an unknown module fails fast. Modules added via `withService` bypass the filter.
 - **Shutdown:** `Ctrl-C` / `SIGTERM` triggers a clean WireMock shutdown via a JVM shutdown hook, no stack trace
+- **Statelessness:** standalone serves the same stateless templated responses as embedded mode (no cross-call state;
+  `ReceiveMessage` does not return prior `SendMessage` payloads). A stateful backend is tracked by issue #0024.
 - **Module isolation rule:** `cloudmock-standalone` is exempt from the inter-module isolation check in `build.gradle`
   because its purpose is to bundle all modules; this exemption is intentional and must not be extended to other modules
 

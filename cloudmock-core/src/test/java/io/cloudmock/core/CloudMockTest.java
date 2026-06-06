@@ -49,6 +49,29 @@ class CloudMockTest {
     }
 
     @Test
+    void withPortBindsToTheSpecifiedPort() throws Exception {
+        int port;
+        try (java.net.ServerSocket probe = new java.net.ServerSocket(0)) {
+            port = probe.getLocalPort();
+        }
+        cloudMock.withPort(port).start();
+        assertEquals(port, cloudMock.port());
+    }
+
+    @Test
+    void withPortAfterStartThrowsCloudMockAlreadyStartedException() {
+        cloudMock.start();
+        assertThrows(CloudMockAlreadyStartedException.class, () -> cloudMock.withPort(9999));
+    }
+
+    @Test
+    void withEnabledServicesAfterStartThrowsCloudMockAlreadyStartedException() {
+        cloudMock.start();
+        assertThrows(CloudMockAlreadyStartedException.class,
+                () -> cloudMock.withEnabledServices(java.util.Set.of("sqs")));
+    }
+
+    @Test
     void stopBeforeStartIsNoOp() {
         assertDoesNotThrow(cloudMock::stop);
     }
