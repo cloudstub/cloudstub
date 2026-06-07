@@ -17,6 +17,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,9 +25,6 @@ class CloudMockSqsServiceTest {
 
     static CloudMock cloudMock;
     static SqsClient sqsClient;
-
-    static final String QUEUE_NAME = "test-queue";
-    static final String QUEUE_URL  = "http://localhost/000000000000/" + QUEUE_NAME;
 
     @BeforeAll
     static void start() {
@@ -45,6 +43,11 @@ class CloudMockSqsServiceTest {
     static void stop() {
         sqsClient.close();
         cloudMock.stop();
+    }
+
+    /** Each test gets its own queue so accumulated state cannot leak between tests. */
+    private String newQueue() {
+        return sqsClient.createQueue(b -> b.queueName("q-" + UUID.randomUUID())).queueUrl();
     }
 
     /** Sends a raw JSON request with X-Amz-Target — verifies stub registration and JSON matching. */
@@ -66,22 +69,23 @@ class CloudMockSqsServiceTest {
 
     @Test
     void createQueueReturnsQueueUrlContainingQueueName() {
-        String queueUrl = sqsClient.createQueue(b -> b.queueName(QUEUE_NAME)).queueUrl();
+        String queueUrl = sqsClient.createQueue(b -> b.queueName("named-queue")).queueUrl();
         assertNotNull(queueUrl);
-        assertTrue(queueUrl.contains(QUEUE_NAME));
+        assertTrue(queueUrl.contains("named-queue"));
     }
 
     @Test
     void getQueueUrlReturnsNonNullQueueUrl() {
-        String queueUrl = sqsClient.getQueueUrl(b -> b.queueName(QUEUE_NAME)).queueUrl();
+        String queueUrl = sqsClient.getQueueUrl(b -> b.queueName("named-queue")).queueUrl();
         assertNotNull(queueUrl);
-        assertTrue(queueUrl.contains(QUEUE_NAME));
+        assertTrue(queueUrl.contains("named-queue"));
     }
 
     @Test
     void sendMessageReturnsNonEmptyMessageId() {
+        String queueUrl = newQueue();
         String messageId = sqsClient.sendMessage(b -> b
-                .queueUrl(QUEUE_URL)
+                .queueUrl(queueUrl)
                 .messageBody("hello from cloudmock"))
                 .messageId();
         assertNotNull(messageId);
@@ -89,41 +93,65 @@ class CloudMockSqsServiceTest {
     }
 
     @Test
-    void receiveMessageReturnsMessageWithRequiredFields() {
+    void receiveReturnsTheMessageThatWasSent() {
+        String queueUrl = newQueue();
+        sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody("round-trip payload"));
+
         ReceiveMessageResponse response = sqsClient.receiveMessage(b -> b
-                .queueUrl(QUEUE_URL)
+                .queueUrl(queueUrl)
                 .maxNumberOfMessages(1));
+
         List<Message> messages = response.messages();
-        assertFalse(messages.isEmpty());
+        assertEquals(1, messages.size());
         Message msg = messages.get(0);
         assertNotNull(msg.messageId());
         assertNotNull(msg.receiptHandle());
-        assertNotNull(msg.body());
+        assertEquals("round-trip payload", msg.body(),
+                "stateful receive must return the body that was sent");
     }
 
     @Test
-    void deleteMessageCompletesWithoutException() {
-        assertDoesNotThrow(() -> sqsClient.deleteMessage(b -> b
-                .queueUrl(QUEUE_URL)
-                .receiptHandle("fake-receipt-handle")));
+    void receiveOnEmptyQueueReturnsNoMessages() {
+        String queueUrl = newQueue();
+        ReceiveMessageResponse response = sqsClient.receiveMessage(b -> b.queueUrl(queueUrl));
+        assertTrue(response.messages().isEmpty());
+    }
+
+    @Test
+    void deleteMessageRemovesItFromTheQueue() {
+        String queueUrl = newQueue();
+        sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody("to be deleted"));
+
+        Message msg = sqsClient.receiveMessage(b -> b.queueUrl(queueUrl)).messages().get(0);
+        sqsClient.deleteMessage(b -> b.queueUrl(queueUrl).receiptHandle(msg.receiptHandle()));
+
+        ReceiveMessageResponse after = sqsClient.receiveMessage(b -> b.queueUrl(queueUrl));
+        assertTrue(after.messages().isEmpty(), "deleted message must not be received again");
     }
 
     @Test
     void deleteQueueCompletesWithoutException() {
-        assertDoesNotThrow(() -> sqsClient.deleteQueue(b -> b.queueUrl(QUEUE_URL)));
+        String queueUrl = newQueue();
+        assertDoesNotThrow(() -> sqsClient.deleteQueue(b -> b.queueUrl(queueUrl)));
     }
 
     @Test
-    void listQueuesReturnsNonNullResponse() {
-        assertNotNull(sqsClient.listQueues());
+    void listQueuesIncludesACreatedQueue() {
+        sqsClient.createQueue(b -> b.queueName("listed-queue"));
+        List<String> urls = sqsClient.listQueues().queueUrls();
+        assertNotNull(urls);
+        assertTrue(urls.stream().anyMatch(u -> u.contains("listed-queue")));
     }
 
     @Test
-    void getQueueAttributesReturnsPopulatedAttributes() {
+    void getQueueAttributesReflectsMessageCount() {
+        String queueUrl = newQueue();
+        sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody("one"));
+        sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody("two"));
+
         GetQueueAttributesResponse response = sqsClient.getQueueAttributes(b -> b
-                .queueUrl(QUEUE_URL)
+                .queueUrl(queueUrl)
                 .attributeNames(QueueAttributeName.ALL));
-        assertNotNull(response);
-        assertFalse(response.attributes().isEmpty());
+        assertEquals("2", response.attributes().get(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES));
     }
 }

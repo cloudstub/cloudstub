@@ -39,29 +39,29 @@ template stubs are untouched.
 
 ## Acceptance criteria
 
-- [ ] New public SPI types in `cloudmock-core`'s `spi` package, none exposing a WireMock type:
-  - [ ] `StubRequest` — read-only view of the incoming request (`method`, `path`, `body`, `header(name)`,
+- [x] New public SPI types in `cloudmock-core`'s `spi` package, none exposing a WireMock type:
+  - [x] `StubRequest` — read-only view of the incoming request (`method`, `path`, `body`, `header(name)`,
     `queryParam(name)`)
-  - [ ] `StubResponse` — value object (status, content-type, body) with `json(...)` / `xml(...)` / `of(...)` factories
-  - [ ] `StubHandler` — functional interface `(StubRequest, StateStore) -> StubResponse`
-- [ ] Handler overloads on `StubRegistrar` for all three protocols, alongside the existing template methods:
-  - [ ] `registerJsonTargetStub(String target, StubHandler handler)`
-  - [ ] `registerXmlFormStub(String actionName, StubHandler handler)`
-  - [ ] `registerRestStub(HttpMethod method, String pathPattern, StubHandler handler)`
-- [ ] Internal `ResponseTransformerV2` (modeled on `BrownoutTransformer`) invokes the handler with the shared
+  - [x] `StubResponse` — value object (status, content-type, body) with `json(...)` / `xml(...)` / `of(...)` factories
+  - [x] `StubHandler` — functional interface `(StubRequest, StateStore) -> StubResponse`
+- [x] Handler overloads on `StubRegistrar` for all three protocols, alongside the existing template methods:
+  - [x] `registerJsonTargetStub(String target, StubHandler handler)`
+  - [x] `registerXmlFormStub(String actionName, StubHandler handler)`
+  - [x] `registerRestStub(HttpMethod method, String pathPattern, StubHandler handler)`
+- [x] Internal `ResponseTransformerV2` (modeled on `BrownoutTransformer`) invokes the handler with the shared
   `StateStore` and converts `StubResponse` back to a WireMock response; WireMock stays hidden
-- [ ] The `StateStore` is threaded to the transformer; handler stubs coexist with the existing fault-injection
+- [x] The `StateStore` is threaded to the transformer; handler stubs coexist with the existing fault-injection
   stubs (throttle/timeout/brownout still apply to a service whose stubs are handler-based)
-- [ ] `cloudmock-sqs` rewritten as the reference stateful module: `CreateQueue`, `SendMessage`, `ReceiveMessage`,
+- [x] `cloudmock-sqs` rewritten as the reference stateful module: `CreateQueue`, `SendMessage`, `ReceiveMessage`,
   `DeleteMessage`, `DeleteQueue`, `ListQueues` backed by the store, so a `SendMessage` then `ReceiveMessage`
   returns the message that was sent
-- [ ] A full `POST /api/reset` clears the store (`StateStore.clearAll()`); a single-service reset clears only that
+- [x] A full `POST /api/reset` clears the store (`StateStore.clearAll()`); a single-service reset clears only that
   service's prefix (`StateStore.clear(serviceId + "/")`)
-- [ ] Tests: SQS send→receive round-trip through the AWS SDK, delete removes the message, and state survives a
+- [x] Tests: SQS send→receive round-trip through the AWS SDK, delete removes the message, and state survives a
   restart when a store directory is configured
-- [ ] Existing template-based modules (`cloudmock-sns`, `cloudmock-s3`, `cloudmock-secretsmanager`) continue to
+- [x] Existing template-based modules (`cloudmock-sns`, `cloudmock-s3`, `cloudmock-secretsmanager`) continue to
   pass unchanged
-- [ ] `CLAUDE.md` updated: statelessness caveat replaced with the stateful-handler description; `StubRegistrar`
+- [x] `CLAUDE.md` updated: statelessness caveat replaced with the stateful-handler description; `StubRegistrar`
   contract section extended
 
 ## Dependencies

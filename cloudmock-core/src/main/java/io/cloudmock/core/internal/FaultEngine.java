@@ -2,6 +2,7 @@ package io.cloudmock.core.internal;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
@@ -97,13 +98,17 @@ public class FaultEngine {
     }
 
     private MappingBuilder timeoutMapping(StubRecord record) {
-        return matcherFor(record)
-                .atPriority(FAULT_PRIORITY)
-                .willReturn(aResponse()
-                        .withStatus(record.statusCode())
-                        .withHeader(HEADER_CONTENT_TYPE, record.contentType())
-                        .withBody(record.responseTemplate())
-                        .withFixedDelay(TIMEOUT_DELAY_MS));
+        ResponseDefinitionBuilder response = aResponse()
+                .withStatus(record.statusCode())
+                .withHeader(HEADER_CONTENT_TYPE, record.contentType())
+                .withBody(record.responseTemplate())
+                .withFixedDelay(TIMEOUT_DELAY_MS);
+        if (record.handlerKey() != null) {
+            response.withTransformers(StatefulResponseTransformer.NAME)
+                    .withTransformerParameter(
+                            StatefulResponseTransformer.HANDLER_KEY_PARAM, record.handlerKey());
+        }
+        return matcherFor(record).atPriority(FAULT_PRIORITY).willReturn(response);
     }
 
     private MappingBuilder brownoutAlwaysMapping(StubRecord record) {
@@ -113,14 +118,20 @@ public class FaultEngine {
     }
 
     private MappingBuilder brownoutProbabilisticMapping(StubRecord record, double rate) {
-        return matcherFor(record)
-                .atPriority(FAULT_PRIORITY)
-                .willReturn(aResponse()
-                        .withStatus(record.statusCode())
-                        .withHeader(HEADER_CONTENT_TYPE, record.contentType())
-                        .withBody(record.responseTemplate())
-                        .withTransformers(BrownoutTransformer.NAME)
-                        .withTransformerParameters(Parameters.one(BrownoutTransformer.RATE_PARAM, rate)));
+        ResponseDefinitionBuilder response = aResponse()
+                .withStatus(record.statusCode())
+                .withHeader(HEADER_CONTENT_TYPE, record.contentType())
+                .withBody(record.responseTemplate())
+                .withTransformerParameters(Parameters.one(BrownoutTransformer.RATE_PARAM, rate));
+        if (record.handlerKey() != null) {
+            // Stateful first so it builds the live body; brownout then decides pass-through vs reset.
+            response.withTransformers(StatefulResponseTransformer.NAME, BrownoutTransformer.NAME)
+                    .withTransformerParameter(
+                            StatefulResponseTransformer.HANDLER_KEY_PARAM, record.handlerKey());
+        } else {
+            response.withTransformers(BrownoutTransformer.NAME);
+        }
+        return matcherFor(record).atPriority(FAULT_PRIORITY).willReturn(response);
     }
 
     private MappingBuilder matcherFor(StubRecord record) {
