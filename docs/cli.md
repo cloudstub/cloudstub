@@ -140,10 +140,11 @@ $ clm sqs send-message --queue orders --body "hello"
 }
 ```
 
-!!! note "Stateless responses"
-    Like the rest of CloudMock, CLI responses are synthetic and stateless — `receive-message`
-    does not return a previously sent message, and `list-objects` does not reflect a prior
-    `put-object`. The CLI exercises the contract, not AWS semantics.
+!!! note "State-backed where the module supports it"
+    The CLI and the AWS SDK share the **same state store**. For state-backed modules (SQS),
+    `clm sqs receive-message` returns messages your app sent through the SDK, and a message sent with
+    `clm sqs send-message` is visible to the SDK. State-backing rolls out per module — SQS is live; S3
+    and Secrets Manager commands are still synthetic until their own state-backing lands.
 
 ## How new modules appear automatically
 

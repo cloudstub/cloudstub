@@ -1,6 +1,6 @@
 package io.cloudmock.core.spi;
 
-import io.cloudmock.core.spi.restapi.ApiRouteRegistrar;
+import io.cloudmock.core.spi.restapi.CloudMockApiContext;
 
 /**
  * Optional companion to {@link CloudMockService} for modules that want to expose API routes
@@ -18,7 +18,9 @@ public interface CloudMockApiService {
 
     /**
      * Called at API server startup. Register all module-specific routes through
-     * {@code registrar}. Routes are mounted at {@code /api/<serviceId><path>}.
+     * {@code context.registrar()}; routes are mounted at {@code /api/<serviceId><path>}. The same
+     * {@code context.stateStore()} the module's stubs use is available here, so REST routes can
+     * return live data instead of synthetic stubs.
      */
-    void registerRoutes(ApiRouteRegistrar registrar);
+    void registerRoutes(CloudMockApiContext context);
 }

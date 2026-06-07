@@ -9,7 +9,10 @@ import io.cloudmock.core.restapi.RequestRecord;
 import io.cloudmock.core.spi.restapi.ApiParam;
 import io.cloudmock.core.spi.restapi.ApiRequest;
 import io.cloudmock.core.spi.restapi.ApiResponse;
+import io.cloudmock.core.spi.restapi.ApiRouteRegistrar;
+import io.cloudmock.core.spi.restapi.CloudMockApiContext;
 import io.cloudmock.core.spi.CloudMockApiService;
+import io.cloudmock.core.spi.StateStore;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -116,15 +119,21 @@ public final class ApiServer implements Closeable {
     }
 
     private void registerModuleRoutes() {
+        StateStore stateStore = cloudMock.stateStore();
         for (CloudMockApiService svc : moduleServices) {
-            svc.registerRoutes((method, path, command, description, params, handler) -> {
+            ApiRouteRegistrar registrar = (method, path, command, description, params, handler) -> {
                 String fullPath = "/api/" + svc.serviceId() + path;
                 routes.add(RouteDescriptor.module(method.name(), fullPath, svc.serviceId(),
                         command, description, params));
                 bind(method.name(), fullPath, handler::handle);
-            });
+            };
+            svc.registerRoutes(new ModuleApiContext(registrar, stateStore));
         }
     }
+
+    /** Hands each module its route registrar plus the shared store (the same instance its stubs use). */
+    private record ModuleApiContext(ApiRouteRegistrar registrar, StateStore stateStore)
+            implements CloudMockApiContext {}
 
     private void addRoute(String method, String path, String description,
                           List<QueryParam> queryParams, RouteHandler handler) {

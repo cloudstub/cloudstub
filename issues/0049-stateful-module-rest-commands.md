@@ -38,22 +38,22 @@ Concretely:
 
 ## Acceptance criteria
 
-- [ ] `CloudMockApiService` handlers can read and write the shared `StateStore`, threaded through API
+- [x] `CloudMockApiService` handlers can read and write the shared `StateStore`, threaded through API
   registration in the same shape as `CloudMockContext` (registrar + state store), with no WireMock or
   AWS-SDK type exposed
-- [ ] The `StateStore` reaching the API handlers is the **same instance** the AWS-protocol handlers use
+- [x] The `StateStore` reaching the API handlers is the **same instance** the AWS-protocol handlers use
   (one store per running CloudMock), so the two surfaces see each other's data
-- [ ] SQS API commands are state-backed against the `sqs/queues/…` keys: `send-message` writes a
+- [x] SQS API commands are state-backed against the `sqs/queues/…` keys: `send-message` writes a
   message, `receive-message` returns previously sent messages, `list-queues` lists created queues,
   `purge-queue` clears a queue's messages
-- [ ] The SQS key scheme is defined once and shared between `CloudMockSqsService` and
+- [x] The SQS key scheme is defined once and shared between `CloudMockSqsService` and
   `CloudMockSqsApiService` (extract package-private key helpers) so the AWS path and the REST path
   cannot diverge
-- [ ] End-to-end: a message sent via the AWS SDK (mock port) is returned by `GET /api/sqs/receive-message`
+- [x] End-to-end: a message sent via the AWS SDK (mock port) is returned by `GET /api/sqs/receive-message`
   (API port), and a message sent via `POST /api/sqs/send-message` is returned by the AWS SDK
-- [ ] The console shows real data with **no console-repo change** (it already calls these routes)
-- [ ] `POST /api/reset` (all) and `?service=sqs` continue to clear the store as today
-- [ ] Docs corrected: the "synthetic and stateless" notes in `docs/console.md`, `docs/cli.md`, and the
+- [x] The console shows real data with **no console-repo change** (it already calls these routes)
+- [x] `POST /api/reset` (all) and `?service=sqs` continue to clear the store as today
+- [x] Docs corrected: the "synthetic and stateless" notes in `docs/console.md`, `docs/cli.md`, and the
   API-service section of `CLAUDE.md` no longer claim the REST surface is stateless
 
 ## Dependencies

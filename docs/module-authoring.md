@@ -231,7 +231,7 @@ package io.cloudmock.myservice;
 import io.cloudmock.core.spi.CloudMockApiService;
 import io.cloudmock.core.spi.HttpMethod;
 import io.cloudmock.core.spi.restapi.ApiParam;
-import io.cloudmock.core.spi.restapi.ApiRouteRegistrar;
+import io.cloudmock.core.spi.restapi.CloudMockApiContext;
 
 import java.util.List;
 import java.util.Map;
@@ -244,7 +244,10 @@ public class CloudMockMyServiceApiService implements CloudMockApiService {
     }
 
     @Override
-    public void registerRoutes(ApiRouteRegistrar r) {
+    public void registerRoutes(CloudMockApiContext context) {
+        // context.stateStore() is the same store the module's stubs use — read/write it here to
+        // return live data instead of synthetic responses.
+        var r = context.registrar();
         r.register(
             HttpMethod.POST,                                  // HTTP method
             "/describe-widget",                               // path under /api/myservice
@@ -269,9 +272,11 @@ Now `clm myservice describe-widget --id w-123` works against any standalone inst
 module loaded. Routes (and therefore CLI commands) for a module that is disabled with `--modules`
 are not registered, keeping the stub view and the API view consistent.
 
-!!! note "Keep responses stateless"
-    These handlers return synthetic, stateless data — the same contract the stubs follow. They
-    are for inspection and test-data injection, not for reproducing AWS semantics.
+!!! note "State-backed or synthetic — your call"
+    Handlers receive the shared `StateStore` via `context.stateStore()`, so they can read and write the
+    same data as the module's stubs (use the same key scheme on both surfaces so they can't drift).
+    `CloudMockSqsApiService` does this — a message sent through the AWS SDK is returned by its
+    `receive-message` route. A handler that ignores the store simply stays synthetic.
 
 ---
 

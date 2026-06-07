@@ -5,7 +5,7 @@ import io.cloudmock.core.spi.HttpMethod;
 import io.cloudmock.core.spi.restapi.ApiParam;
 import io.cloudmock.core.spi.restapi.ApiRequest;
 import io.cloudmock.core.spi.restapi.ApiResponse;
-import io.cloudmock.core.spi.restapi.ApiRouteRegistrar;
+import io.cloudmock.core.spi.restapi.CloudMockApiContext;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +30,8 @@ public class CloudMockS3ApiService implements CloudMockApiService {
     }
 
     @Override
-    public void registerRoutes(ApiRouteRegistrar r) {
+    public void registerRoutes(CloudMockApiContext context) {
+        var r = context.registrar();
         r.register(HttpMethod.GET, "/list-buckets", "list-buckets",
                 "List S3 buckets", List.of(), this::listBuckets);
         r.register(HttpMethod.GET, "/list-objects", "list-objects",

@@ -137,7 +137,12 @@ CLI commands) under `/api/<serviceId>/…`. Discovered via `META-INF/services/io
 public interface CloudMockApiService {
     String serviceId();
 
-    void registerRoutes(ApiRouteRegistrar registrar);
+    void registerRoutes(CloudMockApiContext context);
+}
+
+public interface CloudMockApiContext {       // mirrors CloudMockContext on the stub side
+    ApiRouteRegistrar registrar();
+    StateStore stateStore();                 // the SAME instance the module's stubs use
 }
 
 public interface ApiRouteRegistrar {
@@ -153,9 +158,13 @@ public record ApiParam(String name, boolean required, String description) {
 ```
 
 Handlers (`ApiRequest -> ApiResponse`) use only core SPI types + the JDK — no WireMock, AWS SDK, jackson, or picocli.
-Parameters arrive as query-string values; the request body is not read. Responses are synthetic and stateless, matching
-the stub contract. Reference impls: `CloudMockSqsApiService`, `CloudMockS3ApiService`,
-`CloudMockSecretsManagerApiService`.
+Parameters arrive as query-string values; the request body is not read. Because `registerRoutes` receives the shared
+`StateStore` (issue #0049), REST routes are **state-backed**: they read and write the same data as the AWS-protocol
+stubs, so a message sent through the AWS SDK is returned by `GET /api/sqs/receive-message` and shown in the console,
+and vice versa. This is one state with two representations — the AWS wire protocol on the mock port, a friendly JSON
+view on the API port. Modules share the key scheme between their stub and API surfaces (e.g. `SqsKeys`) so the two
+cannot drift. Reference impls: `CloudMockSqsApiService`, `CloudMockS3ApiService`, `CloudMockSecretsManagerApiService`
+(S3 and Secrets Manager API surfaces are still synthetic pending their own state-backing).
 
 ## SPI contract
 

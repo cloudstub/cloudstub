@@ -38,6 +38,11 @@ AWS service stubs (especially S3) register broad catch-all path patterns. Servin
 same port would cause those stubs to match `/api/*` paths before the API routes could. A dedicated
 port keeps the two traffic streams cleanly separated.
 
+The two ports are **two views of the same state**, not two separate mocks. The mock port speaks the
+AWS wire protocol (for SDKs); the API port is a friendly JSON view for the console and CLI. For
+state-backed modules they read and write one shared store, so a message sent through the AWS SDK is
+returned by `GET /api/sqs/receive-message`, and vice versa.
+
 ## Endpoints
 
 All responses are JSON. The base URL used in the examples below is `http://localhost:4567`.

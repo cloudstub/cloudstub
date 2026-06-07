@@ -65,7 +65,8 @@ as modules load or state changes.
   status shown at a glance. Backed by [`GET /api/history`](rest-api.md).
 - **Service browser** — one panel per module, **built dynamically from the module's routes**. Each
   route advertised by `/api/status` becomes a form: fill in its parameters, send it, and the
-  synthetic response is shown with JSON syntax highlighting.
+  response is shown with JSON syntax highlighting. For state-backed modules (SQS) the response is
+  live data, so a message your app sent through the AWS SDK shows up here.
 - **Dark and light mode** — follows your system preference and can be toggled; the choice is
   remembered.
 
@@ -80,7 +81,9 @@ Because everything is driven by `/api/status`, the console needs no change when 
 - Restrict the loaded modules with `--modules=<a,b>` and the console shows only those services — a
   service that is not loaded has no panel at all.
 
-!!! note "Stateless responses"
-    Like the rest of CloudMock, responses sent from the service browser are synthetic and stateless —
-    `receive-message` does not return a previously sent message, and `list-objects` does not reflect a
-    prior `put-object`. The console exercises the contract, not AWS semantics.
+!!! note "One state, two views"
+    The console and the AWS SDK read the **same state store**, just through different ports. The mock
+    port speaks the AWS wire protocol; the API port (which the console uses) is a friendly JSON view of
+    the same data. So for state-backed modules, `receive-message` in the console returns the message
+    your app sent through the SDK. State-backing rolls out per module — SQS is live; S3 and Secrets
+    Manager API commands are still synthetic until their own state-backing lands.

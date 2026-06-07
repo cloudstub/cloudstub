@@ -6,7 +6,7 @@ import io.cloudmock.core.CloudMock;
 import io.cloudmock.core.spi.CloudMockApiService;
 import io.cloudmock.core.spi.HttpMethod;
 import io.cloudmock.core.spi.restapi.ApiResponse;
-import io.cloudmock.core.spi.restapi.ApiRouteRegistrar;
+import io.cloudmock.core.spi.restapi.CloudMockApiContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -260,7 +260,8 @@ class ApiServerIntegrationTest {
         }
 
         @Override
-        public void registerRoutes(ApiRouteRegistrar registrar) {
+        public void registerRoutes(CloudMockApiContext context) {
+            var registrar = context.registrar();
             registrar.register(HttpMethod.GET, "/echo", "echo ok",
                     req -> new ApiResponse(200, Map.of("ok", true)));
             registrar.register(HttpMethod.GET, "/boom", "always fails",

@@ -58,7 +58,7 @@ public class CloudMockSqsService implements CloudMockService {
     private StubResponse createQueue(StubRequest req, StateStore store) {
         String name = req.jsonField("QueueName");
         String url = ACCOUNT_URL + name;
-        store.put(queueKey(name), url);
+        store.put(SqsKeys.queueKey(name), url);
         return StubResponse.json("{\"QueueUrl\":\"" + SqsJson.escape(url) + "\"}");
     }
 
@@ -74,7 +74,7 @@ public class CloudMockSqsService implements CloudMockService {
             body = "";
         }
         String id = UUID.randomUUID().toString();
-        store.put(messageKey(name, id), body);
+        store.put(SqsKeys.messageKey(name, id), body);
         return StubResponse.json(
                 "{\"MessageId\":\"" + id + "\",\"MD5OfMessageBody\":\"" + SqsJson.md5(body) + "\"}");
     }
@@ -82,7 +82,7 @@ public class CloudMockSqsService implements CloudMockService {
     private StubResponse receiveMessage(StubRequest req, StateStore store) {
         String name = SqsJson.queueName(req.jsonField("QueueUrl"));
         int max = maxMessages(req.jsonField("MaxNumberOfMessages"));
-        List<String> keys = store.list(messagePrefix(name));
+        List<String> keys = store.list(SqsKeys.messagePrefix(name));
 
         StringBuilder messages = new StringBuilder();
         int count = 0;
@@ -116,23 +116,23 @@ public class CloudMockSqsService implements CloudMockService {
         String name = SqsJson.queueName(req.jsonField("QueueUrl"));
         String receiptHandle = req.jsonField("ReceiptHandle");
         if (name != null && receiptHandle != null) {
-            store.delete(messageKey(name, receiptHandle));
+            store.delete(SqsKeys.messageKey(name, receiptHandle));
         }
         return StubResponse.json("{}");
     }
 
     private StubResponse deleteQueue(StubRequest req, StateStore store) {
         String name = SqsJson.queueName(req.jsonField("QueueUrl"));
-        store.delete(queueKey(name));
-        store.clear(messagePrefix(name));
+        store.delete(SqsKeys.queueKey(name));
+        store.clear(SqsKeys.messagePrefix(name));
         return StubResponse.json("{}");
     }
 
     private StubResponse listQueues(StubRequest req, StateStore store) {
         StringBuilder urls = new StringBuilder();
         int count = 0;
-        for (String key : store.list(QUEUES_PREFIX)) {
-            if (!isQueueMarkerKey(key)) {
+        for (String key : store.list(SqsKeys.QUEUES_PREFIX)) {
+            if (!SqsKeys.isQueueMarkerKey(key)) {
                 continue;
             }
             Object url = store.get(key);
@@ -150,7 +150,7 @@ public class CloudMockSqsService implements CloudMockService {
 
     private StubResponse getQueueAttributes(StubRequest req, StateStore store) {
         String name = SqsJson.queueName(req.jsonField("QueueUrl"));
-        int messageCount = store.list(messagePrefix(name)).size();
+        int messageCount = store.list(SqsKeys.messagePrefix(name)).size();
         return StubResponse.json("{\"Attributes\":{"
                 + "\"VisibilityTimeout\":\"30\","
                 + "\"ApproximateNumberOfMessages\":\"" + messageCount + "\","
@@ -158,25 +158,6 @@ public class CloudMockSqsService implements CloudMockService {
                 + "\"MaximumMessageSize\":\"262144\","
                 + "\"MessageRetentionPeriod\":\"345600\","
                 + "\"ReceiveMessageWaitTimeSeconds\":\"0\"}}");
-    }
-
-    private static final String QUEUES_PREFIX = "sqs/queues/";
-
-    private static String queueKey(String name) {
-        return QUEUES_PREFIX + name;
-    }
-
-    private static String messagePrefix(String name) {
-        return QUEUES_PREFIX + name + "/messages/";
-    }
-
-    private static String messageKey(String name, String id) {
-        return messagePrefix(name) + id;
-    }
-
-    /** A queue marker key (e.g. {@code sqs/queues/demo}) has no further path segment; messages do. */
-    private static boolean isQueueMarkerKey(String key) {
-        return key.indexOf('/', QUEUES_PREFIX.length()) < 0;
     }
 
     /** Parses a {@code MaxNumberOfMessages} value, defaulting to 1 (the AWS default) and clamping. */
