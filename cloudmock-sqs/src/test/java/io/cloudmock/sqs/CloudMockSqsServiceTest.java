@@ -127,6 +127,17 @@ class CloudMockSqsServiceTest {
     }
 
     @Test
+    void messageBodyWithJsonSpecialCharactersRoundTrips() {
+        // Exercises the jackson-backed jsonField extraction + response escaping end to end.
+        String queueUrl = newQueue();
+        String payload = "quote \" backslash \\ newline \n tab \t unicode é end";
+        sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody(payload));
+
+        Message msg = sqsClient.receiveMessage(b -> b.queueUrl(queueUrl)).messages().get(0);
+        assertEquals(payload, msg.body(), "special characters must survive extraction and re-encoding");
+    }
+
+    @Test
     void receiveOnEmptyQueueReturnsNoMessages() {
         String queueUrl = newQueue();
         ReceiveMessageResponse response = sqsClient.receiveMessage(b -> b.queueUrl(queueUrl));

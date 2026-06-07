@@ -56,20 +56,20 @@ public class CloudMockSqsService implements CloudMockService {
     }
 
     private StubResponse createQueue(StubRequest req, StateStore store) {
-        String name = SqsJson.stringField(req.body(), "QueueName");
+        String name = req.jsonField("QueueName");
         String url = ACCOUNT_URL + name;
         store.put(queueKey(name), url);
         return StubResponse.json("{\"QueueUrl\":\"" + SqsJson.escape(url) + "\"}");
     }
 
     private StubResponse getQueueUrl(StubRequest req, StateStore store) {
-        String name = SqsJson.stringField(req.body(), "QueueName");
+        String name = req.jsonField("QueueName");
         return StubResponse.json("{\"QueueUrl\":\"" + SqsJson.escape(ACCOUNT_URL + name) + "\"}");
     }
 
     private StubResponse sendMessage(StubRequest req, StateStore store) {
-        String name = SqsJson.queueName(SqsJson.stringField(req.body(), "QueueUrl"));
-        String body = SqsJson.stringField(req.body(), "MessageBody");
+        String name = SqsJson.queueName(req.jsonField("QueueUrl"));
+        String body = req.jsonField("MessageBody");
         if (body == null) {
             body = "";
         }
@@ -80,8 +80,8 @@ public class CloudMockSqsService implements CloudMockService {
     }
 
     private StubResponse receiveMessage(StubRequest req, StateStore store) {
-        String name = SqsJson.queueName(SqsJson.stringField(req.body(), "QueueUrl"));
-        int max = SqsJson.maxNumberOfMessages(req.body());
+        String name = SqsJson.queueName(req.jsonField("QueueUrl"));
+        int max = maxMessages(req.jsonField("MaxNumberOfMessages"));
         List<String> keys = store.list(messagePrefix(name));
 
         StringBuilder messages = new StringBuilder();
@@ -113,8 +113,8 @@ public class CloudMockSqsService implements CloudMockService {
     }
 
     private StubResponse deleteMessage(StubRequest req, StateStore store) {
-        String name = SqsJson.queueName(SqsJson.stringField(req.body(), "QueueUrl"));
-        String receiptHandle = SqsJson.stringField(req.body(), "ReceiptHandle");
+        String name = SqsJson.queueName(req.jsonField("QueueUrl"));
+        String receiptHandle = req.jsonField("ReceiptHandle");
         if (name != null && receiptHandle != null) {
             store.delete(messageKey(name, receiptHandle));
         }
@@ -122,7 +122,7 @@ public class CloudMockSqsService implements CloudMockService {
     }
 
     private StubResponse deleteQueue(StubRequest req, StateStore store) {
-        String name = SqsJson.queueName(SqsJson.stringField(req.body(), "QueueUrl"));
+        String name = SqsJson.queueName(req.jsonField("QueueUrl"));
         store.delete(queueKey(name));
         store.clear(messagePrefix(name));
         return StubResponse.json("{}");
@@ -149,7 +149,7 @@ public class CloudMockSqsService implements CloudMockService {
     }
 
     private StubResponse getQueueAttributes(StubRequest req, StateStore store) {
-        String name = SqsJson.queueName(SqsJson.stringField(req.body(), "QueueUrl"));
+        String name = SqsJson.queueName(req.jsonField("QueueUrl"));
         int messageCount = store.list(messagePrefix(name)).size();
         return StubResponse.json("{\"Attributes\":{"
                 + "\"VisibilityTimeout\":\"30\","
@@ -177,5 +177,18 @@ public class CloudMockSqsService implements CloudMockService {
     /** A queue marker key (e.g. {@code sqs/queues/demo}) has no further path segment; messages do. */
     private static boolean isQueueMarkerKey(String key) {
         return key.indexOf('/', QUEUES_PREFIX.length()) < 0;
+    }
+
+    /** Parses a {@code MaxNumberOfMessages} value, defaulting to 1 (the AWS default) and clamping. */
+    private static int maxMessages(String raw) {
+        if (raw == null) {
+            return 1;
+        }
+        try {
+            long value = Long.parseLong(raw);
+            return value < 1 ? 1 : (int) Math.min(value, Integer.MAX_VALUE);
+        } catch (NumberFormatException e) {
+            return 1;
+        }
     }
 }

@@ -19,19 +19,19 @@ behind an abstraction that does not leak a JSON library type into the public SPI
 
 ## Acceptance criteria
 
-- [ ] A core capability lets a `StubHandler` read fields from a JSON request body without writing a
+- [x] A core capability lets a `StubHandler` read fields from a JSON request body without writing a
   parser — e.g. `StubRequest.jsonField(String path)` and/or a small `JsonBody` accessor obtained
   from the request
-- [ ] No JSON-library type (jackson or otherwise) appears in the public SPI signature — `cloudmock-core`
+- [x] No JSON-library type (jackson or otherwise) appears in the public SPI signature — `cloudmock-core`
   already shades jackson to `io.cloudmock.shaded.jackson`, so core can parse internally without
   exposing it
-- [ ] Correctly handles nested objects, JSON string escapes, and fields whose names are prefixes of
+- [x] Correctly handles nested objects, JSON string escapes, and fields whose names are prefixes of
   other field names (the cases the current regex approach is fragile around)
-- [ ] `cloudmock-sqs` is migrated off `SqsJson`'s regex field extraction to the shared accessor
+- [x] `cloudmock-sqs` is migrated off `SqsJson`'s regex field extraction to the shared accessor
   (`SqsJson` keeps only genuinely SQS-specific helpers, e.g. MD5 and queue-name extraction, or is
   removed if nothing remains)
-- [ ] The accessor is usable by every JSON/X-Amz-Target module with no per-module parser
-- [ ] Malformed/truncated input yields a clean result (null/empty/typed error), never an unhandled
+- [x] The accessor is usable by every JSON/X-Amz-Target module with no per-module parser
+- [x] Malformed/truncated input yields a clean result (null/empty/typed error), never an unhandled
   exception out of a handler — preserving the hardening added in [0044](0044-stateful-stub-handlers.md)
 
 ## Dependencies

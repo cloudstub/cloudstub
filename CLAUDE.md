@@ -198,11 +198,14 @@ Modules register themselves via `META-INF/services/io.cloudmock.core.spi.CloudMo
 
 Each protocol comes in two flavours: a **template** overload (static Handlebars, stateless) and a **handler**
 overload that runs module Java code per request with access to the shared `StateStore`, so what a user sends in one
-call comes back in the next. Handlers receive a `StubRequest` (method/path/body/header/query — no WireMock type) and
-return a `StubResponse` (status + content type + body); internally they are driven by a single
-`StatefulResponseTransformer` (a WireMock `ResponseTransformerV2`, keyed by a per-stub handler-key parameter) so the
-networking engine stays hidden and fault injection (throttle/timeout/brownout) still applies to handler-based stubs.
-Handlers must depend only on the core SPI and the JDK — no WireMock, AWS SDK, jackson, or picocli.
+call comes back in the next. Handlers receive a `StubRequest` (method/path/body/header/query, plus
+`jsonField(path)` to read JSON request-body fields without a per-module parser — no WireMock or JSON-library type)
+and return a `StubResponse` (status + content type + body, plus optional headers); internally they are driven by a
+single `StatefulResponseTransformer` (a WireMock `ResponseTransformerV2`, keyed by a per-stub handler-key parameter)
+so the networking engine stays hidden and fault injection (throttle/timeout/brownout) still applies to handler-based
+stubs. Handlers must depend only on the core SPI and the JDK — no WireMock, AWS SDK, jackson, or picocli. The
+`jsonField` parsing lives in core (`WireMockStubRequest`, backed by shaded jackson), so the SPI exposes no JSON type
+and JSON-protocol modules (SQS, DynamoDB, Lambda) share one parser instead of hand-rolling regex (issue #0045).
 
 No raw WireMock `MappingBuilder` escape hatch will be added: exposing a WireMock type in the public SPI would make it
 impossible to swap the underlying HTTP engine without a breaking change. The handler overloads were the sanctioned
