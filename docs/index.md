@@ -25,6 +25,9 @@ redirect the AWS SDK v2, and discovers service modules via `ServiceLoader`. Each
 installable JAR that registers its stubs through the `StubRegistrar` SPI. The underlying HTTP server (WireMock) is
 completely hidden — you never interact with it directly.
 
+First-party modules target the AWS SDK for Java **v2**. Teams still on **v1** can redirect their clients to CloudMock
+with the `cloudmock-sdk-v1` companion — see [SDK v1 Support](sdk-v1.md).
+
 ---
 
 ## Quick example

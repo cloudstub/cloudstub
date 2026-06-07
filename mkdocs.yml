@@ -36,6 +36,7 @@ nav:
       - Spring Boot Integration: spring-boot.md
       - Fault Injection: fault-injection.md
       - Standalone Mode: standalone.md
+      - SDK v1 Support: sdk-v1.md
   - Module Authoring: module-authoring.md
   - CloudMock Codegen: codegen.md
 

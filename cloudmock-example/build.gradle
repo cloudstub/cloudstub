@@ -10,4 +10,7 @@ dependencies {
     testImplementation project(':cloudmock-sqs')
     testImplementation project(':cloudmock-secretsmanager')
     testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+
+    testImplementation project(':cloudmock-sdk-v1')
+    testImplementation libs.aws.v1.sns
 }

@@ -112,3 +112,4 @@ CloudMock starts in under 200 ms. No containers, no credentials, no network.
 - [Spring Boot Integration](spring-boot.md) — use CloudMock with a full Spring Boot application context
 - [Fault Injection](fault-injection.md) — simulate throttling, timeouts, and network brownouts
 - [Standalone Mode](standalone.md) — run CloudMock as a long-lived local development server instead of embedding it in tests
+- [SDK v1 Support](sdk-v1.md) — redirect AWS SDK **v1** clients to CloudMock while you migrate to v2

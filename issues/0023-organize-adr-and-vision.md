@@ -5,15 +5,15 @@
 
 ## Summary
 
-Move the existing `ADR.md` to `docs/adr/001-cloudmock-architecture.md`. Create `docs/adr/VISION.md` covering long-term
+Move the existing `ADR.md` to `docs/adr/cloudmock-architecture.md`. Create `docs/adr/project-vision.md` covering long-term
 project direction: the three stages (contract → stateful → behavioural fidelity), standalone mode, SDK v1 support,
-management console, and the LocalStack alternative goal. The ADR captures decisions already made. The VISION captures
+management console, and the LocalStack alternative goal. The ADR captures decisions already made. The project vision captures
 where the project is going. Both are contributor-facing, not user-facing.
 
 ## Acceptance criteria
 
-- [ ] `docs/adr/001-cloudmock-architecture.md` exists and contains the content previously in `ADR.md`
-- [ ] `docs/adr/VISION.md` exists and covers:
+- [ ] `docs/adr/cloudmock-architecture.md` exists and contains the content previously in `ADR.md`
+- [ ] `docs/adr/project-vision.md` exists and covers:
   - The three stages: Stage 1 (contract mocking — current), Stage 2 (stateful simulation), Stage 3 (behavioural fidelity — opt-in)
   - Standalone mode as a near-term goal for replacing LocalStack in local dev workflows
   - SDK v1 support via the companion library
