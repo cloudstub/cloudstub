@@ -41,6 +41,9 @@ class JsonFieldTest {
             echo(context, "Probe.DollarA", "$.a");
             echo(context, "Probe.Prefix", "prefix");
             echo(context, "Probe.PrefixLong", "prefixLong");
+            echo(context, "Probe.ArrayIdx", "items.1.name");
+            echo(context, "Probe.Empty", "");
+            echo(context, "Probe.DollarOnly", "$.");
         }
         private static void echo(CloudMockContext ctx, String target, String path) {
             ctx.registrar().registerJsonTargetStub(target, (req, store) -> {
@@ -85,6 +88,23 @@ class JsonFieldTest {
         cloudMock.start();
         assertEquals("<null>", probe("Probe.Missing", "{\"a\":\"x\"}"));
         assertEquals("<null>", probe("Probe.NestedB", "{\"a\":\"x\"}"));
+    }
+
+    @Test
+    void numericSegmentIndexesIntoArray() throws Exception {
+        cloudMock.withService(new ProbeService());
+        cloudMock.start();
+        assertEquals("second",
+                probe("Probe.ArrayIdx", "{\"items\":[{\"name\":\"first\"},{\"name\":\"second\"}]}"));
+    }
+
+    @Test
+    void emptyOrDollarOnlyPathReturnsNull() throws Exception {
+        cloudMock.withService(new ProbeService());
+        cloudMock.start();
+        // An empty path must not resolve to the whole document.
+        assertEquals("<null>", probe("Probe.Empty", "{\"a\":\"x\"}"));
+        assertEquals("<null>", probe("Probe.DollarOnly", "{\"a\":\"x\"}"));
     }
 
     @Test

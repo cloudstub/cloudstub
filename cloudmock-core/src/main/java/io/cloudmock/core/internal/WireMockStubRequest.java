@@ -6,6 +6,8 @@ import com.github.tomakehurst.wiremock.http.QueryParameter;
 import com.github.tomakehurst.wiremock.http.Request;
 import io.cloudmock.core.spi.HttpMethod;
 import io.cloudmock.core.spi.StubRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adapts a WireMock {@link Request} to the public {@link StubRequest} SPI view, so that
@@ -16,7 +18,13 @@ import io.cloudmock.core.spi.StubRequest;
  */
 final class WireMockStubRequest implements StubRequest {
 
-    /** Shared, thread-safe once configured; jackson is shaded into {@code io.cloudmock.shaded}. */
+    private static final Logger log = LoggerFactory.getLogger(WireMockStubRequest.class);
+
+    /**
+     * A plain, read-only mapper shared across requests; thread-safe for {@code readTree}. Deliberately
+     * NOT the one in {@code JsonFileStateStore}, whose default typing would mis-parse plain request
+     * bodies.
+     */
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final Request request;
@@ -63,21 +71,18 @@ final class WireMockStubRequest implements StubRequest {
 
     @Override
     public String jsonField(String path) {
-        JsonNode node = bodyTree();
-        if (node == null || path == null) {
+        JsonNode root = bodyTree();
+        if (root == null || path == null) {
             return null;
         }
         String dotted = path.startsWith("$.") ? path.substring(2) : path;
-        for (String segment : dotted.split("\\.")) {
-            if (segment.isEmpty()) {
-                continue;
-            }
-            node = node.get(segment);
-            if (node == null) {
-                return null;
-            }
+        if (dotted.isEmpty()) {
+            return null;
         }
-        // Only scalars are returned as text; objects/arrays/explicit null map to absent.
+        // Reuse jackson's JSON Pointer instead of a bespoke walker: it navigates objects and array
+        // indices (e.g. "Items.0.id") and never throws — a missing path resolves to a MissingNode.
+        JsonNode node = root.at("/" + dotted.replace('.', '/'));
+        // Only scalars are returned as text; objects/arrays/missing/explicit null map to absent.
         return node.isValueNode() && !node.isNull() ? node.asText() : null;
     }
 
@@ -89,7 +94,11 @@ final class WireMockStubRequest implements StubRequest {
             if (!raw.isEmpty()) {
                 try {
                     bodyTree = MAPPER.readTree(raw);
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    // A non-JSON or malformed body is not an error — handlers just get null. Log at
+                    // debug so a developer chasing a stateful round-trip can see why a field was empty.
+                    log.debug("Request body is not valid JSON; jsonField will return null: {}",
+                            e.getMessage());
                     bodyTree = null;
                 }
             }

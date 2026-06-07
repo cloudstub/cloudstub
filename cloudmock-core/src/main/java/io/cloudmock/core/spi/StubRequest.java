@@ -39,13 +39,14 @@ public interface StubRequest {
      * modules (SQS, DynamoDB, Lambda, …) never have to write their own parser. The body is parsed
      * once per request.
      *
-     * <p>The path is a sequence of object keys separated by {@code '.'}; a leading {@code "$."} is
-     * tolerated for familiarity with JSONPath. Examples: {@code "QueueName"}, {@code "Item.id.S"},
-     * {@code "$.MessageBody"}. String values are returned unescaped; numbers and booleans are
-     * returned in their JSON textual form (e.g. {@code "10"}, {@code "true"}).
+     * <p>The path is a sequence of segments separated by {@code '.'}; a leading {@code "$."} is
+     * tolerated for familiarity with JSONPath. A numeric segment indexes into a JSON array. Examples:
+     * {@code "QueueName"}, {@code "Item.id.S"}, {@code "Records.0.eventName"}, {@code "$.MessageBody"}.
+     * String values are returned unescaped; numbers and booleans are returned in their JSON textual
+     * form (e.g. {@code "10"}, {@code "true"}).
      *
-     * <p>Returns {@code null} if the body is empty, is not valid JSON, the path is absent, or the
-     * value at the path is JSON {@code null} or a non-scalar (object/array). It never throws on
+     * <p>Returns {@code null} if the body is empty or not valid JSON, the path is empty or absent, or
+     * the value at the path is JSON {@code null} or a non-scalar (object/array). It never throws on
      * malformed input — a bad body yields {@code null}, not an exception out of the handler.
      *
      * @param path dotted path to a scalar field, e.g. {@code "QueueName"}
