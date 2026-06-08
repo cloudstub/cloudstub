@@ -64,7 +64,7 @@ subprojects {
     }
 
     if (project.name != 'cloudmock-standalone') {
-        configurations.matching { !it.name.toLowerCase().contains('test') }.all {
+        configurations.matching { !it.name.toLowerCase().contains('test') }.configureEach {
             resolutionStrategy.eachDependency { DependencyResolveDetails details ->
                 if (details.requested.group == 'io.cloudmock' && details.requested.name != 'cloudmock-core') {
                     throw new GradleException(

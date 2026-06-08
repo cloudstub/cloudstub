@@ -45,16 +45,16 @@ hardcoded service list.
 
 ## Acceptance criteria
 
-- [ ] CLI lives in a separate repository `cloud-mock/cloudmock-cli`
-- [ ] Binary ships as `cloudmock` with `clm` as a built-in alias — both work
-- [ ] CLI can query running status and loaded modules
-- [ ] CLI supports the global commands listed above
-- [ ] CLI supports the SQS, S3, and Secrets Manager commands listed above
-- [ ] CLI discovers available commands from `/api/status` — new modules expose new commands
+- [x] CLI lives in a separate repository `cloud-mock/cloudmock-cli`
+- [x] Binary ships as `cloudmock` with `clm` as a built-in alias — both work
+- [x] CLI can query running status and loaded modules
+- [x] CLI supports the global commands listed above
+- [x] CLI supports the SQS, S3, and Secrets Manager commands listed above
+- [x] CLI discovers available commands from `/api/status` — new modules expose new commands
   automatically without any change to the CLI
-- [ ] CLI communicates with standalone mode over the REST API
-- [ ] CLI works without AWS SDK or AWS CLI installed
-- [ ] CLI returns clear error messages when CloudMock is not running or a service is not loaded
+- [x] CLI communicates with standalone mode over the REST API
+- [x] CLI works without AWS SDK or AWS CLI installed
+- [x] CLI returns clear error messages when CloudMock is not running or a service is not loaded
 
 ## Dependencies
 

@@ -35,6 +35,9 @@ java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar --port=4566 -
 CLOUDMOCK_PORT=4566 CLOUDMOCK_API_PORT=4567 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar  # via env vars
 ```
 
+The `clm` / `cloudmock` CLI lives in its own repository (`cloud-mock/cloudmock-cli`), not in this
+monorepo — see the **CLI** section below.
+
 ### Subprojects
 
 | Module | Status | Notes |
@@ -50,6 +53,9 @@ CLOUDMOCK_PORT=4566 CLOUDMOCK_API_PORT=4567 java -jar cloudmock-standalone/build
 | `cloudmock-codegen` | Done | Smithy → CloudMockService stub generator |
 | `cloudmock-standalone` | Done | Runnable fat JAR; boots all service modules on port 4566 (default) for local dev |
 | `cloudmock-example` | Done | Spring Boot app + integration tests (CloudMockExtension) |
+
+The `clm` / `cloudmock` CLI is **not** a subproject of this monorepo — it lives in a separate
+repository (`cloud-mock/cloudmock-cli`). See the **CLI** section.
 
 ### Key dependency versions
 
@@ -95,6 +101,50 @@ single runnable fat JAR. It is the drop-in replacement for LocalStack in local d
   `ReceiveMessage` does not return prior `SendMessage` payloads). A stateful backend is tracked by issue #0024.
 - **Module isolation rule:** `cloudmock-standalone` is exempt from the inter-module isolation check in `build.gradle`
   because its purpose is to bundle all modules; this exemption is intentional and must not be extended to other modules
+- **API service filtering:** `StandaloneMain` filters discovered `CloudMockApiService` implementations by the enabled
+  module set, so a service disabled with `--modules` exposes neither stubs nor REST routes nor CLI commands
+
+## CLI
+
+`cloudmock-cli` (`clm` / `cloudmock`) is a thin HTTP client over the standalone REST API. It lives in its **own
+repository** (`cloud-mock/cloudmock-cli`, cloned locally at `../cloudmock-cli`), not in this monorepo — that placement
+is intentional and required by issue #0033. The notes below describe how it integrates with this repo's REST API.
+
+- **No dependencies on CloudMock:** depends only on picocli + jackson — *not* on `cloudmock-core`, WireMock, or any
+  service module. That zero-coupling is what lets it be a separate repo: it never imports a CloudMock type, it only
+  speaks HTTP to `/api/status` and `/api/<service>/…`.
+- **Runtime discovery:** built-in commands are `status` and `reset`; every other command is built at startup from the
+  `routes` array of `GET /api/status`. A module route advertising a `service`, `command`, and `params` becomes
+  `clm <service> <command>` with one option per param. Adding a module therefore adds CLI commands with no CLI change.
+- **Service logic lives server-side:** each module exposes its CLI actions as REST routes via the optional
+  `CloudMockApiService` SPI (see below). The CLI never speaks an AWS wire protocol itself.
+- **Connection:** `--host` / `--api-port` flags or `CLOUDMOCK_HOST` / `CLOUDMOCK_API_PORT` env vars; talks only to the
+  API port. Connection failure → "not running" message + non-zero exit; non-2xx → server's error surfaced, exit 1.
+
+## API service SPI
+
+`CloudMockApiService` is the optional companion to `CloudMockService` for modules that expose REST routes (and thereby
+CLI commands) under `/api/<serviceId>/…`. Discovered via `META-INF/services/io.cloudmock.core.spi.CloudMockApiService`.
+
+```java
+public interface CloudMockApiService {
+    String serviceId();
+    void registerRoutes(ApiRouteRegistrar registrar);
+}
+
+public interface ApiRouteRegistrar {
+    // command name + params are surfaced in /api/status and drive the CLI
+    void register(HttpMethod method, String path, String command, String description,
+                  List<ApiParam> params, ApiHandler handler);
+    default void register(HttpMethod method, String path, String description, ApiHandler handler);
+}
+
+public record ApiParam(String name, boolean required, String description) {}
+```
+
+Handlers (`ApiRequest -> ApiResponse`) use only core SPI types + the JDK — no WireMock, AWS SDK, jackson, or picocli.
+Parameters arrive as query-string values; the request body is not read. Responses are synthetic and stateless, matching
+the stub contract. Reference impls: `CloudMockSqsApiService`, `CloudMockS3ApiService`, `CloudMockSecretsManagerApiService`.
 
 ## SPI contract (frozen)
 

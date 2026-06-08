@@ -125,7 +125,7 @@ This is the boundary that matters. The companion redirects the **endpoint**; it 
 For the JSON/`X-Amz-Target` services, a v1 call therefore arrives in a shape that no first-party stub matches, so
 **WireMock returns 404** and the v1 client raises an `AmazonServiceException`. Connectivity is proven (you reached the
 server); response fidelity is not (no stub answered). The companion's own
-[`CloudMockV1EndpointsTest`](https://github.com/cloud-mock/cloud-mock/blob/main/cloudmock-sdk-v1/src/test/java/io/cloudmock/sdkv1/CloudMockV1EndpointsTest.java)
+[`CloudMockV1EndpointsTest`](https://github.com/cloud-mock/cloudmock/blob/main/cloudmock-sdk-v1/src/test/java/io/cloudmock/sdkv1/CloudMockV1EndpointsTest.java)
 asserts exactly this: a v1 `listQueues()` reaches CloudMock and gets an HTTP error response back, proving the connection
 without claiming a matched stub.
 
@@ -197,5 +197,5 @@ assertNotNull(result.getMessageId()); // populated — the XML/QUERY stub was se
 
 Both files above are real, compiling code, exercised on every `./gradlew build`:
 
-- [`SnsV1PublishStubService`](https://github.com/cloud-mock/cloud-mock/blob/main/cloudmock-example/src/test/java/io/cloudmock/example/sdkv1/SnsV1PublishStubService.java)
-- [`SnsV1PublishStubExampleTest`](https://github.com/cloud-mock/cloud-mock/blob/main/cloudmock-example/src/test/java/io/cloudmock/example/sdkv1/SnsV1PublishStubExampleTest.java)
+- [`SnsV1PublishStubService`](https://github.com/cloud-mock/cloudmock/blob/main/cloudmock-example/src/test/java/io/cloudmock/example/sdkv1/SnsV1PublishStubService.java)
+- [`SnsV1PublishStubExampleTest`](https://github.com/cloud-mock/cloudmock/blob/main/cloudmock-example/src/test/java/io/cloudmock/example/sdkv1/SnsV1PublishStubExampleTest.java)

@@ -1,8 +1,8 @@
 site_name: CloudMock
 site_description: Embedded, containerless AWS mock for JVM integration tests
-site_url: https://cloud-mock.github.io/cloud-mock/
-repo_url: https://github.com/cloud-mock/cloud-mock
-repo_name: cloud-mock/cloud-mock
+site_url: https://cloud-mock.github.io/cloudmock/
+repo_url: https://github.com/cloud-mock/cloudmock
+repo_name: cloud-mock/cloudmock
 edit_uri: edit/main/docs/
 
 theme:
@@ -37,6 +37,7 @@ nav:
       - Fault Injection: fault-injection.md
       - Standalone Mode: standalone.md
       - REST API: rest-api.md
+      - CLI: cli.md
       - SDK v1 Support: sdk-v1.md
   - Module Authoring: module-authoring.md
   - CloudMock Codegen: codegen.md

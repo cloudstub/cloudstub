@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import io.cloudmock.core.CloudMock;
 import io.cloudmock.core.restapi.ModuleStatus;
 import io.cloudmock.core.restapi.RequestRecord;
+import io.cloudmock.core.spi.restapi.ApiParam;
 import io.cloudmock.core.spi.restapi.ApiRequest;
 import io.cloudmock.core.spi.restapi.ApiResponse;
 import io.cloudmock.core.spi.CloudMockApiService;
@@ -116,16 +117,22 @@ public final class ApiServer implements Closeable {
 
     private void registerModuleRoutes() {
         for (CloudMockApiService svc : moduleServices) {
-            svc.registerRoutes((method, path, description, handler) -> {
+            svc.registerRoutes((method, path, command, description, params, handler) -> {
                 String fullPath = "/api/" + svc.serviceId() + path;
-                addRoute(method.name(), fullPath, description, List.of(), handler::handle);
+                routes.add(RouteDescriptor.module(method.name(), fullPath, svc.serviceId(),
+                        command, description, params));
+                bind(method.name(), fullPath, handler::handle);
             });
         }
     }
 
     private void addRoute(String method, String path, String description,
                           List<QueryParam> queryParams, RouteHandler handler) {
-        routes.add(new RouteDescriptor(method, path, description, queryParams));
+        routes.add(RouteDescriptor.core(method, path, description, queryParams));
+        bind(method, path, handler);
+    }
+
+    private void bind(String method, String path, RouteHandler handler) {
         server.createContext(path, exchange -> {
             // HttpServer contexts match by path prefix; require an exact path so that, e.g.,
             // /api/statusEXTRA does not fall through to the /api/status handler.
@@ -214,6 +221,20 @@ public final class ApiServer implements Closeable {
             route.put("method", r.method());
             route.put("path", r.path());
             route.put("description", r.description());
+            // Module routes carry a service + command + parameter list so a generic client
+            // (the CLI) can build `<service> <command>` with typed options at runtime.
+            if (r.service() != null) {
+                route.put("service", r.service());
+                route.put("command", r.command());
+            }
+            if (!r.params().isEmpty()) {
+                route.put("params", r.params().stream()
+                        .map(p -> Map.of(
+                                "name", p.name(),
+                                "required", p.required(),
+                                "description", p.description()))
+                        .toList());
+            }
             if (!r.queryParams().isEmpty()) {
                 route.put("queryParams", r.queryParams().stream()
                         .map(p -> Map.of("name", p.name(), "description", p.description()))
@@ -244,18 +265,15 @@ public final class ApiServer implements Closeable {
         for (RouteDescriptor r : routes) {
             Map<String, Object> operation = new LinkedHashMap<>();
             operation.put("summary", r.description());
-            if (!r.queryParams().isEmpty()) {
-                operation.put("parameters", r.queryParams().stream()
-                        .map(p -> {
-                            Map<String, Object> param = new LinkedHashMap<>();
-                            param.put("name", p.name());
-                            param.put("in", "query");
-                            param.put("required", false);
-                            param.put("description", p.description());
-                            param.put("schema", Map.of("type", "string"));
-                            return param;
-                        })
-                        .toList());
+            List<Map<String, Object>> parameters = new ArrayList<>();
+            for (QueryParam p : r.queryParams()) {
+                parameters.add(openApiParam(p.name(), false, p.description()));
+            }
+            for (ApiParam p : r.params()) {
+                parameters.add(openApiParam(p.name(), p.required(), p.description()));
+            }
+            if (!parameters.isEmpty()) {
+                operation.put("parameters", parameters);
             }
             operation.put("responses", Map.of("200", Map.of("description", "OK")));
             paths.computeIfAbsent(r.path(), k -> new LinkedHashMap<>())
@@ -263,6 +281,16 @@ public final class ApiServer implements Closeable {
         }
         spec.put("paths", paths);
         return spec;
+    }
+
+    private static Map<String, Object> openApiParam(String name, boolean required, String description) {
+        Map<String, Object> param = new LinkedHashMap<>();
+        param.put("name", name);
+        param.put("in", "query");
+        param.put("required", required);
+        param.put("description", description);
+        param.put("schema", Map.of("type", "string"));
+        return param;
     }
 
     // -------------------------------------------------------------------------
@@ -320,6 +348,23 @@ public final class ApiServer implements Closeable {
 
     private record QueryParam(String name, String description) {}
 
-    private record RouteDescriptor(String method, String path, String description,
-                                   List<QueryParam> queryParams) {}
+    /**
+     * A registered route. Core routes (status/reset/…) leave {@code service}/{@code command}
+     * null and may carry {@code queryParams}; module routes set {@code service}/{@code command}
+     * and may carry {@code params}. The two parameter lists are mutually exclusive in practice.
+     */
+    private record RouteDescriptor(String method, String path, String service, String command,
+                                   String description, List<QueryParam> queryParams,
+                                   List<ApiParam> params) {
+
+        static RouteDescriptor core(String method, String path, String description,
+                                    List<QueryParam> queryParams) {
+            return new RouteDescriptor(method, path, null, null, description, queryParams, List.of());
+        }
+
+        static RouteDescriptor module(String method, String path, String service, String command,
+                                      String description, List<ApiParam> params) {
+            return new RouteDescriptor(method, path, service, command, description, List.of(), params);
+        }
+    }
 }
