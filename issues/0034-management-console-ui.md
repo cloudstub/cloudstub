@@ -24,17 +24,17 @@ of CloudMock.
 
 ## Acceptance criteria
 
-- [ ] Console lives in a separate repository `cloud-mock/cloudmock-console`
-- [ ] Console consumes only the CloudMock REST API — no direct state store access
-- [ ] Navigation is built dynamically from `/api/status` — no hardcoded service list
-- [ ] Adding or removing a module changes the console automatically
-- [ ] Design is modern, clean, and professional — not a bare-bones admin panel
-- [ ] Consistent visual language: typography, spacing, color, and component design
-- [ ] Responsive layout that works on different screen sizes
-- [ ] Dark and light mode
-- [ ] Payload viewer supports JSON syntax highlighting and formatting
-- [ ] Works in any modern browser with no install
-- [ ] No login, no setup — open the browser, point it at your CloudMock instance, see state
+- [x] Console lives in a separate repository `cloud-mock/cloudmock-console`
+- [x] Console consumes only the CloudMock REST API — no direct state store access
+- [x] Navigation is built dynamically from `/api/status` — no hardcoded service list
+- [x] Adding or removing a module changes the console automatically
+- [x] Design is modern, clean, and professional — not a bare-bones admin panel
+- [x] Consistent visual language: typography, spacing, color, and component design
+- [x] Responsive layout that works on different screen sizes
+- [x] Dark and light mode
+- [x] Payload viewer supports JSON syntax highlighting and formatting
+- [x] Works in any modern browser with no install
+- [x] No login, no setup — open the browser, point it at your CloudMock instance, see state
 
 ## Dependencies
 
