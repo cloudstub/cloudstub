@@ -137,7 +137,7 @@ public final class ApiServer implements Closeable {
             // Allow cross-origin requests so the CloudMock Console (or any browser client)
             // can call the API from a different origin without a proxy.
             exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
             exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
 
             // Handle CORS pre-flight.
