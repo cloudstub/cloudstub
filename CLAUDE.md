@@ -4,7 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Git workflow
 
-Every feature must be developed on a dedicated branch created from `main` before any code is written. Branch names should follow the pattern `feature/<short-description>`. Never commit feature work directly to `main`.
+Every feature must be developed on a dedicated branch created from `main` before any code is written. Branch names
+should follow the pattern `feature/<short-description>`. Never commit feature work directly to `main`.
 
 ## Current state
 
@@ -40,19 +41,19 @@ monorepo — see the **CLI** section below.
 
 ### Subprojects
 
-| Module | Status | Notes |
-|---|---|---|
-| `cloudmock-core` | Done | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage) |
-| `cloudmock-junit6` | Done | `@ExtendWith` + `@RegisterExtension`, fault injection annotations |
-| `cloudmock-sns` | Done | Phase 3 — XML/Form protocol; reference implementation for `registerXmlFormStub` |
-| `cloudmock-sqs` | Done | Phase 2 reference — JSON/X-Amz-Target protocol |
-| `cloudmock-secretsmanager` | Done | Phase 2 reference — JSON/X-Amz-Target protocol |
-| `cloudmock-s3` | Done | Phase 3 — REST path protocol; generated from real AWS Smithy model |
-| `cloudmock-dynamodb` | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol |
-| `cloudmock-lambda` | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol |
-| `cloudmock-codegen` | Done | Smithy → CloudMockService stub generator |
-| `cloudmock-standalone` | Done | Runnable fat JAR; boots all service modules on port 4566 (default) for local dev |
-| `cloudmock-example` | Done | Spring Boot app + integration tests (CloudMockExtension) |
+| Module                     | Status           | Notes                                                                                  |
+|----------------------------|------------------|----------------------------------------------------------------------------------------|
+| `cloudmock-core`           | Done             | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                        |
+| `cloudmock-junit6`         | Done             | `@ExtendWith` + `@RegisterExtension`, fault injection annotations                      |
+| `cloudmock-sns`            | Done             | Phase 3 — XML/Form protocol; reference implementation for `registerXmlFormStub`        |
+| `cloudmock-sqs`            | Done             | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044) |
+| `cloudmock-secretsmanager` | Done             | Phase 2 reference — JSON/X-Amz-Target protocol                                         |
+| `cloudmock-s3`             | Done             | Phase 3 — REST path protocol; generated from real AWS Smithy model                     |
+| `cloudmock-dynamodb`       | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol                                                   |
+| `cloudmock-lambda`         | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol                                                   |
+| `cloudmock-codegen`        | Done             | Smithy → CloudMockService stub generator                                               |
+| `cloudmock-standalone`     | Done             | Runnable fat JAR; boots all service modules on port 4566 (default) for local dev       |
+| `cloudmock-example`        | Done             | Spring Boot app + integration tests (CloudMockExtension)                               |
 
 The `clm` / `cloudmock` CLI is **not** a subproject of this monorepo — it lives in a separate
 repository (`cloud-mock/cloudmock-cli`). See the **CLI** section.
@@ -87,7 +88,8 @@ single runnable fat JAR. It is the drop-in replacement for LocalStack in local d
 
 - **Default port:** `4566` (matches LocalStack, so `AWS_ENDPOINT_URL=http://localhost:4566` works without changes)
 - **Port override:** `--port=<n>` CLI argument or `CLOUDMOCK_PORT` environment variable
-- **API port:** `4567` (default) — REST API served on a secondary port in the same process; override with `--api-port=<n>` or `CLOUDMOCK_API_PORT`
+- **API port:** `4567` (default) — REST API served on a secondary port in the same process; override with
+  `--api-port=<n>` or `CLOUDMOCK_API_PORT`
 - **Request history cap:** `--max-history=<n>` CLI argument or `CLOUDMOCK_MAX_HISTORY` env var bounds the in-memory
   request journal exposed by `GET /api/history` (default `1000`; `unlimited`/`none`/`0` to disable). Backed by
   `CloudMock.withMaxRequestHistory(int)`, which sets WireMock's `maxRequestJournalEntries`. A full `POST /api/reset`
@@ -95,10 +97,15 @@ single runnable fat JAR. It is the drop-in replacement for LocalStack in local d
 - **Module discovery:** `ServiceLoader` — the same mechanism as embedded mode; printed to stdout at startup
 - **Module selection:** `--modules=<a,b>` CLI argument or `CLOUDMOCK_MODULES` env var enables only the listed service
   IDs (default: all bundled modules). Backed by `CloudMock.withEnabledServices(Collection<String>)` in core, which
-  filters `ServiceLoader` discovery. Naming an unknown module fails fast. Modules added via `withService` bypass the filter.
+  filters `ServiceLoader` discovery. Naming an unknown module fails fast. Modules added via `withService` bypass the
+  filter.
 - **Shutdown:** `Ctrl-C` / `SIGTERM` triggers a clean WireMock shutdown via a JVM shutdown hook, no stack trace
-- **Statelessness:** standalone serves the same stateless templated responses as embedded mode (no cross-call state;
-  `ReceiveMessage` does not return prior `SendMessage` payloads). A stateful backend is tracked by issue #0024.
+- **State:** standalone and embedded mode share the same core engine and the same state behaviour. Modules built on
+  the stateful handler overloads (issue #0044) return live data — e.g. SQS `ReceiveMessage` returns the payloads of
+  prior `SendMessage` calls. State is in-memory by default and persistent when a store directory is set (the
+  standalone launcher defaults to a persistent `.cloudmock` directory); see the **State store** notes. Template-only
+  modules remain stateless. A full `POST /api/reset` clears all state (`StateStore.clearAll()`); `?service=X` clears
+  only that service's prefix.
 - **Module isolation rule:** `cloudmock-standalone` is exempt from the inter-module isolation check in `build.gradle`
   because its purpose is to bundle all modules; this exemption is intentional and must not be extended to other modules
 - **API service filtering:** `StandaloneMain` filters discovered `CloudMockApiService` implementations by the enabled
@@ -129,6 +136,7 @@ CLI commands) under `/api/<serviceId>/…`. Discovered via `META-INF/services/io
 ```java
 public interface CloudMockApiService {
     String serviceId();
+
     void registerRoutes(ApiRouteRegistrar registrar);
 }
 
@@ -136,37 +144,70 @@ public interface ApiRouteRegistrar {
     // command name + params are surfaced in /api/status and drive the CLI
     void register(HttpMethod method, String path, String command, String description,
                   List<ApiParam> params, ApiHandler handler);
+
     default void register(HttpMethod method, String path, String description, ApiHandler handler);
 }
 
-public record ApiParam(String name, boolean required, String description) {}
+public record ApiParam(String name, boolean required, String description) {
+}
 ```
 
 Handlers (`ApiRequest -> ApiResponse`) use only core SPI types + the JDK — no WireMock, AWS SDK, jackson, or picocli.
 Parameters arrive as query-string values; the request body is not read. Responses are synthetic and stateless, matching
-the stub contract. Reference impls: `CloudMockSqsApiService`, `CloudMockS3ApiService`, `CloudMockSecretsManagerApiService`.
+the stub contract. Reference impls: `CloudMockSqsApiService`, `CloudMockS3ApiService`,
+`CloudMockSecretsManagerApiService`.
 
-## SPI contract (frozen)
+## SPI contract
 
 ```java
 public interface CloudMockService {
     String serviceId();                    // e.g. "sqs", "secretsmanager"
-    void register(StubRegistrar registrar);
+
+    void register(CloudMockContext context);
+}
+
+public interface CloudMockContext {
+    StubRegistrar registrar();             // declare HTTP stubs
+
+    StateStore stateStore();               // shared, core-owned live-data backend
 }
 
 public interface StubRegistrar {
+    // Template stubs — static Handlebars, stateless
     void registerXmlFormStub(String actionName, String responseTemplate);
+
     void registerJsonTargetStub(String target, String responseTemplate);
+
     void registerRestStub(HttpMethod method, String pathPattern, String responseTemplate);
+
+    // Stateful stubs — run a StubHandler at request time with access to the StateStore (issue #0044)
+    void registerXmlFormStub(String actionName, StubHandler handler);
+
+    void registerJsonTargetStub(String target, StubHandler handler);
+
+    void registerRestStub(HttpMethod method, String pathPattern, StubHandler handler);
+}
+
+@FunctionalInterface
+public interface StubHandler {           // (StubRequest, StateStore) -> StubResponse
+    StubResponse handle(StubRequest request, StateStore store);
 }
 ```
 
 Modules register themselves via `META-INF/services/io.cloudmock.core.spi.CloudMockService`.
 
-The three `StubRegistrar` methods cover all AWS protocol families in scope. No raw WireMock `MappingBuilder` escape
-hatch will be added: exposing a WireMock type in the public SPI would make it impossible to swap the underlying HTTP
-engine without a breaking change. If a future service requires routing logic that cannot be expressed through the three
-existing methods, the correct path is to add a new method to `StubRegistrar` via the normal issue flow.
+Each protocol comes in two flavours: a **template** overload (static Handlebars, stateless) and a **handler**
+overload that runs module Java code per request with access to the shared `StateStore`, so what a user sends in one
+call comes back in the next. Handlers receive a `StubRequest` (method/path/body/header/query — no WireMock type) and
+return a `StubResponse` (status + content type + body); internally they are driven by a single
+`StatefulResponseTransformer` (a WireMock `ResponseTransformerV2`, keyed by a per-stub handler-key parameter) so the
+networking engine stays hidden and fault injection (throttle/timeout/brownout) still applies to handler-based stubs.
+Handlers must depend only on the core SPI and the JDK — no WireMock, AWS SDK, jackson, or picocli.
+
+No raw WireMock `MappingBuilder` escape hatch will be added: exposing a WireMock type in the public SPI would make it
+impossible to swap the underlying HTTP engine without a breaking change. The handler overloads were the sanctioned
+extension for stateful routing; any further protocol needs are added the same way — a new `StubRegistrar` method via
+the normal issue flow.
 
 ## Request routing protocols
 
@@ -174,11 +215,11 @@ AWS SDK v2 uses JSON/X-Amz-Target for SQS (confirmed in implementation — the C
 All three `StubRegistrar` routing methods are now exercised by real modules: JSON/X-Amz-Target by `cloudmock-sqs` and
 `cloudmock-secretsmanager`, XML/Form by `cloudmock-sns`, and REST path by `cloudmock-s3`.
 
-| Protocol            | Services                          | Matching rule                |
-|---------------------|-----------------------------------|------------------------------|
-| JSON / X-Amz-Target | SQS, Secrets Manager, DynamoDB    | `X-Amz-Target` header        |
-| XML / Form URL      | SNS (legacy)                      | `Action` form body parameter |
-| REST path           | S3                                | HTTP method + path regex     |
+| Protocol            | Services                       | Matching rule                |
+|---------------------|--------------------------------|------------------------------|
+| JSON / X-Amz-Target | SQS, Secrets Manager, DynamoDB | `X-Amz-Target` header        |
+| XML / Form URL      | SNS (legacy)                   | `Action` form body parameter |
+| REST path           | S3                             | HTTP method + path regex     |
 
 Response templates use Handlebars. Available helpers:
 
@@ -198,7 +239,8 @@ Three annotations in `cloudmock-junit6`, applied at test-method level:
 
 ## Spring Boot integration note
 
-`cloudmock-core` shades WireMock and Jetty internally. Users can freely use `platform('org.springframework.boot:spring-boot-dependencies:...')` without any Jetty version conflict.
+`cloudmock-core` shades WireMock and Jetty internally. Users can freely use
+`platform('org.springframework.boot:spring-boot-dependencies:...')` without any Jetty version conflict.
 
 Inside the monorepo, `cloudmock-example` uses explicit Spring Boot versions (not the BOM) because project-path
 dependencies bypass the shadow JAR. This is a development-only constraint — published artifacts have no such limitation.

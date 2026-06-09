@@ -1,9 +1,11 @@
 package io.cloudmock.core.internal;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import io.cloudmock.core.restapi.ModuleStatus;
 import io.cloudmock.core.restapi.StubInfo;
 import io.cloudmock.core.spi.HttpMethod;
+import io.cloudmock.core.spi.StubHandler;
 import io.cloudmock.core.spi.StubRegistrar;
 
 import java.net.HttpURLConnection;
@@ -26,11 +28,13 @@ import static io.cloudmock.core.internal.HttpConstants.*;
 public final class WireMockStubRegistrar implements StubRegistrar {
 
     private final WireMockServer server;
+    private final StatefulResponseTransformer stateful;
     private final ServiceRegistry registry = new ServiceRegistry();
     private String currentServiceId;
 
-    public WireMockStubRegistrar(WireMockServer server) {
+    public WireMockStubRegistrar(WireMockServer server, StatefulResponseTransformer stateful) {
         this.server = server;
+        this.stateful = stateful;
     }
 
     /** Creates a {@link FaultEngine} backed by this registrar's stub registry. */
@@ -56,7 +60,7 @@ public final class WireMockStubRegistrar implements StubRegistrar {
         if (currentServiceId != null) {
             registry.record(currentServiceId, new StubRecord(
                     StubProtocol.FORM_URL, actionName, responseTemplate,
-                    CONTENT_TYPE_XML_UTF8, HttpURLConnection.HTTP_OK));
+                    CONTENT_TYPE_XML_UTF8, HttpURLConnection.HTTP_OK, null));
         }
     }
 
@@ -72,7 +76,7 @@ public final class WireMockStubRegistrar implements StubRegistrar {
         if (currentServiceId != null) {
             registry.record(currentServiceId, new StubRecord(
                     StubProtocol.JSON_TARGET, target, responseTemplate,
-                    CONTENT_TYPE_AMZ_JSON_1_1, HttpURLConnection.HTTP_OK));
+                    CONTENT_TYPE_AMZ_JSON_1_1, HttpURLConnection.HTTP_OK, null));
         }
     }
 
@@ -87,7 +91,51 @@ public final class WireMockStubRegistrar implements StubRegistrar {
         if (currentServiceId != null) {
             registry.record(currentServiceId, new StubRecord(
                     StubProtocol.REST, matchKey, responseTemplate,
-                    "application/octet-stream", HttpURLConnection.HTTP_OK));
+                    "application/octet-stream", HttpURLConnection.HTTP_OK, null));
+        }
+    }
+
+    @Override
+    public void registerXmlFormStub(String actionName, StubHandler handler) {
+        String actionPattern = "(?s)(.*&)?Action=" + Pattern.quote(actionName) + "(&.*)?";
+        registerHandlerStub(StubProtocol.FORM_URL, actionName,
+                post(anyUrl()).withRequestBody(matching(actionPattern)),
+                CONTENT_TYPE_XML_UTF8, handler);
+    }
+
+    @Override
+    public void registerJsonTargetStub(String target, StubHandler handler) {
+        registerHandlerStub(StubProtocol.JSON_TARGET, target,
+                post(anyUrl()).withHeader(HEADER_AMZ_TARGET, equalTo(target)),
+                CONTENT_TYPE_AMZ_JSON_1_1, handler);
+    }
+
+    @Override
+    public void registerRestStub(HttpMethod method, String pathPattern, StubHandler handler) {
+        registerHandlerStub(StubProtocol.REST, method.name() + " " + pathPattern,
+                request(method.name(), urlMatching(pathPattern)),
+                "application/octet-stream", handler);
+    }
+
+    /**
+     * Shared registration for all three stateful protocols: names the stub, registers the handler
+     * under that key, and points the stub at the {@link StatefulResponseTransformer}. The base
+     * response is empty — the transformer replaces its status, content type, and body at request
+     * time. {@code contentType} is recorded only for fault stubs (the live response sets its own).
+     */
+    private void registerHandlerStub(StubProtocol protocol, String matchKey, MappingBuilder matcher,
+                                     String contentType, StubHandler handler) {
+        String key = stubName(matchKey);
+        stateful.register(key, handler);
+        server.stubFor(matcher
+                .withName(key)
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withTransformers(StatefulResponseTransformer.NAME)
+                        .withTransformerParameter(StatefulResponseTransformer.HANDLER_KEY_PARAM, key)));
+        if (currentServiceId != null) {
+            registry.record(currentServiceId, new StubRecord(
+                    protocol, matchKey, "", contentType, HttpURLConnection.HTTP_OK, key));
         }
     }
 

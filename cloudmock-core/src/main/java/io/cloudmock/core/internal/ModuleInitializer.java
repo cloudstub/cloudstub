@@ -23,8 +23,8 @@ public final class ModuleInitializer {
     public record Result(WireMockStubRegistrar registrar, FaultEngine faultEngine) {}
 
     public static Result initialize(WireMockServer server, CloudMockSettings settings,
-                                    StateStore stateStore) {
-        WireMockStubRegistrar registrar = new WireMockStubRegistrar(server);
+                                    StateStore stateStore, StatefulResponseTransformer stateful) {
+        WireMockStubRegistrar registrar = new WireMockStubRegistrar(server, stateful);
         FaultEngine faultEngine = registrar.newFaultEngine();
         CloudMockContextImpl context = new CloudMockContextImpl(registrar, stateStore);
 

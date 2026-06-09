@@ -1,5 +1,7 @@
 package io.cloudmock.core.internal;
 
+import io.cloudmock.core.spi.StubResponse;
+
 final class HttpConstants {
 
     private HttpConstants() {}
@@ -7,6 +9,8 @@ final class HttpConstants {
     static final String HEADER_CONTENT_TYPE = "Content-Type";
     static final String HEADER_AMZ_TARGET   = "X-Amz-Target";
 
-    static final String CONTENT_TYPE_XML_UTF8     = "text/xml;charset=UTF-8";
-    static final String CONTENT_TYPE_AMZ_JSON_1_1 = "application/x-amz-json-1.1";
+    // Single source of truth lives in the public SPI so template stubs (registered here) and
+    // stateful StubResponse bodies always agree on the AWS wire content types.
+    static final String CONTENT_TYPE_XML_UTF8     = StubResponse.CONTENT_TYPE_XML;
+    static final String CONTENT_TYPE_AMZ_JSON_1_1 = StubResponse.CONTENT_TYPE_JSON;
 }

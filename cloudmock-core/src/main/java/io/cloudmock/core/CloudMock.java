@@ -8,6 +8,7 @@ import io.cloudmock.core.internal.CloudMockSettings;
 import io.cloudmock.core.internal.FaultEngine;
 import io.cloudmock.core.internal.ModuleInitializer;
 import io.cloudmock.core.internal.RequestHistory;
+import io.cloudmock.core.internal.StatefulResponseTransformer;
 import io.cloudmock.core.internal.WireMockServerFactory;
 import io.cloudmock.core.internal.WireMockStubRegistrar;
 import io.cloudmock.core.internal.store.StateStoreFactory;
@@ -147,12 +148,16 @@ public final class CloudMock implements AutoCloseable {
      */
     public void start() {
         requireNotStarted();
-        server = WireMockServerFactory.createStarted(settings);
+        // The store and its transformer must exist before the server, since the transformer is
+        // registered as a WireMock extension at server-build time.
+        stateStore = StateStoreFactory.create(settings.storeDirectory());
+        StatefulResponseTransformer stateful = new StatefulResponseTransformer(stateStore);
+        server = WireMockServerFactory.createStarted(settings, stateful);
         startedAt = Instant.now();
         AwsEndpointOverride.set(server.port());
-        stateStore = StateStoreFactory.create(settings.storeDirectory());
 
-        ModuleInitializer.Result modules = ModuleInitializer.initialize(server, settings, stateStore);
+        ModuleInitializer.Result modules =
+                ModuleInitializer.initialize(server, settings, stateStore, stateful);
         registrar = modules.registrar();
         faultEngine = modules.faultEngine();
         requestHistory = new RequestHistory(server);

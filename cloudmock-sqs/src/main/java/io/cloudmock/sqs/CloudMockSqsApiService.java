@@ -7,9 +7,6 @@ import io.cloudmock.core.spi.restapi.ApiRequest;
 import io.cloudmock.core.spi.restapi.ApiResponse;
 import io.cloudmock.core.spi.restapi.ApiRouteRegistrar;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -54,7 +51,7 @@ public class CloudMockSqsApiService implements CloudMockApiService {
         String body = req.queryParams().getOrDefault("body", "");
         return new ApiResponse(200, Map.of(
                 "messageId", UUID.randomUUID().toString(),
-                "md5OfBody", md5(body)));
+                "md5OfBody", SqsJson.md5(body)));
     }
 
     private ApiResponse receiveMessage(ApiRequest req) {
@@ -69,20 +66,5 @@ public class CloudMockSqsApiService implements CloudMockApiService {
         return new ApiResponse(200, Map.of(
                 "status", "purged",
                 "queue", req.queryParams().getOrDefault("queue", "")));
-    }
-
-    private static String md5(String value) {
-        try {
-            byte[] digest = MessageDigest.getInstance("MD5")
-                    .digest(value.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder(digest.length * 2);
-            for (byte b : digest) {
-                hex.append(Character.forDigit((b >> 4) & 0xF, 16));
-                hex.append(Character.forDigit(b & 0xF, 16));
-            }
-            return hex.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("MD5 not available", e);
-        }
     }
 }

@@ -2,6 +2,7 @@ package io.cloudmock.core.internal;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
@@ -97,6 +98,9 @@ public class FaultEngine {
     }
 
     private MappingBuilder timeoutMapping(StubRecord record) {
+        // A timeout fault only needs to delay; the AWS SDK aborts before reading the body. We
+        // deliberately do NOT run a stateful handler here — the response is discarded, so executing
+        // the handler would mutate the state store as a surprising side effect of a simulated timeout.
         return matcherFor(record)
                 .atPriority(FAULT_PRIORITY)
                 .willReturn(aResponse()
@@ -113,14 +117,23 @@ public class FaultEngine {
     }
 
     private MappingBuilder brownoutProbabilisticMapping(StubRecord record, double rate) {
-        return matcherFor(record)
-                .atPriority(FAULT_PRIORITY)
-                .willReturn(aResponse()
-                        .withStatus(record.statusCode())
-                        .withHeader(HEADER_CONTENT_TYPE, record.contentType())
-                        .withBody(record.responseTemplate())
-                        .withTransformers(BrownoutTransformer.NAME)
-                        .withTransformerParameters(Parameters.one(BrownoutTransformer.RATE_PARAM, rate)));
+        ResponseDefinitionBuilder response = aResponse()
+                .withStatus(record.statusCode())
+                .withHeader(HEADER_CONTENT_TYPE, record.contentType())
+                .withBody(record.responseTemplate())
+                .withTransformerParameters(Parameters.one(BrownoutTransformer.RATE_PARAM, rate));
+        if (record.handlerKey() != null) {
+            // Stateful first so it builds the live body; brownout then decides pass-through vs reset.
+            // Unlike timeout, a probabilistic brownout must run the handler: the requests that are
+            // NOT reset have to return real data. A reset request that already wrote to the store
+            // mirrors AWS's at-least-once delivery (the server processed it; the response was lost).
+            response.withTransformers(StatefulResponseTransformer.NAME, BrownoutTransformer.NAME)
+                    .withTransformerParameter(
+                            StatefulResponseTransformer.HANDLER_KEY_PARAM, record.handlerKey());
+        } else {
+            response.withTransformers(BrownoutTransformer.NAME);
+        }
+        return matcherFor(record).atPriority(FAULT_PRIORITY).willReturn(response);
     }
 
     private MappingBuilder matcherFor(StubRecord record) {
