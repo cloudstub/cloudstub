@@ -14,7 +14,7 @@ on GitHub's default setup settings.
 - [x] `.github/workflows/codeql.yml` added to the repository
 - [x] Workflow configured for Java/Kotlin
 - [x] Workflow runs on push to `main`, on pull requests, and on a weekly schedule
-- [ ] Default setup disabled in repository settings after the workflow is in place
+- [x] Default setup disabled in repository settings after the workflow is in place
 - [ ] No CodeQL warnings on pull requests after the change
 
 ## Notes
