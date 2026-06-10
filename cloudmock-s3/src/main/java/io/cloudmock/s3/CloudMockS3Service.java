@@ -10,10 +10,9 @@ import java.io.UncheckedIOException;
 
 /**
  * CloudMock service module for S3.
- * Response templates are minimal placeholders in {@code src/main/resources/templates/}.
- * Replace each {@code .hbs} file with a well-formed Handlebars response that the AWS SDK
- * can parse without error. See existing modules (cloudmock-sqs, cloudmock-secretsmanager)
- * for examples.
+ *
+ * <p>Uses the REST path protocol: each operation is matched by HTTP method and a path regex and
+ * served from a Handlebars template in {@code src/main/resources/templates/}.
  */
 public class CloudMockS3Service implements CloudMockService {
 
@@ -108,8 +107,6 @@ public class CloudMockS3Service implements CloudMockService {
         // ListObjects (v1) catch-all is registered at the top of this method (see comment there).
         // Match list-type=2 anywhere in the query so ListObjectsV2 requests carrying prefix, max-keys,
         // continuation-token, etc. still route here instead of falling through to the v1 catch-all.
-        // (Was end-anchored "/[^/]+?list-type=2", which only matched the no-extra-params case — see
-        // the issue #0019 code review.)
         registrar.registerRestStub(HttpMethod.GET, "/[^/]+\\?(.*&)?list-type=2(&.*)?", loadTemplate("ListObjectsV2"));
         registrar.registerRestStub(HttpMethod.GET, "/[^/]+/.+?x-id=ListParts", loadTemplate("ListParts"));
         registrar.registerRestStub(HttpMethod.PUT, "/[^/]+?abac", loadTemplate("PutBucketAbac"));

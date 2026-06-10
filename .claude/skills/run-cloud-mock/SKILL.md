@@ -8,6 +8,14 @@ CloudMock standalone is a long-running Java server process. The driver is
 test ports, exercises every AWS protocol and every REST API route, then stops
 it cleanly.
 
+## Documentation style
+
+Any documentation you write or touch — javadoc, inline comments, reference docs — describes only the actual behavior of
+the code (what it does, how to use it, parameters, contracts, caveats). No narrative: no project history, issue-number
+storytelling, design-philosophy rationale, or marketing framing ("reference implementation", "canonical example", "the
+lesson is"). Inline comments may explain a non-obvious *why* for a specific line when it prevents a bug, but must not
+editorialize. Rationale belongs in commits and issues, not in the code's documentation.
+
 ## Prerequisites
 
 Java 17+ on `$PATH`. The project ships Java 21 in the dev environment.

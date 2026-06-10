@@ -7,15 +7,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Every feature must be developed on a dedicated branch created from `main` before any code is written. Branch names
 should follow the pattern `feature/<short-description>`. Never commit feature work directly to `main`.
 
+## Documentation style
+
+Documentation — javadoc, inline comments, and reference docs — describes only the actual behavior of the code: what it
+does, how to use it, parameters, return values, contracts, thread-safety, and concrete caveats (e.g. what is and is not
+simulated). It must not carry narrative: no project history, issue-number storytelling, design-philosophy rationale, or
+marketing framing (e.g. "reference implementation", "canonical example", "the lesson is", "promise of permanence").
+Inline comments may explain a non-obvious *why* for a specific line when it prevents a bug, but must not editorialize.
+Keep documentation factual and minimal; rationale belongs in commits and issues, not in the code's documentation.
+
 ## Current state
 
-**Phase 2 complete.** The full multi-project Gradle monorepo is in place. The SPI contract is frozen, the core engine is
-running, both Phase 2 reference modules are implemented and tested, the JUnit 6 extension with fault injection is live,
-the codegen tool exists, and a Spring Boot example application demonstrates end-to-end usage. A documentation site
-(MkDocs Material) is built and wired to GitHub Pages.
+The full multi-project Gradle monorepo is in place. The SPI contract is stable and governed by an explicit evolution
+policy (see **SPI evolution policy** — it is deliberately never declared closed), the core engine is running, the
+`cloudmock-sqs`, `cloudmock-secretsmanager`, `cloudmock-sns`, and `cloudmock-s3` modules are implemented and tested,
+the JUnit 6 extension with fault injection is live, the codegen tool exists, and a Spring Boot example application
+demonstrates end-to-end usage. A documentation site (MkDocs Material) is built and wired to GitHub Pages.
 
-Phase 3 work remaining: `cloudmock-s3`, `cloudmock-dynamodb`, `cloudmock-lambda` module implementations (scaffolding
-exists), and additional AWS service modules (tomorrow's session).
+Work remaining: `cloudmock-dynamodb` and `cloudmock-lambda` module implementations (scaffolding exists), and
+additional AWS service modules.
 
 ## Build system
 
@@ -45,12 +55,12 @@ monorepo — see the **CLI** section below.
 |----------------------------|------------------|----------------------------------------------------------------------------------------|
 | `cloudmock-core`           | Done             | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                        |
 | `cloudmock-junit6`         | Done             | `@ExtendWith` + `@RegisterExtension`, fault injection annotations                      |
-| `cloudmock-sns`            | Done             | Phase 3 — XML/Form protocol; reference implementation for `registerXmlFormStub`        |
+| `cloudmock-sns`            | Done             | XML/Form protocol; reference implementation for `registerXmlFormStub`                  |
 | `cloudmock-sqs`            | Done             | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044) |
-| `cloudmock-secretsmanager` | Done             | Phase 2 reference — JSON/X-Amz-Target protocol                                         |
-| `cloudmock-s3`             | Done             | Phase 3 — REST path protocol; generated from real AWS Smithy model                     |
-| `cloudmock-dynamodb`       | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol                                                   |
-| `cloudmock-lambda`         | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol                                                   |
+| `cloudmock-secretsmanager` | Done             | Reference impl — JSON/X-Amz-Target protocol                                            |
+| `cloudmock-s3`             | Done             | REST path protocol; generated from real AWS Smithy model                               |
+| `cloudmock-dynamodb`       | Scaffolding only | JSON/X-Amz-Target protocol                                                             |
+| `cloudmock-lambda`         | Scaffolding only | JSON/X-Amz-Target protocol                                                             |
 | `cloudmock-codegen`        | Done             | Smithy → CloudMockService stub generator                                               |
 | `cloudmock-standalone`     | Done             | Runnable fat JAR; boots all service modules on port 4566 (default) for local dev       |
 | `cloudmock-example`        | Done             | Spring Boot app + integration tests (CloudMockExtension)                               |
@@ -245,6 +255,39 @@ impossible to swap the underlying HTTP engine without a breaking change. The han
 extension for stateful routing; any further protocol needs are added the same way — a new `StubRegistrar` method via
 the normal issue flow.
 
+## SPI evolution policy
+
+The SPI (`CloudMockService`, `CloudMockContext`, `StubRegistrar`, `StubHandler`, `StateStore`, and the
+`CloudMockApiService` family) stays **open to change** — now and after 1.0. It has already changed twice during normal
+development (`register(StubRegistrar)` → `register(CloudMockContext)` for the state store; the `StubHandler` overloads
+for stateful stubs), and we deliberately keep the freedom to change it again whenever a better design appears rather
+than locking ourselves out of one. The question is never *whether* the contract may change but *how* a change is
+managed:
+
+- **Additive changes** (new methods, new overloads, new interfaces, new `default` methods) are routine. They go in via
+  the normal issue flow and require only a minor version bump of `cloudmock-core`. The `StubHandler` overloads are the
+  canonical example: existing modules kept compiling and running unchanged.
+- **Breaking changes** (removing or re-signing a method, changing semantics) are allowed but require a major version
+  bump of `cloudmock-core` and a migration note. They are not forbidden — they are simply priced.
+- **Compatibility is enforced by version, not by promise.** Each module JAR declares the minimum core it needs via the
+  `CloudMock-Core-Min-Version` entry in its `MANIFEST.MF`; the core reads this attribute at startup and warns when the
+  running core is older. This is the mechanism that lets the SPI stay open to change safely: a module built against a
+  newer additive method states its floor, and an out-of-date core is detected rather than failing obscurely. Core and
+  module JARs therefore version independently — a module pins only its *minimum* core, not an exact one.
+
+The result is stability through versioning and a clear additive-vs-breaking line.
+
+## Definition of done for infrastructure issues
+
+An infrastructure issue (a store, a transformer, a registrar, any shared plumbing) is **not done when the plumbing
+exists** — it is done when a real consumer exercises it end to end through the running system. A module on the request
+path, the admin API, or an end-to-end test must read and write the new infrastructure for the issue to close; building
+the mechanism, wiring its lifecycle, and exposing it to callers is necessary but not sufficient. This rule exists
+because [0035](issues/0035-implement-state-store.md) shipped a complete, lifecycle-managed, persistent, thread-safe
+state store that **nothing on the request path actually read or wrote**, so the server still served stateless
+responses; the gap was only closed later by [0044](issues/0044-stateful-stub-handlers.md). Acceptance criteria for an
+infra issue must therefore name the consumer that proves it works, not just the artifact that was built.
+
 ## Request routing protocols
 
 AWS SDK v2 uses JSON/X-Amz-Target for SQS (confirmed in implementation — the CLAUDE.md table was outdated).
@@ -283,7 +326,9 @@ dependencies bypass the shadow JAR. This is a development-only constraint — pu
 
 ## Open questions
 
-1. Versioning and compatibility policy between `cloudmock-core` versions and module JAR versions.
+_None open._ The former question — versioning and compatibility policy between `cloudmock-core` versions and module JAR
+versions — is resolved by the **SPI evolution policy** above: modules version independently and pin only a minimum core
+via `CloudMock-Core-Min-Version`; additive changes bump the minor, breaking changes bump the major.
 
 ## Out of scope
 

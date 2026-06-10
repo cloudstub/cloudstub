@@ -11,13 +11,12 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * CloudMock service module for Amazon SQS — the reference <em>stateful</em> module.
+ * CloudMock service module for Amazon SQS.
  *
  * <p>AWS SDK v2 (≥2.20) uses the JSON/X-Amz-Target protocol for SQS: requests carry an
  * {@code X-Amz-Target} header (e.g. {@code AmazonSQS.SendMessage}) and a JSON body. Each operation
  * is registered as a {@link io.cloudmock.core.spi.StubHandler} that reads and writes the shared
- * {@link StateStore}, so a message sent in one call is returned by a later {@code ReceiveMessage} —
- * the module, not a template, is the bridge between the AWS protocol and the store.
+ * {@link StateStore}, so a message sent in one call is returned by a later {@code ReceiveMessage}.
  *
  * <p>State is keyed under the {@code sqs/} prefix:
  * <ul>
@@ -25,10 +24,10 @@ import java.util.UUID;
  *   <li>{@code sqs/queues/{name}/messages/{id}} → the message body</li>
  * </ul>
  *
- * <p>Not simulated (consistent with CloudMock's documented out-of-scope list): visibility timeout,
- * FIFO deduplication/ordering. A received message stays visible until explicitly deleted.
+ * <p>Not simulated: visibility timeout, FIFO deduplication/ordering. A received message stays
+ * visible until explicitly deleted.
  *
- * <p>Discovered automatically via {@code ServiceLoader} from
+ * <p>Discovered via {@code ServiceLoader} from
  * {@code META-INF/services/io.cloudmock.core.spi.CloudMockService}.
  */
 public class CloudMockSqsService implements CloudMockService {

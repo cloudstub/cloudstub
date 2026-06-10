@@ -13,8 +13,7 @@ import java.util.Set;
  * Mutable holder for all pre-start configuration of a {@link io.cloudmock.core.CloudMock} instance.
  *
  * <p>Populated by CloudMock's fluent {@code withX} methods and then consumed (read-only) by the
- * factories and initialisers that build the running engine. Isolating configuration here keeps
- * CloudMock focused on lifecycle rather than carrying a field per setting.
+ * factories and initialisers that build the running engine.
  */
 public final class CloudMockSettings {
 

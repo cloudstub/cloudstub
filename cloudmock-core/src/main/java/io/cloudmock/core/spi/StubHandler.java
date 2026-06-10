@@ -5,10 +5,8 @@ package io.cloudmock.core.spi;
  * shared {@link StateStore}, performs whatever reads and writes the AWS operation implies, and
  * returns the {@link StubResponse} to send back.
  *
- * <p>This is the mechanism by which "what a user sends in one call comes back in the next": a
- * handler for {@code SendMessage} writes the message to the store, and a handler for
- * {@code ReceiveMessage} reads it back. The handler is the bridge between the AWS API protocol and
- * the store — the store itself has no AWS knowledge.
+ * <p>A handler for {@code SendMessage} writes the message to the store, and a handler for
+ * {@code ReceiveMessage} reads it back, so what a user sends in one call is returned by the next.
  *
  * <p>Handlers must depend only on the core SPI types and the JDK — no WireMock, AWS SDK, jackson, or
  * other library type may appear in their signature or implementation surface. They run on WireMock's

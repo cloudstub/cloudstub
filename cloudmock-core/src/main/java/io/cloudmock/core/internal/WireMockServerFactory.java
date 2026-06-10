@@ -15,7 +15,7 @@ public final class WireMockServerFactory {
     private WireMockServerFactory() {}
 
     /**
-     * Creates a started WireMock server configured per {@code settings}.
+     * Builds a WireMock server from {@code settings}, starts it, and returns it.
      *
      * @param transformer the shared global transformer that runs stateful stub handlers and applies
      *                    faults; registered as a WireMock extension so it can reach the state store

@@ -24,23 +24,15 @@ import static io.cloudmock.core.internal.HttpConstants.*;
  * stateful — and then applies any active fault for the stub's service as a decoration over that
  * response.
  *
- * <p>This is the one place CloudMock turns a matched stub into bytes on the wire, so the networking
- * engine stays hidden from modules and no WireMock type leaks into the SPI. Faults are a wrapper
- * here, not a parallel set of shadow stubs (issue #0046): a new response capability (headers,
- * statefulness, …) is produced by the normal path and the fault composes over whatever that path
- * returns, so the fault layer needs no change when the response model grows.
- *
- * <p>Whether a fault runs the underlying handler is a property of the fault type, expressed once:
+ * <p>Whether a fault runs the underlying handler depends on the fault type:
  * <ul>
  *   <li><b>Throttle</b> replaces the body with an error and <b>timeout</b> only delays it; the SDK
  *       discards the body in both cases, so the handler is <em>not</em> run.</li>
  *   <li>A full-rate <b>brownout</b> always resets the connection, so the handler is not run.</li>
- *   <li>A probabilistic <b>brownout</b> runs the handler: the requests that are not reset have to
- *       return real data, and a reset request that already wrote to the store mirrors AWS's
- *       at-least-once delivery (the server processed it; the response was lost).</li>
+ *   <li>A probabilistic <b>brownout</b> runs the handler, since requests that are not reset must
+ *       return real data; a reset request that already wrote to the store leaves that write in place.</li>
  * </ul>
- * The handler runs at most once per request — there is no second, parallel response path to
- * re-invoke it.
+ * The handler runs at most once per request.
  */
 public class CloudMockResponseTransformer implements ResponseTransformerV2 {
 

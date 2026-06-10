@@ -13,11 +13,7 @@ import io.cloudmock.core.spi.StubRegistrar;
  * error. Secret state is not simulated — {@code GetSecretValue} always returns a fixed
  * {@code SecretString} regardless of what was passed to {@code CreateSecret}.
  *
- * <p>This module is the reference implementation for the JSON/X-Amz-Target routing protocol.
- * All Handlebars templates here serve as the canonical pattern for future JSON target modules
- * (DynamoDB, Lambda, EventBridge, and others).
- *
- * <p>Discovered automatically via {@code ServiceLoader} from
+ * <p>Discovered via {@code ServiceLoader} from
  * {@code META-INF/services/io.cloudmock.core.spi.CloudMockService}.
  */
 public class CloudMockSecretsManagerService implements CloudMockService {

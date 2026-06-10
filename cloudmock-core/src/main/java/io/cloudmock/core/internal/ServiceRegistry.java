@@ -16,11 +16,11 @@ public class ServiceRegistry {
 
     private final Map<String, List<StubRecord>> byService = new HashMap<>();
 
-    public void record(String serviceId, StubRecord record) {
+    void record(String serviceId, StubRecord record) {
         byService.computeIfAbsent(serviceId, k -> new ArrayList<>()).add(record);
     }
 
-    public List<StubRecord> getStubs(String serviceId) {
+    List<StubRecord> getStubs(String serviceId) {
         return Collections.unmodifiableList(byService.getOrDefault(serviceId, List.of()));
     }
 

@@ -2,8 +2,7 @@ package io.cloudmock.core.internal;
 
 /**
  * Manages the {@code aws.endpoint-url} system property that redirects AWS SDK v2 traffic to the
- * embedded mock server. Setting it on start and clearing it on stop is a distinct concern from
- * running the server, so it lives here rather than inline in the engine.
+ * embedded mock server. Set on start, cleared on stop.
  */
 public final class AwsEndpointOverride {
 

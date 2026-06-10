@@ -10,8 +10,8 @@ package io.cloudmock.core.spi;
  *
  * <h2>Compatibility</h2>
  * <p>Module JARs must declare the minimum {@code cloudmock-core} version they require via the
- * {@code CloudMock-Core-Min-Version} entry in their {@code MANIFEST.MF}. The core engine reads
- * this attribute at startup and logs a warning if the running core version is older. Example:
+ * {@code CloudMock-Core-Min-Version} entry in their {@code MANIFEST.MF}. The core engine reads this
+ * attribute at startup and logs a warning if the running core version is older. Example:
  * <pre>
  * CloudMock-Core-Min-Version: 0.1.0
  * </pre>

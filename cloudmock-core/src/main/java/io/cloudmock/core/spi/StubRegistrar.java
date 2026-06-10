@@ -21,10 +21,6 @@ package io.cloudmock.core.spi;
  *       on each matching request with access to the shared {@link StateStore}, so what a user sends
  *       in one call can be returned by a later call.</li>
  * </ul>
- *
- * <p>Only the additive {@link StubHandler} overloads were added after the Phase 1 freeze; the
- * template methods are unchanged and covered by CloudMock's public API stability guarantee.
- * Breaking changes require a major version bump of {@code cloudmock-core}.
  */
 public interface StubRegistrar {
 

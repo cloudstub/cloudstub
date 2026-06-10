@@ -8,9 +8,6 @@ final class HttpConstants {
 
     static final String HEADER_CONTENT_TYPE = "Content-Type";
     static final String HEADER_AMZ_TARGET   = "X-Amz-Target";
-
-    // Single source of truth lives in the public SPI so template stubs (registered here) and
-    // stateful StubResponse bodies always agree on the AWS wire content types.
     static final String CONTENT_TYPE_XML_UTF8     = StubResponse.CONTENT_TYPE_XML;
     static final String CONTENT_TYPE_AMZ_JSON_1_1 = StubResponse.CONTENT_TYPE_JSON;
 }

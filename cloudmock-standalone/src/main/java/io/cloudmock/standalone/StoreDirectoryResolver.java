@@ -5,14 +5,12 @@ import java.nio.file.Path;
 /**
  * Resolves the directory used for persistent state in standalone mode.
  *
- * <p>Standalone is the long-running local-development server, so it persists state by default —
- * a restart keeps whatever the running services have stored. (Embedded test mode is the opposite:
- * it never sets a store directory and uses a throwaway in-memory store, so tests never write state
- * to disk.)
+ * <p>Standalone persists state by default, so a restart keeps whatever the running services have
+ * stored.
  *
  * <p>Precedence: {@code --store-dir=<path>} CLI flag, then {@code CLOUDMOCK_STORE_DIR} environment
  * variable, then the {@link #DEFAULT_STORE_DIR default directory}. Passing {@code none} (or
- * {@code off}) selects an in-memory store for an ephemeral run that leaves no files behind.
+ * {@code off}) selects an in-memory store that leaves no files behind.
  */
 final class StoreDirectoryResolver {
 

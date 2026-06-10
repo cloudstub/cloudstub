@@ -4,13 +4,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Records the active fault, if any, for each service. The fault is <em>applied</em> as a decoration
- * over the matched stub's real response by {@link CloudMockResponseTransformer}; this class only
- * tracks which fault is active, so injecting or clearing a fault never touches the underlying stubs
- * and never re-declares a response definition (issue #0046).
+ * Records the active fault, if any, for each service. The fault is applied as a decoration over the
+ * matched stub's real response by {@link CloudMockResponseTransformer}; this class only tracks which
+ * fault is active, so injecting or clearing a fault never touches the underlying stubs.
  *
- * <p>Clearing a single service restores its normal responses without affecting any other service or
- * the stubs themselves.
+ * <p>Clearing a single service affects only that service; other services and the stubs themselves
+ * are untouched.
  */
 public class FaultEngine {
 

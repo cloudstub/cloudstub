@@ -258,7 +258,7 @@ on WireMock internals.
 ### Phase 1 — Monorepo foundation
 
 - Establish Gradle multi-project build with strict inter-module isolation enforced by CI.
-- Implement the `CloudMockService` SPI interface and `StubRegistrar` facade — **this contract is frozen before any
+- Implement the `CloudMockService` SPI interface and `StubRegistrar` facade — **this contract is established before any
   module work begins**.
 - Implement `cloudmock-core`: embedded WireMock bootstrap, system property injection, `ServiceLoader` discovery loop.
 - Publish to Maven local; validate with a minimal smoke test.
