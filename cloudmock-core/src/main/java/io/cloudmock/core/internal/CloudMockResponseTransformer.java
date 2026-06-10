@@ -4,12 +4,15 @@ import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.http.HttpHeader;
 import com.github.tomakehurst.wiremock.http.HttpHeaders;
+import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import io.cloudmock.core.spi.StateStore;
 import io.cloudmock.core.spi.StubHandler;
 import io.cloudmock.core.spi.StubResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.HttpURLConnection;
 import java.util.Map;
@@ -40,6 +43,8 @@ public class CloudMockResponseTransformer implements ResponseTransformerV2 {
 
     /** Prefix shared with {@link WireMockStubRegistrar} stub names: {@code cloudmock:<id>:<key>}. */
     static final String STUB_NAME_PREFIX = "cloudmock:";
+
+    private static final Logger log = LoggerFactory.getLogger(CloudMockResponseTransformer.class);
 
     private static final int TIMEOUT_DELAY_MS = 30_000;
 
@@ -81,24 +86,67 @@ public class CloudMockResponseTransformer implements ResponseTransformerV2 {
         StubMapping mapping = serveEvent.getStubMapping();
         String name = mapping == null ? null : mapping.getName();
         if (name == null || !name.startsWith(STUB_NAME_PREFIX)) {
-            return response;   // unmatched request or non-CloudMock stub: nothing to do
+            if (mapping == null) {
+                logUnmatched(serveEvent.getRequest());
+            }
+            return response;
         }
         String[] parts = name.substring(STUB_NAME_PREFIX.length()).split(":", 2);
         if (parts.length < 2) {
             return response;
         }
         String serviceId = parts[0];
+        String operation = parts[1];
 
         FaultEngine.Fault fault = faultEngine.faultFor(serviceId);
+        Response result;
+        String faultTag = null;
         if (fault == null) {
-            return runHandler(name, response, serveEvent);
+            result = runHandler(name, response, serveEvent);
+        } else {
+            result = switch (fault.type()) {
+                case THROTTLE -> {
+                    faultTag = "throttled";
+                    yield throttle(registry.find(serviceId, operation), response);
+                }
+                case TIMEOUT -> {
+                    faultTag = "timeout";
+                    yield Response.Builder.like(response).but()
+                            .incrementInitialDelay(TIMEOUT_DELAY_MS).build();
+                }
+                case BROWNOUT -> {
+                    faultTag = "brownout";
+                    yield brownout(fault.rate(), name, response, serveEvent);
+                }
+            };
         }
-        return switch (fault.type()) {
-            case THROTTLE -> throttle(registry.find(serviceId, parts[1]), response);
-            case TIMEOUT -> Response.Builder.like(response).but()
-                    .incrementInitialDelay(TIMEOUT_DELAY_MS).build();
-            case BROWNOUT -> brownout(fault.rate(), name, response, serveEvent);
-        };
+        if (faultTag != null) {
+            log.info("{} {} -> {} [{}]", serviceId, operation, result.getStatus(), faultTag);
+        } else {
+            log.info("{} {} -> {}", serviceId, operation, result.getStatus());
+        }
+        if (log.isDebugEnabled()) {
+            Request req = serveEvent.getRequest();
+            log.debug("  request body: {}", req.getBodyAsString());
+            String body = result.getBodyAsString();
+            if (body != null) {
+                log.debug("  response body: {}", body);
+            }
+        }
+        return result;
+    }
+
+    private void logUnmatched(Request req) {
+        if (!log.isWarnEnabled()) {
+            return;
+        }
+        String target = req.getHeader(HEADER_AMZ_TARGET);
+        String contentType = req.getHeader(HEADER_CONTENT_TYPE);
+        log.warn("Unmatched request: {} {} (X-Amz-Target: {}, Content-Type: {})",
+                req.getMethod().value(), req.getUrl(), target, contentType);
+        if (log.isDebugEnabled()) {
+            log.debug("  request body: {}", req.getBodyAsString());
+        }
     }
 
     /**

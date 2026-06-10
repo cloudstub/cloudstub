@@ -2,6 +2,8 @@ package io.cloudmock.standalone;
 
 import io.cloudmock.core.CloudMock;
 import io.cloudmock.core.spi.CloudMockApiService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -11,6 +13,17 @@ import java.util.ServiceLoader;
 import java.util.Set;
 
 public final class StandaloneMain {
+
+    // Debug detection runs before logger acquisition so the level takes effect when slf4j-simple
+    // binds its configuration. CLOUDMOCK_DEBUG or -Dcloudmock.debug=true both work.
+    static {
+        if ("true".equalsIgnoreCase(System.getProperty("cloudmock.debug")) ||
+            "true".equalsIgnoreCase(System.getenv("CLOUDMOCK_DEBUG"))) {
+            System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
+        }
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(StandaloneMain.class);
 
     public static void main(String[] args) throws Exception {
         int port = PortResolver.resolve(args);

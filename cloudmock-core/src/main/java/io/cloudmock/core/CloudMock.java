@@ -18,6 +18,9 @@ import io.cloudmock.core.restapi.RequestRecord;
 import io.cloudmock.core.spi.CloudMockService;
 import io.cloudmock.core.spi.StateStore;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Collection;
@@ -55,6 +58,8 @@ import java.util.ServiceLoader;
  * </pre>
  */
 public final class CloudMock implements AutoCloseable {
+
+    private static final Logger log = LoggerFactory.getLogger(CloudMock.class);
 
     /** Default cap on retained request-history entries; bounds memory in long-lived processes. */
     public static final int DEFAULT_MAX_REQUEST_HISTORY = 1000;
@@ -179,6 +184,7 @@ public final class CloudMock implements AutoCloseable {
 
         registrar = ModuleInitializer.initialize(server, settings, stateStore, transformer, registry);
         requestHistory = new RequestHistory(server);
+        log.info("CloudMock started on port {}", server.port());
     }
 
     /**
@@ -189,6 +195,7 @@ public final class CloudMock implements AutoCloseable {
         if (server == null) {
             return;
         }
+        log.info("CloudMock stopped");
         server.stop();
         server = null;
         registrar = null;

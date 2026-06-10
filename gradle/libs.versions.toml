@@ -21,6 +21,7 @@ aws-dynamodb       = { module = "software.amazon.awssdk:dynamodb",           ver
 aws-lambda         = { module = "software.amazon.awssdk:lambda",             version.ref = "awssdk" }
 junit-bom          = { module = "org.junit:junit-bom",                       version.ref = "junit" }
 junit-jupiter      = { module = "org.junit.jupiter:junit-jupiter",           version.ref = "junit" }
+slf4j-api          = { module = "org.slf4j:slf4j-api",                       version.ref = "slf4j" }
 slf4j-simple       = { module = "org.slf4j:slf4j-simple",                    version.ref = "slf4j" }
 smithy-model       = { module = "software.amazon.smithy:smithy-model",       version.ref = "smithy" }
 smithy-aws-traits  = { module = "software.amazon.smithy:smithy-aws-traits",  version.ref = "smithy" }

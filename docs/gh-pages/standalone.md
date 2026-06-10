@@ -136,6 +136,12 @@ Press `Ctrl-C` or send `SIGTERM`. CloudMock prints a shutdown message and exits 
 [CloudMock] Shutting down...
 ```
 
+## Logging
+
+By default, CloudMock writes INFO-level output to stdout via `slf4j-simple`. To enable DEBUG output (stub
+registration and full request/response bodies), pass `-Dcloudmock.debug=true` or set `CLOUDMOCK_DEBUG=true`. See
+[Logging](logging.md) for the full reference, log levels, and how to plug in a custom implementation.
+
 ## Bundled service modules
 
 The standalone JAR bundles the following modules. No additional JARs are required:

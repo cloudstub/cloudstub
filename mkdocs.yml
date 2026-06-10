@@ -4,7 +4,7 @@ site_url: https://cloud-mock.github.io/cloudmock/
 repo_url: https://github.com/cloud-mock/cloudmock
 repo_name: cloud-mock/cloudmock
 edit_uri: edit/main/docs/gh-pages/
-docs_dir: /docs/gh-pages
+docs_dir: docs/gh-pages
 
 theme:
   name: material
@@ -40,6 +40,7 @@ nav:
       - REST API: rest-api.md
       - CLI: cli.md
       - Console: console.md
+      - Logging: logging.md
       - SDK v1 Support: sdk-v1.md
   - Module Authoring: module-authoring.md
   - CloudMock Codegen: codegen.md
