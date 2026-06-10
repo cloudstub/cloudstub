@@ -4,7 +4,7 @@ site_url: https://cloud-mock.github.io/cloudmock/
 repo_url: https://github.com/cloud-mock/cloudmock
 repo_name: cloud-mock/cloudmock
 edit_uri: edit/main/docs/gh-pages/
-docs_dir: gh-pages
+docs_dir: /docs/gh-pages
 
 theme:
   name: material
