@@ -7,6 +7,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Least-privilege default for the whole workflow; the format job widens to contents: write.
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
