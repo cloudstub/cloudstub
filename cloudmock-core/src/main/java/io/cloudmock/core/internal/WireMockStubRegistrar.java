@@ -7,6 +7,8 @@ import io.cloudmock.core.restapi.StubInfo;
 import io.cloudmock.core.spi.HttpMethod;
 import io.cloudmock.core.spi.StubHandler;
 import io.cloudmock.core.spi.StubRegistrar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.HttpURLConnection;
 import java.util.List;
@@ -28,6 +30,8 @@ import static io.cloudmock.core.internal.HttpConstants.*;
  * transformer can recover the service ID and match key of a matched stub from its name.
  */
 public final class WireMockStubRegistrar implements StubRegistrar {
+
+    private static final Logger log = LoggerFactory.getLogger(WireMockStubRegistrar.class);
 
     private final WireMockServer server;
     private final CloudMockResponseTransformer transformer;
@@ -58,6 +62,7 @@ public final class WireMockStubRegistrar implements StubRegistrar {
                         .withBody(responseTemplate)));
         if (currentServiceId != null) {
             registry.record(currentServiceId, new StubRecord(StubProtocol.FORM_URL, actionName));
+            log.debug("Stub registered: {} FORM_URL Action={}", currentServiceId, actionName);
         }
     }
 
@@ -72,6 +77,7 @@ public final class WireMockStubRegistrar implements StubRegistrar {
                         .withBody(responseTemplate)));
         if (currentServiceId != null) {
             registry.record(currentServiceId, new StubRecord(StubProtocol.JSON_TARGET, target));
+            log.debug("Stub registered: {} JSON_TARGET Target={}", currentServiceId, target);
         }
     }
 
@@ -85,6 +91,7 @@ public final class WireMockStubRegistrar implements StubRegistrar {
                         .withBody(responseTemplate)));
         if (currentServiceId != null) {
             registry.record(currentServiceId, new StubRecord(StubProtocol.REST, matchKey));
+            log.debug("Stub registered: {} REST {}", currentServiceId, matchKey);
         }
     }
 
@@ -122,6 +129,7 @@ public final class WireMockStubRegistrar implements StubRegistrar {
                 .willReturn(aResponse().withStatus(HttpURLConnection.HTTP_OK)));
         if (currentServiceId != null) {
             registry.record(currentServiceId, new StubRecord(protocol, matchKey));
+            log.debug("Stub registered: {} {} (stateful) {}", currentServiceId, protocol, matchKey);
         }
     }
 

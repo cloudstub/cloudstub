@@ -3,6 +3,8 @@ package io.cloudmock.core.internal;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cloudmock.core.spi.CloudMockService;
 import io.cloudmock.core.spi.StateStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -15,6 +17,8 @@ import java.util.Set;
  * {@link CloudMockContextImpl}. The resulting registrar is handed back for the engine to expose.
  */
 public final class ModuleInitializer {
+
+    private static final Logger log = LoggerFactory.getLogger(ModuleInitializer.class);
 
     private ModuleInitializer() {}
 
@@ -31,16 +35,22 @@ public final class ModuleInitializer {
                     if (enabled != null && !enabled.contains(service.serviceId())) {
                         return;
                     }
-                    register(registrar, context, service);
+                    register(registrar, context, service, registry);
                 });
-        settings.explicitServices().forEach(service -> register(registrar, context, service));
+        settings.explicitServices().forEach(service -> register(registrar, context, service, registry));
 
         return registrar;
     }
 
     private static void register(WireMockStubRegistrar registrar, CloudMockContextImpl context,
-                                 CloudMockService service) {
-        registrar.setCurrentService(service.serviceId());
+                                 CloudMockService service, ServiceRegistry registry) {
+        String id = service.serviceId();
+        registrar.setCurrentService(id);
         service.register(context);
+        int stubCount = registry.getStubs(id).size();
+        log.info("Registered module: {} ({} stub(s))", id, stubCount);
+        if (log.isDebugEnabled()) {
+            registry.getStubs(id).forEach(s -> log.debug("  {} {}", s.protocol(), s.matchKey()));
+        }
     }
 }
