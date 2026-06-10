@@ -33,7 +33,7 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Guides:
-      - JUnit 6 Extension: junit6-extension.md
+      - JUnit Extension: junit-extension.md
       - Spring Boot Integration: spring-boot.md
       - Fault Injection: fault-injection.md
       - Standalone Mode: standalone.md

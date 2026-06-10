@@ -1,0 +1,26 @@
+// Forces JUnit 5 across all configurations, overriding the root build's JUnit 6 BOM injection.
+// This subproject exists solely to verify that cloudmock-junit compiles and runs under JUnit 5.
+def junit5Version = libs.versions.junit5.get()                                  // e.g. 5.11.4
+// JUnit Platform 1.N.M tracks Jupiter 5.N.M, so derive the platform version from the catalog's
+// Jupiter version rather than hardcoding it — the two cannot drift on a future junit5 bump.
+def junit5PlatformVersion = '1.' + junit5Version.substring(junit5Version.indexOf('.') + 1)  // e.g. 1.11.4
+configurations.configureEach {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'org.junit.jupiter') {
+            details.useVersion junit5Version
+            details.because 'pin to JUnit 5 for compatibility verification'
+        }
+        if (details.requested.group == 'org.junit.platform') {
+            details.useVersion junit5PlatformVersion
+            details.because 'pin to the JUnit Platform version matching JUnit 5'
+        }
+    }
+}
+
+dependencies {
+    testImplementation project(':cloudmock-core')
+    testImplementation project(':cloudmock-junit')
+    testImplementation project(':cloudmock-sqs')
+    testImplementation libs.aws.sqs
+    testRuntimeOnly libs.slf4j.simple
+}

@@ -4,14 +4,14 @@ This guide walks you from zero to a passing CloudMock integration test in under 
 
 ## 1. Add dependencies
 
-CloudMock is modular. Add `cloudmock-core`, the JUnit 6 extension, and only the AWS service modules your project needs.
+CloudMock is modular. Add `cloudmock-core`, the JUnit extension, and only the AWS service modules your project needs.
 
 === "Gradle"
 
     ```groovy
     dependencies {
         testImplementation 'io.cloudmock:cloudmock-core:0.1.0'
-        testImplementation 'io.cloudmock:cloudmock-junit6:0.1.0'
+        testImplementation 'io.cloudmock:cloudmock-junit:0.1.0'
 
         // Add one or more service modules
         testImplementation 'io.cloudmock:cloudmock-sqs:0.1.0'
@@ -35,7 +35,7 @@ CloudMock is modular. Add `cloudmock-core`, the JUnit 6 extension, and only the 
         </dependency>
         <dependency>
             <groupId>io.cloudmock</groupId>
-            <artifactId>cloudmock-junit6</artifactId>
+            <artifactId>cloudmock-junit</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>
         </dependency>
@@ -59,7 +59,7 @@ CloudMock is modular. Add `cloudmock-core`, the JUnit 6 extension, and only the 
 Annotate the test class with `@ExtendWith(CloudMockExtension.class)`. CloudMock starts before the first test, stops after the last, and sets `aws.endpoint-url` so the AWS SDK routes all traffic to the embedded server automatically.
 
 ```java
-import io.cloudmock.junit6.CloudMockExtension;
+import io.cloudmock.junit.CloudMockExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
@@ -108,7 +108,7 @@ CloudMock starts in under 200 ms. No containers, no credentials, no network.
 
 ## Next steps
 
-- [JUnit 6 Extension](junit6-extension.md) — learn the `@RegisterExtension` pattern for port access and explicit service registration
+- [JUnit Extension](junit-extension.md) — learn the `@RegisterExtension` pattern for port access and explicit service registration
 - [Spring Boot Integration](spring-boot.md) — use CloudMock with a full Spring Boot application context
 - [Fault Injection](fault-injection.md) — simulate throttling, timeouts, and network brownouts
 - [Standalone Mode](standalone.md) — run CloudMock as a long-lived local development server instead of embedding it in tests

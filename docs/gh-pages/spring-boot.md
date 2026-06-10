@@ -73,7 +73,7 @@ The `cloudmock-core` artifact shades its internal WireMock and Jetty dependencie
         implementation 'software.amazon.awssdk:secretsmanager:2.25.70'
 
         testImplementation 'io.cloudmock:cloudmock-core:0.1.0'
-        testImplementation 'io.cloudmock:cloudmock-junit6:0.1.0'
+        testImplementation 'io.cloudmock:cloudmock-junit:0.1.0'
         testImplementation 'io.cloudmock:cloudmock-sqs:0.1.0'
         testImplementation 'io.cloudmock:cloudmock-secretsmanager:0.1.0'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -94,4 +94,51 @@ The `cloudmock-core` artifact shades its internal WireMock and Jetty dependencie
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+            <version>2.25.70</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>secretsmanager</artifactId>
+            <version>2.25.70</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.cloudmock</groupId>
+            <artifactId>cloudmock-core</artifactId>
+            <version>0.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cloudmock</groupId>
+            <artifactId>cloudmock-junit</artifactId>
+            <version>0.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cloudmock</groupId>
+            <artifactId>cloudmock-sqs</artifactId>
+            <version>0.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cloudmock</groupId>
+            <artifactId>cloudmock-secretsmanager</artifactId>
+            <version>0.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     ```

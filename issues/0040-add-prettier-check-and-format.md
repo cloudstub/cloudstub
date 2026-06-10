@@ -1,4 +1,4 @@
-# Add Prettier workflow for README formatting
+# Add Prettier workflow for documentation files formatting
 
 **Type:** setup
 

@@ -17,14 +17,14 @@ CloudMock runs inside the JVM itself. No container, no external process, no extr
 
 ## Installation
 
-Add `cloudmock-core`, the JUnit 6 extension, and the service module(s) you need.
+Add `cloudmock-core`, the JUnit extension, and the service module(s) you need.
 
 **Gradle**
 
 ```groovy
 dependencies {
     testImplementation 'io.cloudmock:cloudmock-core:0.1.0'
-    testImplementation 'io.cloudmock:cloudmock-junit6:0.1.0'
+    testImplementation 'io.cloudmock:cloudmock-junit:0.1.0'
 
     // Service modules — add only what your project uses
     testImplementation 'io.cloudmock:cloudmock-sqs:0.1.0'
@@ -49,7 +49,7 @@ dependencies {
     </dependency>
     <dependency>
         <groupId>io.cloudmock</groupId>
-        <artifactId>cloudmock-junit6</artifactId>
+        <artifactId>cloudmock-junit</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>
     </dependency>
@@ -89,8 +89,8 @@ cloudMock.stop();
 ```
 
 `CloudMock.start()` sets `aws.endpoint-url` automatically, so all AWS SDK v2 clients in the same JVM are redirected
-with no further configuration. For full JUnit 6 lifecycle management, fault injection, and `@ExtendWith` usage, see the
-[Getting Started guide](https://cloud-mock.github.io/cloudmockgetting-started/).
+with no further configuration. For full JUnit lifecycle management, fault injection, and `@ExtendWith` usage, see the
+[Getting Started guide](https://cloud-mock.github.io/cloudmock/getting-started/).
 
 ## Standalone mode
 
@@ -137,7 +137,7 @@ clm sqs send-message --queue orders --body "hello"
 
 | Module              | Purpose                                                                        |
 |---------------------|--------------------------------------------------------------------------------|
-| `cloudmock-junit6`  | JUnit 6 extension — `@ExtendWith` + fault injection                            |
+| `cloudmock-junit`   | JUnit extension (JUnit 5 and 6) — `@ExtendWith` + fault injection              |
 | `cloudmock-codegen` | Stub generator — produces a module skeleton from a Smithy model                |
 | `cloudmock-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |
 

@@ -5,6 +5,7 @@ smithy   = "1.50.0"
 awssdk   = "2.25.70"
 awssdkv1 = "1.12.770"
 junit    = "6.1.0"
+junit5   = "5.11.4"
 slf4j    = "2.0.18"
 
 [libraries]

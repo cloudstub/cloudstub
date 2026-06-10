@@ -5,10 +5,18 @@ buildscript {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven-publish'
 
     group = 'io.cloudmock'
     version = '0.1.0-SNAPSHOT'
+
+    // Example projects (the cloudmock-example container and its junit5/junit6 children) are
+    // demonstration apps, not libraries — they are never published. Excluding them here keeps
+    // publishing self-correcting: no io.cloudmock:junit5 / :junit6 / :cloudmock-example artifacts
+    // leak to a repository regardless of how the example tree is restructured.
+    def publishable = project.path != ':cloudmock-example' && !project.path.startsWith(':cloudmock-example:')
+    if (publishable) {
+        apply plugin: 'maven-publish'
+    }
 
     java {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -33,11 +41,13 @@ subprojects {
     // Shadow plugin (cloudmock-core) can publish the shadow JAR via components.shadow
     // rather than the empty components.java.
     afterEvaluate {
-        publishing {
-            publications {
-                mavenJava(MavenPublication) {
-                    from(components.findByName('shadow') ?: components.java)
-                    artifactId = project.name
+        if (publishable) {
+            publishing {
+                publications {
+                    mavenJava(MavenPublication) {
+                        from(components.findByName('shadow') ?: components.java)
+                        artifactId = project.name
+                    }
                 }
             }
         }
@@ -45,7 +55,7 @@ subprojects {
 
     // Service modules may depend on cloudmock-core (the SPI lives there), but no service module
     // may depend on another service module at compile or runtime. Test code is exempt so that
-    // integration test modules (e.g. cloudmock-junit6 tests) can combine multiple modules.
+    // integration test modules (e.g. cloudmock-junit tests) can combine multiple modules.
     // cloudmock-standalone is also exempt: its entire purpose is to bundle all service modules
     // into a single runnable fat JAR.
     afterEvaluate {

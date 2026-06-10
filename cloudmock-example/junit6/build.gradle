@@ -1,0 +1,16 @@
+def springBootVersion = '4.0.6'
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter:${springBootVersion}"
+    implementation libs.aws.sqs
+    implementation libs.aws.secretsmanager
+
+    testImplementation project(':cloudmock-core')
+    testImplementation project(':cloudmock-junit')
+    testImplementation project(':cloudmock-sqs')
+    testImplementation project(':cloudmock-secretsmanager')
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+
+    testImplementation project(':cloudmock-sdk-v1')
+    testImplementation libs.aws.v1.sns
+}

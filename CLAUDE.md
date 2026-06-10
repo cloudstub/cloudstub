@@ -21,7 +21,7 @@ Keep documentation factual and minimal; rationale belongs in commits and issues,
 The full multi-project Gradle monorepo is in place. The SPI contract is stable and governed by an explicit evolution
 policy (see **SPI evolution policy** — it is deliberately never declared closed), the core engine is running, the
 `cloudmock-sqs`, `cloudmock-secretsmanager`, `cloudmock-sns`, and `cloudmock-s3` modules are implemented and tested,
-the JUnit 6 extension with fault injection is live, the codegen tool exists, and a Spring Boot example application
+the JUnit extension (JUnit 5 and 6) with fault injection is live, the codegen tool exists, and a Spring Boot example application
 demonstrates end-to-end usage. A documentation site (MkDocs Material) is built and wired to GitHub Pages.
 
 Work remaining: `cloudmock-dynamodb` and `cloudmock-lambda` module implementations (scaffolding exists), and
@@ -54,7 +54,7 @@ monorepo — see the **CLI** section below.
 | Module                     | Status           | Notes                                                                                  |
 |----------------------------|------------------|----------------------------------------------------------------------------------------|
 | `cloudmock-core`           | Done             | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                        |
-| `cloudmock-junit6`         | Done             | `@ExtendWith` + `@RegisterExtension`, fault injection annotations                      |
+| `cloudmock-junit`          | Done             | `@ExtendWith` + `@RegisterExtension`, fault injection annotations; JUnit 5 and 6       |
 | `cloudmock-sns`            | Done             | XML/Form protocol; reference implementation for `registerXmlFormStub`                  |
 | `cloudmock-sqs`            | Done             | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044) |
 | `cloudmock-secretsmanager` | Done             | Reference impl — JSON/X-Amz-Target protocol                                            |
@@ -63,7 +63,8 @@ monorepo — see the **CLI** section below.
 | `cloudmock-lambda`         | Scaffolding only | JSON/X-Amz-Target protocol                                                             |
 | `cloudmock-codegen`        | Done             | Smithy → CloudMockService stub generator                                               |
 | `cloudmock-standalone`     | Done             | Runnable fat JAR; boots all service modules on port 4566 (default) for local dev       |
-| `cloudmock-example`        | Done             | Spring Boot app + integration tests (CloudMockExtension)                               |
+| `cloudmock-example:junit6` | Done             | Spring Boot app + integration tests with JUnit 6 (CloudMockExtension)                  |
+| `cloudmock-example:junit5` | Done             | Standalone CloudMockExtension tests compiled and run against JUnit 5                   |
 
 The `clm` / `cloudmock` CLI is **not** a subproject of this monorepo — it lives in a separate
 repository (`cloud-mock/cloudmock-cli`). See the **CLI** section.
@@ -308,7 +309,7 @@ Response templates use Handlebars. Available helpers:
 
 ## Fault injection
 
-Three annotations in `cloudmock-junit6`, applied at test-method level:
+Three annotations in `cloudmock-junit`, applied at test-method level:
 
 - `@SimulateThrottle(service = "sqs")` — HTTP 400 ThrottlingException
 - `@SimulateTimeout(service = "sqs")` — 30 s server-side delay
