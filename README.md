@@ -1,5 +1,7 @@
 # CloudMock
 
+[![CI](https://github.com/cloud-mock/cloudmock/actions/workflows/ci.yml/badge.svg)](https://github.com/cloud-mock/cloudmock/actions/workflows/ci.yml)
+
 > An ultra-lightweight, containerless AWS mock framework for the JVM.
 
 ## What is CloudMock?
