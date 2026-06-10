@@ -2,8 +2,6 @@ package io.cloudmock.core.internal.store;
 
 import io.cloudmock.core.spi.StateStore;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,14 +28,7 @@ public final class InMemoryStateStore implements StateStore {
 
     @Override
     public List<String> list(String prefix) {
-        List<String> keys = new ArrayList<>();
-        for (String key : data.keySet()) {
-            if (key.startsWith(prefix)) {
-                keys.add(key);
-            }
-        }
-        keys.sort(Comparator.naturalOrder());
-        return keys;
+        return StateStoreSupport.keysWithPrefix(data.keySet(), prefix);
     }
 
     @Override
@@ -47,7 +38,7 @@ public final class InMemoryStateStore implements StateStore {
 
     @Override
     public void clear(String prefix) {
-        data.keySet().removeIf(key -> key.startsWith(prefix));
+        StateStoreSupport.removeKeysWithPrefix(data, prefix);
     }
 
     @Override

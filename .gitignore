@@ -30,3 +30,7 @@ bin/
 .DS_Store
 /.gradle/
 /**/build/
+
+### CloudMock ###
+# Standalone's default persistent state directory, written when running from the repo tree.
+.cloudmock/

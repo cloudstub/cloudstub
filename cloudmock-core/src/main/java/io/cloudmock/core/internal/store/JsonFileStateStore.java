@@ -2,7 +2,6 @@ package io.cloudmock.core.internal.store;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import io.cloudmock.core.exception.CloudMockStateException;
 import io.cloudmock.core.spi.StateStore;
 import org.slf4j.Logger;
@@ -11,9 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Persistent {@link StateStore} that serialises state to a JSON file on every mutation.
  *
  * <p>Reads the existing file on construction (if present) so state survives a CloudMock restart.
- * Writes are flushed synchronously — {@code put} returns only once the value is on disk — using an
- * atomic temp-file rename to {@code {storeDir}/cloudmock-state.json} to prevent partial writes.
+ * Writes are flushed synchronously — {@code put} returns only once the value has been written via an
+ * atomic temp-file rename to {@code {storeDir}/cloudmock-state.json}, which prevents partial writes.
  *
  * <p><strong>Type fidelity:</strong> the mapper records each value's concrete type, so a value
  * stored as a {@code Foo} is read back as a {@code Foo} after a restart — not as a generic map.
@@ -40,7 +36,7 @@ public final class JsonFileStateStore implements StateStore {
     private static final Logger log = LoggerFactory.getLogger(JsonFileStateStore.class);
     private static final String STORE_FILE_NAME = "cloudmock-state.json";
 
-    private static final ObjectMapper MAPPER = createMapper();
+    private static final ObjectMapper MAPPER = StateStoreMapper.create();
     private static final JavaType MAP_TYPE =
             MAPPER.getTypeFactory().constructMapType(TreeMap.class, String.class, Object.class);
 
@@ -51,14 +47,6 @@ public final class JsonFileStateStore implements StateStore {
     public JsonFileStateStore(Path storeDir) {
         this.storeFile = storeDir.resolve(STORE_FILE_NAME);
         this.data = loadFromDisk();
-    }
-
-    private static ObjectMapper createMapper() {
-        ObjectMapper m = new ObjectMapper();
-        // Embed concrete type info so values round-trip to their original Java types on reload.
-        m.activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
-        return m;
     }
 
     @Override
@@ -76,14 +64,7 @@ public final class JsonFileStateStore implements StateStore {
 
     @Override
     public List<String> list(String prefix) {
-        List<String> keys = new ArrayList<>();
-        for (String key : data.keySet()) {
-            if (key.startsWith(prefix)) {
-                keys.add(key);
-            }
-        }
-        keys.sort(Comparator.naturalOrder());
-        return keys;
+        return StateStoreSupport.keysWithPrefix(data.keySet(), prefix);
     }
 
     @Override
@@ -94,7 +75,7 @@ public final class JsonFileStateStore implements StateStore {
 
     @Override
     public void clear(String prefix) {
-        data.keySet().removeIf(key -> key.startsWith(prefix));
+        StateStoreSupport.removeKeysWithPrefix(data, prefix);
         flush();
     }
 
@@ -122,12 +103,9 @@ public final class JsonFileStateStore implements StateStore {
     private void flush() {
         synchronized (writeLock) {
             try {
-                Files.createDirectories(storeFile.getParent());
-                Path tmp = storeFile.resolveSibling(STORE_FILE_NAME + ".tmp");
                 // Snapshot under the lock; TreeMap gives deterministic, diff-friendly key order.
-                MAPPER.writerFor(MAP_TYPE).writeValue(tmp.toFile(), new TreeMap<>(data));
-                Files.move(tmp, storeFile,
-                        StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                StateStoreSupport.atomicReplace(storeFile,
+                        tmp -> MAPPER.writerFor(MAP_TYPE).writeValue(tmp.toFile(), new TreeMap<>(data)));
             } catch (IOException e) {
                 // Persistence is a hard requirement — surface the failure instead of swallowing it.
                 throw new CloudMockStateException(

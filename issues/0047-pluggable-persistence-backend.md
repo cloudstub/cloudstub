@@ -19,17 +19,17 @@ provides an efficient embedded option so write cost scales with the change, not 
 
 ## Acceptance criteria
 
-- [ ] A single mutation no longer rewrites the entire persisted document; write cost scales with the
+- [x] A single mutation no longer rewrites the entire persisted document; write cost scales with the
   size of the change, not the size of the store
-- [ ] A burst of M writes is not O(M²) in I/O
-- [ ] The persistence backend is selectable behind the `StateStore` interface (the in-memory store and
+- [x] A burst of M writes is not O(M²) in I/O
+- [x] The persistence backend is selectable behind the `StateStore` interface (the in-memory store and
   the current file store remain valid choices; a new efficient embedded backend is added)
-- [ ] State still survives a CloudMock restart (the hard requirement from 0024/0035) and remains
+- [x] State still survives a CloudMock restart (the hard requirement from 0024/0035) and remains
   thread-safe under concurrent writes
-- [ ] Type fidelity is preserved — a value stored as a concrete type reads back as that type after a
+- [x] Type fidelity is preserved — a value stored as a concrete type reads back as that type after a
   restart, as `JsonFileStateStore` does today
-- [ ] No change to the public SPI or to any WireMock type; modules and the admin API are unaffected
-- [ ] `StateStoreTest` (and the SQS persistence test from 0044) pass against the new backend
+- [x] No change to the public SPI or to any WireMock type; modules and the admin API are unaffected
+- [x] `StateStoreTest` (and the SQS persistence test from 0044) pass against the new backend
 
 ## Dependencies
 

@@ -1,5 +1,6 @@
 package io.cloudmock.core.internal;
 
+import io.cloudmock.core.StatePersistence;
 import io.cloudmock.core.spi.CloudMockService;
 
 import java.nio.file.Path;
@@ -21,6 +22,7 @@ public final class CloudMockSettings {
     private int maxRequestHistory;         // <= 0 = unbounded
     private Set<String> enabledServiceIds; // null = register every discovered module
     private Path storeDirectory;           // null = in-memory store
+    private StatePersistence persistenceBackend = StatePersistence.APPEND_LOG;
     private final List<CloudMockService> explicitServices = new ArrayList<>();
 
     public CloudMockSettings(int defaultMaxRequestHistory) {
@@ -43,6 +45,10 @@ public final class CloudMockSettings {
         this.storeDirectory = storeDirectory;
     }
 
+    public void setPersistenceBackend(StatePersistence persistenceBackend) {
+        this.persistenceBackend = persistenceBackend;
+    }
+
     public void addExplicitService(CloudMockService service) {
         this.explicitServices.add(service);
     }
@@ -63,6 +69,11 @@ public final class CloudMockSettings {
     /** @return the persistent store directory, or {@code null} for an in-memory store. */
     public Path storeDirectory() {
         return storeDirectory;
+    }
+
+    /** @return the persistent backend to use when {@link #storeDirectory()} is set. */
+    public StatePersistence persistenceBackend() {
+        return persistenceBackend;
     }
 
     public List<CloudMockService> explicitServices() {

@@ -111,6 +111,30 @@ single runnable fat JAR. It is the drop-in replacement for LocalStack in local d
 - **API service filtering:** `StandaloneMain` filters discovered `CloudMockApiService` implementations by the enabled
   module set, so a service disabled with `--modules` exposes neither stubs nor REST routes nor CLI commands
 
+## State store
+
+`StateStore` is the shared, core-owned live-data backend (`io.cloudmock.core.spi.StateStore`). The implementation is
+chosen by `StateStoreFactory` and is pluggable behind the interface — modules and the admin API see only the SPI, never
+the backend (issue #0047).
+
+- **In-memory** (`InMemoryStateStore`) — default when no store directory is set; state lost on stop. Used in embedded
+  test mode.
+- **Append-log** (`AppendLogStateStore`) — **default persistent backend.** Records each mutation as a single appended
+  line in `{storeDir}/cloudmock-state.log`, so a write costs the size of the change, not the size of the store, and a
+  burst of M writes is O(M) bytes rather than O(M²). The log is replayed on startup and periodically compacted (rewritten
+  as one `put` per live key via an atomic temp-file rename) to bound its size; a compaction failure is logged and never
+  fails the caller's write or breaks the store. A malformed record (truncated mid-append crash, or a structurally-valid
+  line missing fields) is skipped rather than aborting startup, matching the JSON store's "corrupt file starts empty"
+  guarantee. On first run against a directory that still holds a legacy `cloudmock-state.json` but no log, those entries
+  are migrated into the log (and the `.json` renamed to `.json.migrated`) so the default-backend switch loses no state.
+  Zero new dependencies — uses the jackson already shaded in core.
+- **JSON file** (`JsonFileStateStore`) — legacy persistent backend, retained as an explicit choice. Rewrites the whole
+  `cloudmock-state.json` document on every mutation (O(store size) per write); fine for small or static state.
+
+Backend selection: `CloudMock.withPersistenceBackend(StatePersistence.APPEND_LOG | JSON_FILE)`; only relevant when a
+store directory is configured via `withStoreDirectory`. All persistent backends preserve value types across a restart
+(jackson default typing, configured once in `StateStoreMapper`) and are thread-safe under concurrent writes.
+
 ## CLI
 
 `cloudmock-cli` (`clm` / `cloudmock`) is a thin HTTP client over the standalone REST API. It lives in its **own

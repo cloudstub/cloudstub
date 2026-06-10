@@ -74,12 +74,27 @@ public final class CloudMock implements AutoCloseable {
      *
      * <p>Must be called before {@link #start()}.
      *
-     * @param directory directory where {@code cloudmock-state.json} will be written
+     * @param directory directory where the state file is written (a {@code cloudmock-state.log}
+     *                  append-only log by default; see {@link #withPersistenceBackend})
      * @throws CloudMockAlreadyStartedException if already started
      */
     public CloudMock withStoreDirectory(Path directory) {
         requireNotStarted();
         settings.setStoreDirectory(directory);
+        return this;
+    }
+
+    /**
+     * Selects the persistent state backend used when a store directory is configured via
+     * {@link #withStoreDirectory}. Defaults to {@link StatePersistence#APPEND_LOG}, whose write
+     * cost scales with the change rather than the whole store. Has no effect on an in-memory store
+     * (no directory set). Must be called before {@link #start()}.
+     *
+     * @throws CloudMockAlreadyStartedException if already started
+     */
+    public CloudMock withPersistenceBackend(StatePersistence backend) {
+        requireNotStarted();
+        settings.setPersistenceBackend(backend);
         return this;
     }
 
@@ -153,7 +168,7 @@ public final class CloudMock implements AutoCloseable {
         // transformer is registered as a WireMock extension at server-build time. The transformer is
         // the single response path: it runs stateful handlers and applies faults as a decoration
         // over the response, so faults are not parallel shadow stubs.
-        stateStore = StateStoreFactory.create(settings.storeDirectory());
+        stateStore = StateStoreFactory.create(settings.storeDirectory(), settings.persistenceBackend());
         ServiceRegistry registry = new ServiceRegistry();
         faultEngine = new FaultEngine();
         CloudMockResponseTransformer transformer =
