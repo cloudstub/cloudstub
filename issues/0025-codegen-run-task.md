@@ -9,6 +9,20 @@ Gradle convenience tasks to cover the most common developer workflows. Each task
 from the repo root with a single command. The codegen `run` task is the primary deliverable;
 the remaining tasks follow the same pattern.
 
+## Status
+
+This issue is split. The first branch (`feature/0025-gradle-convenience-tasks`) delivers the
+three tasks that depend only on already-completed work:
+
+- `./gradlew :cloudmock-codegen:run` — **done**
+- `./gradlew :cloudmock-codegen:validate` — **done** (added a `--validate` flag to the codegen
+  entry point; the task injects it so callers pass only `--model`)
+- `./gradlew :cloudmock-standalone:run` — **done** (see the corrected task below)
+
+The remaining tasks (`generateDocs`, `checkCompatibility`, `integrationTest`, and the
+`spotlessApply` documentation note) depend on other issues that are not yet complete and are
+deferred to a follow-up branch.
+
 ## Tasks
 
 ### `./gradlew :cloudmock-codegen:run --args="--model <path-or-url> --output <dir>"`
@@ -19,12 +33,16 @@ from the repo root, consistent with the `java -jar` invocation.
 
 ### `./gradlew :cloudmock-codegen:validate --args="--model <path>"`
 Validate a Smithy model without generating output. Useful for module authors who want to
-check their model before running full codegen.
+check their model before running full codegen. Implemented by adding a `--validate` flag to the
+codegen entry point (`Main`); the `validate` Gradle task injects `--validate` via an
+`argumentProvider` so callers pass only `--model`.
 
-### `./gradlew :cloudmock-core:run`
+### `./gradlew :cloudmock-standalone:run`
 Start CloudMock in standalone mode from the monorepo without building a fat JAR first. Apply
-the `application` plugin to `cloudmock-core` with the standalone entry point as `mainClass`.
-Pin `workingDir` to the repo root for consistent path resolution.
+the `application` plugin to `cloudmock-standalone` (not `cloudmock-core`) — the standalone entry
+point `io.cloudmock.standalone.StandaloneMain` lives in `cloudmock-standalone`, so the plugin
+belongs where the main class actually is. Pin `workingDir` to the repo root for consistent path
+resolution. (The original issue text named `cloudmock-core`; that was incorrect.)
 
 ### `./gradlew generateDocs`
 Generate Javadoc across all public modules and output to `docs/api/`. Wires into the MkDocs
@@ -46,27 +64,27 @@ is applied — see the Spotless issue. Documented here for completeness.
 
 ## Acceptance criteria
 
-- [ ] `./gradlew :cloudmock-codegen:run --args="--model <path-or-url> --output <dir>"` generates
+- [x] `./gradlew :cloudmock-codegen:run --args="--model <path-or-url> --output <dir>"` generates
   a module identical to the `java -jar` path for the same inputs
-- [ ] `./gradlew :cloudmock-codegen:validate --args="--model <path>"` validates a Smithy model
+- [x] `./gradlew :cloudmock-codegen:validate --args="--model <path>"` validates a Smithy model
   without generating any output
-- [ ] The Shadow fat JAR (`./gradlew :cloudmock-codegen:shadowJar`) still builds and runs
+- [x] The Shadow fat JAR (`./gradlew :cloudmock-codegen:shadowJar`) still builds and runs
   exactly as before — both plugins coexist
-- [ ] `workingDir` is pinned to `rootProject.projectDir` for both codegen and core `run` tasks
-- [ ] `./gradlew :cloudmock-core:run` starts CloudMock in standalone mode from the repo root
-- [ ] `./gradlew generateDocs` generates Javadoc for all public modules to `docs/api/`
-- [ ] `./gradlew checkCompatibility` verifies JUnit 5 and JUnit 6 compatibility
-- [ ] `./gradlew integrationTest` runs integration tests separately from unit tests
-- [ ] `integrationTest` has its own source set — integration test code is not mixed with unit tests
-- [ ] All tasks work from the repo root
-- [ ] All tasks documented in `CLAUDE.md` under the standard commands block
-- [ ] `docs/codegen.md` documents `run` as the primary in-repo workflow and retains `java -jar`
-  as the standalone/distribution path
-- [ ] Publishing configuration is unaffected — `cloudmock-codegen` still publishes the shadow JAR
+- [x] `workingDir` is pinned to `rootProject.projectDir` for both codegen and standalone `run` tasks
+- [x] `./gradlew :cloudmock-standalone:run` starts CloudMock in standalone mode from the repo root
+- [ ] `./gradlew generateDocs` generates Javadoc for all public modules to `docs/api/` _(deferred)_
+- [ ] `./gradlew checkCompatibility` verifies JUnit 5 and JUnit 6 compatibility _(deferred)_
+- [ ] `./gradlew integrationTest` runs integration tests separately from unit tests _(deferred)_
+- [ ] `integrationTest` has its own source set — integration test code is not mixed with unit tests _(deferred)_
+- [x] All (in-scope) tasks work from the repo root
+- [x] All (in-scope) tasks documented in `CLAUDE.md` under the standard commands block
+- [x] `docs/gh-pages/codegen.md` documents `run` as the primary in-repo workflow and retains
+  `java -jar` as the standalone/distribution path
+- [x] Publishing configuration is unaffected — `cloudmock-codegen` still publishes the shadow JAR
 
 ## Dependencies
 
-- 0021 (standalone mode — for `:cloudmock-core:run`)
+- 0021 (standalone mode — for `:cloudmock-standalone:run`)
 - 0012 (codegen — for `:cloudmock-codegen:run` and `:cloudmock-codegen:validate`)
 - Spotless issue (for `./gradlew spotlessApply`)
 - JUnit compatibility issue (for `checkCompatibility`)

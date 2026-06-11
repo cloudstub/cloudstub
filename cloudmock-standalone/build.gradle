@@ -1,3 +1,9 @@
+// The application plugin adds `run` so CloudMock can be started in standalone mode from the repo
+// root (./gradlew :cloudmock-standalone:run) without first building the fat JAR. The entry point
+// lives in this module (StandaloneMain), so the application plugin is applied here, not on
+// cloudmock-core. Application is applied first so the shadow plugin's application integration sees
+// the configured main class; the two coexist by design.
+apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
@@ -13,6 +19,24 @@ dependencies {
     testImplementation project(':cloudmock-core')
     testImplementation libs.aws.sqs
     testImplementation libs.slf4j.simple
+}
+
+application {
+    mainClass = 'io.cloudmock.standalone.StandaloneMain'
+}
+
+// Publish only the shadow (fat) JAR, matching the publication shape from before the application
+// plugin was applied. With the application plugin present, shadow leaves the thin-jar
+// apiElements/runtimeElements variants in the published component; skip them so a Gradle consumer
+// resolves the fat JAR (shadowRuntimeElements), not the thin jar plus its dependencies.
+components.java.withVariantsFromConfiguration(configurations.apiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.runtimeElements) { skip() }
+
+// Start from the repo root so the persistent `.cloudmock` store directory and any relative paths
+// resolve identically to the `java -jar` invocation.
+//   ./gradlew :cloudmock-standalone:run --args="--port=4566 --api-port=4567"
+run {
+    workingDir = rootProject.projectDir
 }
 
 jar {

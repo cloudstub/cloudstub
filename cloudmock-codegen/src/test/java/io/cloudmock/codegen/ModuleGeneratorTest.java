@@ -141,6 +141,21 @@ class ModuleGeneratorTest {
     }
 
     @Test
+    void validateSummarisesModelWithoutGenerating() throws Exception {
+        URL fixture = getClass().getResource("/fixtures/test-service.smithy");
+        assertNotNull(fixture, "test-service.smithy fixture not found on classpath");
+        Path modelPath = Path.of(fixture.toURI());
+
+        ModelSummary summary = new ModuleGenerator().validate(modelPath);
+
+        assertEquals("testservice", summary.serviceId());
+        assertEquals("cloudmock-testservice", summary.moduleName());
+        assertEquals(Protocol.JSON_TARGET, summary.protocol());
+        // Operations are returned sorted by name.
+        assertEquals(List.of("CreateFoo", "DeleteFoo"), summary.operations());
+    }
+
+    @Test
     void generatesCorrectFilesFromJsonAstFormat() throws Exception {
         URL fixture = getClass().getResource("/fixtures/widget-service.json");
         assertNotNull(fixture, "widget-service.json fixture not found on classpath");

@@ -31,6 +31,9 @@ import software.amazon.smithy.model.validation.ValidationEvent;
  */
 public class ModuleGenerator {
 
+    // Stand-in core version for the discarded build.gradle produced during a validation dry run.
+    private static final String VALIDATION_CORE_VERSION = "0.0.0";
+
     private final boolean verbose;
 
     public ModuleGenerator() {
@@ -44,7 +47,54 @@ public class ModuleGenerator {
         this.verbose = verbose;
     }
 
+    /**
+     * Loads a Smithy model and runs a full in-memory generation pass without writing any files.
+     *
+     * <p>This is a true dry run: it exercises the same model analysis <em>and</em> the same
+     * per-operation source generation as {@link #generate}, then discards the produced files. A
+     * model that {@code validate} accepts is therefore one that {@code generate} can also turn into
+     * a module — the two cannot disagree.
+     *
+     * @return a summary of what a full generation run would produce
+     * @throws IllegalArgumentException if the model has no service shape or resolves zero
+     *     operations
+     */
+    ModelSummary validate(Path modelPath) {
+        Analysis analysis = analyze(modelPath);
+
+        // Run the full generation to surface anything generate() would fail on; the files are
+        // discarded. The core version only affects the generated build.gradle text, which is never
+        // returned, so a placeholder is used here.
+        buildFiles(analysis, VALIDATION_CORE_VERSION);
+
+        List<String> operations =
+                analysis.operations().stream()
+                        .map(op -> op.getId().getName())
+                        .collect(Collectors.toList()); // already sorted by analyze()
+
+        return new ModelSummary(
+                analysis.serviceId(), analysis.moduleName(), analysis.protocol(), operations);
+    }
+
     public GenerationResult generate(Path modelPath, String coreVersion) {
+        Analysis analysis = analyze(modelPath);
+        return new GenerationResult(
+                analysis.serviceId(), analysis.moduleName(), buildFiles(analysis, coreVersion));
+    }
+
+    /** The model and the values derived from it that both {@link #generate} and validation need. */
+    private record Analysis(
+            Model model,
+            ServiceShape service,
+            String serviceId,
+            String className,
+            String pkg,
+            String moduleName,
+            Protocol protocol,
+            List<OperationShape> operations) {}
+
+    /** Loads the model and resolves the service, applying the shared structural gates. */
+    private Analysis analyze(Path modelPath) {
         Model model = loadModel(modelPath);
 
         ServiceShape service =
@@ -68,35 +118,37 @@ public class ModuleGenerator {
                         .collect(Collectors.toList());
 
         // Hard gate: a service with no operations means the wrong file was passed, or the model
-        // failed
-        // to assemble structurally (validation is disabled, so this is our main safety net).
-        // Generating
-        // an empty module would silently produce a useless stub, so fail loudly instead.
+        // failed to assemble structurally (validation is disabled, so this is our main safety net).
+        // Generating an empty module would silently produce a useless stub, so fail loudly instead.
         if (operations.isEmpty()) {
             throw new IllegalArgumentException(
                     "Service '"
                             + service.getId()
-                            + "' resolved 0 operations — "
-                            + "is this the right model file?");
+                            + "' resolved 0 operations — is this the right model file?");
         }
 
+        return new Analysis(
+                model, service, serviceId, className, pkg, moduleName, protocol, operations);
+    }
+
+    /** Builds every generated source file in memory from a resolved {@link Analysis}. */
+    private List<GeneratedFile> buildFiles(Analysis a, String coreVersion) {
         List<GeneratedFile> files = new ArrayList<>();
-        files.add(buildGradle(serviceId, coreVersion));
-        files.add(serviceClass(service, operations, protocol, pkg, className));
-        files.add(serviceLoaderFile(pkg, className));
-        files.add(testClass(operations, pkg, className));
-        for (OperationShape op : operations) {
-            files.add(templateFile(model, op, protocol));
+        files.add(buildGradle(a.serviceId(), coreVersion));
+        files.add(serviceClass(a.service(), a.operations(), a.protocol(), a.pkg(), a.className()));
+        files.add(serviceLoaderFile(a.pkg(), a.className()));
+        files.add(testClass(a.operations(), a.pkg(), a.className()));
+        for (OperationShape op : a.operations()) {
+            files.add(templateFile(a.model(), op, a.protocol()));
         }
-        boolean isXml = (protocol == Protocol.FORM_URL || protocol == Protocol.REST_XML);
-        for (OperationShape op : operations) {
-            files.add(builderClass(model, op, protocol, pkg, isXml));
+        boolean isXml = (a.protocol() == Protocol.FORM_URL || a.protocol() == Protocol.REST_XML);
+        for (OperationShape op : a.operations()) {
+            files.add(builderClass(a.model(), op, a.protocol(), a.pkg(), isXml));
         }
         // One shared serialisation helper per module, rather than copying the helpers into every
         // builder.
-        files.add(responseSupportClass(pkg, isXml));
-
-        return new GenerationResult(serviceId, moduleName, files);
+        files.add(responseSupportClass(a.pkg(), isXml));
+        return files;
     }
 
     private Model loadModel(Path modelPath) {

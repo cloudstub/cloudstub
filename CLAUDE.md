@@ -40,8 +40,11 @@ Standard commands:
 ./gradlew spotlessCheck              # fail if any Java source is unformatted
 ./gradlew :cloudmock-core:test       # single subproject tests
 ./gradlew publishToMavenLocal        # publish for local smoke testing
-./gradlew :cloudmock-codegen:shadowJar                                 # build the codegen fat JAR
-java -jar cloudmock-codegen/build/libs/cloudmock-codegen.jar --model <path-or-url> [--output <dir>]  # stub generation
+./gradlew :cloudmock-codegen:run --args="--model <path-or-url> --output <dir>"   # in-repo stub generation (no fat JAR build)
+./gradlew :cloudmock-codegen:validate --args="--model <path>"          # validate a Smithy model without generating output
+./gradlew :cloudmock-codegen:shadowJar                                 # build the codegen fat JAR (distribution / CI)
+java -jar cloudmock-codegen/build/libs/cloudmock-codegen.jar --model <path-or-url> [--output <dir>] [--validate]  # stub generation
+./gradlew :cloudmock-standalone:run                                    # start standalone from the repo root (no fat JAR build)
 ./gradlew :cloudmock-standalone:shadowJar                              # build the standalone fat JAR
 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar    # start on default ports (4566 mock, 4567 API)
 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar --port=4566 --api-port=4567   # explicit ports
