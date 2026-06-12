@@ -10,12 +10,12 @@ CloudStub is modular. Add `cloudstub-core`, the JUnit extension, and only the AW
 
     ```groovy
     dependencies {
-        testImplementation 'io.cloudstub:cloudstub-core:0.1.0'
-        testImplementation 'io.cloudstub:cloudstub-junit:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-core:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-junit:0.1.0'
 
         // Add one or more service modules
-        testImplementation 'io.cloudstub:cloudstub-sqs:0.1.0'
-        testImplementation 'io.cloudstub:cloudstub-secretsmanager:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-sqs:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-secretsmanager:0.1.0'
 
         // AWS SDK v2 clients for the services you use
         testImplementation 'software.amazon.awssdk:sqs:2.25.70'
@@ -28,19 +28,19 @@ CloudStub is modular. Add `cloudstub-core`, the JUnit extension, and only the AW
     ```xml
     <dependencies>
         <dependency>
-            <groupId>io.cloudstub</groupId>
+            <groupId>io.github.cloudstub</groupId>
             <artifactId>cloudstub-core</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.cloudstub</groupId>
+            <groupId>io.github.cloudstub</groupId>
             <artifactId>cloudstub-junit</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.cloudstub</groupId>
+            <groupId>io.github.cloudstub</groupId>
             <artifactId>cloudstub-sqs</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>

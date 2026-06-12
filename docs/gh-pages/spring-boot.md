@@ -72,10 +72,10 @@ The `cloudstub-core` artifact shades its internal WireMock and Jetty dependencie
         implementation 'software.amazon.awssdk:sqs:2.25.70'
         implementation 'software.amazon.awssdk:secretsmanager:2.25.70'
 
-        testImplementation 'io.cloudstub:cloudstub-core:0.1.0'
-        testImplementation 'io.cloudstub:cloudstub-junit:0.1.0'
-        testImplementation 'io.cloudstub:cloudstub-sqs:0.1.0'
-        testImplementation 'io.cloudstub:cloudstub-secretsmanager:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-core:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-junit:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-sqs:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-secretsmanager:0.1.0'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
     ```
@@ -112,25 +112,25 @@ The `cloudstub-core` artifact shades its internal WireMock and Jetty dependencie
         </dependency>
 
         <dependency>
-            <groupId>io.cloudstub</groupId>
+            <groupId>io.github.cloudstub</groupId>
             <artifactId>cloudstub-core</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.cloudstub</groupId>
+            <groupId>io.github.cloudstub</groupId>
             <artifactId>cloudstub-junit</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.cloudstub</groupId>
+            <groupId>io.github.cloudstub</groupId>
             <artifactId>cloudstub-sqs</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.cloudstub</groupId>
+            <groupId>io.github.cloudstub</groupId>
             <artifactId>cloudstub-secretsmanager</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>

@@ -28,13 +28,13 @@ subprojects {
         }
     }
 
-    group = 'io.cloudstub'
-    version = '0.1.0-SNAPSHOT'
+    // group and version are single-sourced from the root gradle.properties so a release bump is
+    // one line; they propagate to every project (root + subprojects).
 
     // Example projects (the cloudstub-example container and its junit5/junit6 children) are
     // demonstration apps, not libraries — they are never published. Excluding them here keeps
-    // publishing self-correcting: no io.cloudstub:junit5 / :junit6 / :cloudstub-example artifacts
-    // leak to a repository regardless of how the example tree is restructured.
+    // publishing self-correcting: no io.github.cloudstub:junit5 / :junit6 / :cloudstub-example
+    // artifacts leak to a repository regardless of how the example tree is restructured.
     def publishable = project.path != ':cloudstub-example' && !project.path.startsWith(':cloudstub-example:')
     if (publishable) {
         apply plugin: 'maven-publish'
@@ -112,7 +112,7 @@ subprojects {
     afterEvaluate {
         ['compileClasspath', 'runtimeClasspath'].each { cfgName ->
             configurations.findByName(cfgName)?.allDependencies?.each { dep ->
-                if (dep.group == 'io.cloudstub' && dep.name != 'cloudstub-core') {
+                if (dep.group == 'io.github.cloudstub' && dep.name != 'cloudstub-core') {
                     throw new GradleException(
                         "Module isolation violation in '${project.name}': " +
                         "declared dependency on '${dep.group}:${dep.name}' is forbidden. " +
@@ -125,7 +125,7 @@ subprojects {
 
     configurations.matching { !it.name.toLowerCase().contains('test') }.configureEach {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-            if (details.requested.group == 'io.cloudstub' && details.requested.name != 'cloudstub-core') {
+            if (details.requested.group == 'io.github.cloudstub' && details.requested.name != 'cloudstub-core') {
                 throw new GradleException(
                     "Module isolation violation in '${project.name}': " +
                     "transitive dependency on '${details.requested.group}:${details.requested.name}' is forbidden. " +

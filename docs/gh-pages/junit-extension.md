@@ -11,14 +11,14 @@ Compatible with JUnit 5 and JUnit 6. JUnit 4 is not supported.
 === "Gradle"
 
     ```groovy
-    testImplementation 'io.cloudstub:cloudstub-junit:0.1.0'
+    testImplementation 'io.github.cloudstub:cloudstub-junit:0.1.0'
     ```
 
 === "Maven"
 
     ```xml
     <dependency>
-        <groupId>io.cloudstub</groupId>
+        <groupId>io.github.cloudstub</groupId>
         <artifactId>cloudstub-junit</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>

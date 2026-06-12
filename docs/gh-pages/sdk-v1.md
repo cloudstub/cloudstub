@@ -20,11 +20,11 @@ Add the companion, a CloudStub service module, and the `com.amazonaws:aws-java-s
 
     ```groovy
     dependencies {
-        testImplementation 'io.cloudstub:cloudstub-core:0.1.0'
-        testImplementation 'io.cloudstub:cloudstub-sdk-v1:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-core:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-sdk-v1:0.1.0'
 
         // A CloudStub service module (see the fidelity note below)
-        testImplementation 'io.cloudstub:cloudstub-sns:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-sns:0.1.0'
 
         // The AWS SDK v1 client you are migrating away from
         testImplementation 'com.amazonaws:aws-java-sdk-sns:1.12.770'
@@ -36,19 +36,19 @@ Add the companion, a CloudStub service module, and the `com.amazonaws:aws-java-s
     ```xml
     <dependencies>
         <dependency>
-            <groupId>io.cloudstub</groupId>
+            <groupId>io.github.cloudstub</groupId>
             <artifactId>cloudstub-core</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.cloudstub</groupId>
+            <groupId>io.github.cloudstub</groupId>
             <artifactId>cloudstub-sdk-v1</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.cloudstub</groupId>
+            <groupId>io.github.cloudstub</groupId>
             <artifactId>cloudstub-sns</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>

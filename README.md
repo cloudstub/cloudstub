@@ -25,12 +25,12 @@ Add `cloudstub-core`, the JUnit extension, and the service module(s) you need.
 
 ```groovy
 dependencies {
-    testImplementation 'io.cloudstub:cloudstub-core:0.1.0'
-    testImplementation 'io.cloudstub:cloudstub-junit:0.1.0'
+    testImplementation 'io.github.cloudstub:cloudstub-core:0.1.0'
+    testImplementation 'io.github.cloudstub:cloudstub-junit:0.1.0'
 
     // Service modules — add only what your project uses
-    testImplementation 'io.cloudstub:cloudstub-sqs:0.1.0'
-    testImplementation 'io.cloudstub:cloudstub-secretsmanager:0.1.0'
+    testImplementation 'io.github.cloudstub:cloudstub-sqs:0.1.0'
+    testImplementation 'io.github.cloudstub:cloudstub-secretsmanager:0.1.0'
 
     // Matching AWS SDK v2 clients
     testImplementation 'software.amazon.awssdk:sqs:2.25.70'
@@ -44,19 +44,19 @@ dependencies {
 
 <dependencies>
     <dependency>
-        <groupId>io.cloudstub</groupId>
+        <groupId>io.github.cloudstub</groupId>
         <artifactId>cloudstub-core</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>io.cloudstub</groupId>
+        <groupId>io.github.cloudstub</groupId>
         <artifactId>cloudstub-junit</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>io.cloudstub</groupId>
+        <groupId>io.github.cloudstub</groupId>
         <artifactId>cloudstub-sqs</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>
