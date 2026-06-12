@@ -36,7 +36,7 @@ class StandaloneNoServicesTest {
     @Test
     void warnsThatNoServicesAreEnabled() throws Exception {
         assertTrue(
-                process.awaitOutput(l -> l.contains("Enabled services: (none)"), 5_000),
+                process.awaitOutput(l -> l.contains("Enabled services: (none)")),
                 "Expected startup log to report no services enabled, got: " + process.output());
     }
 
@@ -44,7 +44,7 @@ class StandaloneNoServicesTest {
     void warningTellsDeveloperHowToEnableServices() throws Exception {
         assertTrue(
                 process.awaitOutput(
-                        l -> l.contains("--services=") && l.contains("CLOUDSTUB_SERVICES"), 5_000),
+                        l -> l.contains("--services=") && l.contains("CLOUDSTUB_SERVICES")),
                 "Expected an actionable warning naming --services / CLOUDSTUB_SERVICES, got: "
                         + process.output());
     }

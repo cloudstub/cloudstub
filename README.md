@@ -99,14 +99,20 @@ with no further configuration. For full JUnit lifecycle management, fault inject
 Besides running embedded in tests, CloudStub ships as a long-lived standalone server for local development — start it
 once, leave it running, and point any application that reads `AWS_ENDPOINT_URL` at it. No Docker, no daemon.
 
+The standalone JAR is a thin server runtime: the launcher plus `cloudstub-core`, with **no service modules bundled**.
+Download the module jars you want and drop them in a plugin directory (default `./modules`), then start the server:
+
 ```
-./gradlew :cloudstub-standalone:shadowJar
-java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs,secretsmanager
+mkdir -p modules
+# drop cloudstub-sqs.jar, cloudstub-s3.jar, … into ./modules
+java -jar cloudstub-standalone.jar --services=sqs,secretsmanager
 ```
 
-The server binds to port `4566` by default (override with `--port=<n>` or `CLOUDSTUB_PORT`). Services are opt-in: choose
-which ones to enable with `--services=sqs,secretsmanager` (or `CLOUDSTUB_SERVICES`). With no `--services` the server
-starts but serves nothing and prints a warning telling you how to enable services. `Ctrl-C` shuts it down cleanly.
+The launcher loads every jar in the plugin directory; point it elsewhere with `--modules-dir=<path>` (or
+`CLOUDSTUB_MODULES_DIR`). `--modules-dir` controls what is **available** (which module jars are on the classpath);
+`--services` narrows what is **enabled** among those. The server binds to port `4566` by default (override with
+`--port=<n>` or `CLOUDSTUB_PORT`). Services are opt-in: with no `--services` the server starts but serves nothing and
+prints a warning telling you how to enable services. `Ctrl-C` shuts it down cleanly.
 
 ```
 export AWS_ENDPOINT_URL=http://localhost:4566
@@ -122,8 +128,9 @@ clm status
 clm sqs send-message --queue orders --body "hello"
 ```
 
-> Standalone mode serves the same stateless, templated responses as embedded mode — it does not persist state across
-> calls. See the [Standalone Mode guide](https://cloudstub.github.io/cloudstub/standalone/) and
+> Standalone mode shares the same core engine and state backend as embedded mode: stateful modules return live data
+> (a `SendMessage` is returned by a later `ReceiveMessage`), and state is persistent by default (use `--store-dir=none`
+> for in-memory). See the [Standalone Mode guide](https://cloudstub.github.io/cloudstub/standalone/) and
 > [CLI guide](https://cloudstub.github.io/cloudstub/cli/) for full details.
 
 ## Supported services

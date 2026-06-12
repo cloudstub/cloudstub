@@ -39,7 +39,7 @@ class StandaloneServiceSelectionTest {
     @Test
     void startupLogReportsOnlySqsEnabled() throws Exception {
         assertTrue(
-                process.awaitOutput(l -> l.contains("Enabled services: sqs"), 5_000),
+                process.awaitOutput(l -> l.contains("Enabled services: sqs")),
                 "Expected startup log to report only sqs enabled, got: " + process.output());
     }
 

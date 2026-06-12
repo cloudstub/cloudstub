@@ -6,11 +6,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Launches the standalone fat JAR as a subprocess and waits until it is accepting connections.
@@ -37,6 +39,40 @@ final class StandaloneProcess implements AutoCloseable {
                                 jarPath,
                                 "--port=" + port,
                                 "--api-port=" + (port + 1000)));
+        String modulesDir = System.getProperty("cloudstub.standalone.modules.dir");
+        if (modulesDir != null) {
+            command.add("--modules-dir=" + modulesDir);
+        }
+
+        return getStandaloneProcess(port, command, extraArgs);
+    }
+
+    /**
+     * Starts the server with an explicit modules directory, overriding the system property. Useful
+     * for tests that need a custom (e.g. filtered or empty) plugin directory.
+     */
+    static StandaloneProcess startWithModulesDir(int port, Path modulesDir, String... extraArgs)
+            throws Exception {
+        String jarPath = System.getProperty("cloudstub.standalone.jar");
+        assertNotNull(jarPath, "cloudstub.standalone.jar system property must be set");
+
+        List<String> command =
+                new ArrayList<>(
+                        List.of(
+                                "java",
+                                "-jar",
+                                jarPath,
+                                "--port=" + port,
+                                "--api-port=" + (port + 1000),
+                                "--modules-dir=" + modulesDir.toAbsolutePath()));
+
+        return getStandaloneProcess(port, command, extraArgs);
+    }
+
+    @NonNull
+    private static StandaloneProcess getStandaloneProcess(
+            int port, List<String> command, String[] extraArgs)
+            throws IOException, InterruptedException {
         command.addAll(List.of(extraArgs));
 
         ProcessBuilder pb = new ProcessBuilder(command);
@@ -59,8 +95,8 @@ final class StandaloneProcess implements AutoCloseable {
      *
      * @return {@code true} if a matching line appeared before the timeout
      */
-    boolean awaitOutput(Predicate<String> predicate, long timeoutMs) throws InterruptedException {
-        long deadline = System.currentTimeMillis() + timeoutMs;
+    boolean awaitOutput(Predicate<String> predicate) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + (long) 5000;
         while (System.currentTimeMillis() < deadline) {
             if (output.stream().anyMatch(predicate)) {
                 return true;

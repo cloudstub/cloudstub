@@ -6,19 +6,36 @@
 apply plugin: 'application'
 apply plugin: 'io.github.goooler.shadow'
 
+configurations {
+    // Collects the in-repo module jars used to populate a plugin directory for local dev (`run`)
+    // and the integration-test subprocess. This is NOT a compile/runtime dependency — the
+    // standalone fat JAR does not bundle these; they are loaded at runtime via PluginLoader from
+    // the plugin directory. The name contains "test" so it stays exempt from the inter-module
+    // isolation check (it is a jar-collection bucket, not this module's own classpath).
+    integrationTestModuleJars {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
+
 dependencies {
     implementation project(':cloudstub-core')
     implementation libs.jackson.databind
     implementation libs.slf4j.api
     runtimeOnly libs.slf4j.simple
-    runtimeOnly project(':cloudstub-sqs')
-    runtimeOnly project(':cloudstub-sns')
-    runtimeOnly project(':cloudstub-secretsmanager')
-    runtimeOnly project(':cloudstub-s3')
 
     testImplementation project(':cloudstub-core')
     testImplementation libs.aws.sqs
     testImplementation libs.slf4j.simple
+    // Unit tests that exercise the state cross-surface (StatefulCrossSurfaceTest) and request
+    // history (ApiServerIntegrationTest) need the SQS module discoverable via ServiceLoader.
+    // testRuntimeOnly is test-only and is exempt from the inter-module isolation check.
+    testRuntimeOnly project(':cloudstub-sqs')
+
+    integrationTestModuleJars project(':cloudstub-sqs')
+    integrationTestModuleJars project(':cloudstub-sns')
+    integrationTestModuleJars project(':cloudstub-secretsmanager')
+    integrationTestModuleJars project(':cloudstub-s3')
 }
 
 application {
@@ -34,9 +51,14 @@ components.java.withVariantsFromConfiguration(configurations.runtimeElements) { 
 
 // Start from the repo root so the persistent `.cloudstub` store directory and any relative paths
 // resolve identically to the `java -jar` invocation.
-//   ./gradlew :cloudstub-standalone:run --args="--port=4566 --api-port=4567"
+//   ./gradlew :cloudstub-standalone:run --args="--services=sqs,sns,secretsmanager,s3"
+// The fat JAR no longer bundles modules, so make the in-repo module jars discoverable by pointing
+// the plugin directory at the copied jars via CLOUDSTUB_MODULES_DIR. Services remain opt-in: pass
+// --services (or CLOUDSTUB_SERVICES) to enable the ones you want.
 run {
     workingDir = rootProject.projectDir
+    dependsOn 'copyModuleJars'
+    environment 'CLOUDSTUB_MODULES_DIR', "${buildDir}/modules"
 }
 
 jar {
@@ -53,10 +75,18 @@ shadowJar {
     mergeServiceFiles()
 }
 
+// Copies the in-repo module jars into build/modules so both the `run` task and the integration-test
+// subprocess have a populated plugin directory to point at (via CLOUDSTUB_MODULES_DIR / --modules-dir).
+tasks.register('copyModuleJars', Copy) {
+    from configurations.integrationTestModuleJars
+    into "${buildDir}/modules"
+}
+
 // The end-to-end tests in src/integrationTest launch the fat JAR as a subprocess, so they need it
 // built first and pointed at via a system property. Unit tests (src/test) run in-process and do
 // not require the JAR, so this is scoped to the integrationTest task, not test.
 tasks.named('integrationTest') {
-    dependsOn shadowJar
+    dependsOn shadowJar, copyModuleJars
     systemProperty 'cloudstub.standalone.jar', shadowJar.archiveFile.get().asFile.absolutePath
+    systemProperty 'cloudstub.standalone.modules.dir', "${buildDir}/modules"
 }

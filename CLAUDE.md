@@ -47,11 +47,11 @@ Standard commands:
 ./gradlew :cloudstub-codegen:validate --args="--model <path>"          # validate a Smithy model without generating output
 ./gradlew :cloudstub-codegen:shadowJar                                 # build the codegen fat JAR (distribution / CI)
 java -jar cloudstub-codegen/build/libs/cloudstub-codegen.jar --model <path-or-url> [--output <dir>] [--validate]  # stub generation
-./gradlew :cloudstub-standalone:run                                    # start standalone from the repo root (no fat JAR build)
-./gradlew :cloudstub-standalone:shadowJar                              # build the standalone fat JAR
-java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar    # start on default ports (4566 mock, 4567 API)
-java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --port=4566 --api-port=4567   # explicit ports
-CLOUDSTUB_PORT=4566 CLOUDSTUB_API_PORT=4567 java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar  # via env vars
+./gradlew :cloudstub-standalone:run --args="--services=sqs,sns,secretsmanager,s3"   # start from repo root; copies in-repo module jars into build/modules (no fat JAR build)
+./gradlew :cloudstub-standalone:shadowJar                              # build the standalone fat JAR (launcher + core only; no service modules)
+java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs   # start on default ports; loads module jars from ./modules
+java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --modules-dir=/path/to/modules --services=sqs   # explicit plugin directory
+CLOUDSTUB_PORT=4566 CLOUDSTUB_API_PORT=4567 java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar  # ports via env vars
 ```
 
 ### Code formatting
@@ -90,20 +90,20 @@ reference deploys at `/api/`.
 
 ### Subprojects
 
-| Module                     | Status           | Notes                                                                                  |
-| -------------------------- | ---------------- | -------------------------------------------------------------------------------------- |
-| `cloudstub-core`           | Done             | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                        |
-| `cloudstub-junit`          | Done             | `@ExtendWith` + `@RegisterExtension`, fault injection annotations; JUnit 5 and 6       |
-| `cloudstub-sns`            | Done             | XML/Form protocol; reference implementation for `registerXmlFormStub`                  |
-| `cloudstub-sqs`            | Done             | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044) |
-| `cloudstub-secretsmanager` | Done             | Reference impl — JSON/X-Amz-Target protocol                                            |
-| `cloudstub-s3`             | Done             | REST path protocol; generated from real AWS Smithy model                               |
-| `cloudstub-dynamodb`       | Scaffolding only | JSON/X-Amz-Target protocol                                                             |
-| `cloudstub-lambda`         | Scaffolding only | JSON/X-Amz-Target protocol                                                             |
-| `cloudstub-codegen`        | Done             | Smithy → CloudStubService stub generator                                               |
-| `cloudstub-standalone`     | Done             | Runnable fat JAR; boots all service modules on port 4566 (default) for local dev       |
-| `cloudstub-example:junit6` | Done             | Spring Boot app + integration tests with JUnit 6 (CloudStubExtension)                  |
-| `cloudstub-example:junit5` | Done             | Standalone CloudStubExtension tests compiled and run against JUnit 5                   |
+| Module                     | Status           | Notes                                                                                         |
+| -------------------------- | ---------------- | --------------------------------------------------------------------------------------------- |
+| `cloudstub-core`           | Done             | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                               |
+| `cloudstub-junit`          | Done             | `@ExtendWith` + `@RegisterExtension`, fault injection annotations; JUnit 5 and 6              |
+| `cloudstub-sns`            | Done             | XML/Form protocol; reference implementation for `registerXmlFormStub`                         |
+| `cloudstub-sqs`            | Done             | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044)        |
+| `cloudstub-secretsmanager` | Done             | Reference impl — JSON/X-Amz-Target protocol                                                   |
+| `cloudstub-s3`             | Done             | REST path protocol; generated from real AWS Smithy model                                      |
+| `cloudstub-dynamodb`       | Scaffolding only | JSON/X-Amz-Target protocol                                                                    |
+| `cloudstub-lambda`         | Scaffolding only | JSON/X-Amz-Target protocol                                                                    |
+| `cloudstub-codegen`        | Done             | Smithy → CloudStubService stub generator                                                      |
+| `cloudstub-standalone`     | Done             | Runnable fat JAR (launcher + core only); loads module jars from a plugin directory; port 4566 |
+| `cloudstub-example:junit6` | Done             | Spring Boot app + integration tests with JUnit 6 (CloudStubExtension)                         |
+| `cloudstub-example:junit5` | Done             | Standalone CloudStubExtension tests compiled and run against JUnit 5                          |
 
 The `clm` / `cloudstub` CLI is **not** a subproject of this monorepo — it lives in a separate
 repository (`cloudstub/cloudstub-cli`). See the **CLI** section.
@@ -133,9 +133,19 @@ Three layers, strictly in order of dependency:
 
 ## Standalone mode
 
-`cloudstub-standalone` is a thin launcher module that bundles `cloudstub-core` and all current service modules into a
-single runnable fat JAR. It is the drop-in replacement for LocalStack in local development scripts.
+`cloudstub-standalone` is a thin launcher module. Its fat JAR contains only the launcher and `cloudstub-core` (with
+its shaded WireMock/Jetty) — **no service modules are bundled**. Service modules are distributed as separate jars and
+loaded at runtime from a plugin directory. It is the drop-in replacement for LocalStack in local development scripts.
 
+- **Distribution model:** download the server jar once, then download the module jars you want and drop them in the
+  plugin directory. Each module jar is small (the `CloudStubService` class plus its `META-INF/services` registration).
+- **Plugin directory:** module jars are loaded from a directory (default `./modules`), overridable with
+  `--modules-dir=<path>` CLI argument or `CLOUDSTUB_MODULES_DIR` environment variable. Jars in that directory are
+  loaded via a `URLClassLoader` whose parent is the app classloader, so `io.cloudstub.core.spi` types resolve to the
+  same classes core uses. An explicitly provided `--modules-dir` that does not exist (or a blank value) fails fast; a
+  missing or empty **default** `./modules` is not fatal — the server starts and serves nothing. The resolved plugin
+  directory and the loaded modules are printed at startup. `--modules-dir` controls what is _available_ (which jars are
+  on the classpath); `--services` (below) narrows what is _enabled_ among those.
 - **Default port:** `4566` (matches LocalStack, so `AWS_ENDPOINT_URL=http://localhost:4566` works without changes)
 - **Port override:** `--port=<n>` CLI argument or `CLOUDSTUB_PORT` environment variable
 - **API port:** `4567` (default) — REST API served on a secondary port in the same process; override with
@@ -144,7 +154,10 @@ single runnable fat JAR. It is the drop-in replacement for LocalStack in local d
   request journal exposed by `GET /api/history` (default `1000`; `unlimited`/`none`/`0` to disable). Backed by
   `CloudStub.withMaxRequestHistory(int)`, which sets WireMock's `maxRequestJournalEntries`. A full `POST /api/reset`
   (no `service`) also clears the history via `CloudStub.clearHistory()`; a single-service reset does not.
-- **Module discovery:** `ServiceLoader` — the same mechanism as embedded mode; printed to stdout at startup
+- **Module discovery:** `ServiceLoader.load(CloudStubService.class, <plugin-classloader>)` over the jars in the plugin
+  directory — the same SPI mechanism as embedded mode, only the classloader differs; printed to stdout at startup. The
+  launcher sets the thread context classloader to the plugin classloader before `CloudStub.start()` so core's
+  `ModuleInitializer` discovers the same module set.
 - **Service selection:** `--services=<a,b>` CLI argument or `CLOUDSTUB_SERVICES` env var enables only the listed
   service IDs. Services are **opt-in**: with no selection the server starts but loads nothing, logging an actionable
   warning that names `--services` / `CLOUDSTUB_SERVICES` and the available IDs. This matches embedded mode, where only
@@ -158,8 +171,11 @@ single runnable fat JAR. It is the drop-in replacement for LocalStack in local d
   standalone launcher defaults to a persistent `.cloudstub` directory); see the **State store** notes. Template-only
   modules remain stateless. A full `POST /api/reset` clears all state (`StateStore.clearAll()`); `?service=X` clears
   only that service's prefix.
-- **Module isolation rule:** `cloudstub-standalone` is exempt from the inter-module isolation check in `build.gradle`
-  because its purpose is to bundle all modules; this exemption is intentional and must not be extended to other modules
+- **Module isolation rule:** `cloudstub-standalone` is **not** exempt from the inter-module isolation check — it
+  depends only on `cloudstub-core` at compile/runtime. The in-repo module jars are referenced solely through a
+  test-scoped jar-collection configuration (`integrationTestModuleJars`) that is copied into `build/modules` to
+  populate a plugin directory for the `run` task and the integration-test subprocess; these are not compile or runtime
+  dependencies and do not bundle the modules into the fat JAR.
 - **API service filtering:** `StandaloneMain` filters discovered `CloudStubApiService` implementations by the enabled
   service set, so a service not enabled via `--services` exposes neither stubs nor REST routes nor CLI commands
 
