@@ -1,0 +1,48 @@
+{
+  "smithy": "2.0",
+  "shapes": {
+    "com.example#WidgetService": {
+      "type": "service",
+      "version": "2024-01-01",
+      "operations": [
+        { "target": "com.example#CreateWidget" },
+        { "target": "com.example#DeleteWidget" }
+      ],
+      "traits": {
+        "aws.api#service": { "sdkId": "Widget" },
+        "aws.protocols#awsJson1_0": {}
+      }
+    },
+    "com.example#CreateWidget": {
+      "type": "operation",
+      "input": { "target": "com.example#CreateWidgetInput" },
+      "output": { "target": "com.example#CreateWidgetOutput" }
+    },
+    "com.example#CreateWidgetInput": {
+      "type": "structure",
+      "members": {
+        "name": { "target": "smithy.api#String", "traits": { "smithy.api#required": {} } }
+      },
+      "traits": { "smithy.api#input": {} }
+    },
+    "com.example#CreateWidgetOutput": {
+      "type": "structure",
+      "members": {
+        "widgetId": { "target": "smithy.api#String" }
+      },
+      "traits": { "smithy.api#output": {} }
+    },
+    "com.example#DeleteWidget": {
+      "type": "operation",
+      "input": { "target": "com.example#DeleteWidgetInput" },
+      "output": { "target": "smithy.api#Unit" }
+    },
+    "com.example#DeleteWidgetInput": {
+      "type": "structure",
+      "members": {
+        "widgetId": { "target": "smithy.api#String", "traits": { "smithy.api#required": {} } }
+      },
+      "traits": { "smithy.api#input": {} }
+    }
+  }
+}

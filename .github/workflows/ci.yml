@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: read
@@ -23,7 +23,7 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v5.0.2
         with:
-          gradle-version: '8.8'
+          gradle-version: "8.8"
 
       - name: Check formatting
         run: gradle spotlessCheck

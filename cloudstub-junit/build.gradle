@@ -1,0 +1,10 @@
+dependencies {
+    implementation project(':cloudstub-core')
+    compileOnly  libs.junit.jupiter
+    testImplementation libs.junit.jupiter
+    testImplementation project(':cloudstub-sqs')
+    testImplementation project(':cloudstub-secretsmanager')
+    testImplementation libs.aws.sqs
+    testImplementation libs.aws.secretsmanager
+    testRuntimeOnly libs.slf4j.simple
+}

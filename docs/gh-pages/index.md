@@ -1,8 +1,8 @@
-# CloudMock
+# CloudStub
 
 > An ultra-lightweight, containerless AWS mock for JVM integration tests.
 
-CloudMock runs entirely inside the JVM. No Docker. No external process. No credentials. Tests that touch AWS services
+CloudStub runs entirely inside the JVM. No Docker. No external process. No credentials. Tests that touch AWS services
 start at the same speed as tests that don't.
 
 It also ships as a **standalone runnable JAR** for local development: start it once and any application that reads
@@ -10,11 +10,11 @@ It also ships as a **standalone runnable JAR** for local development: start it o
 
 ---
 
-## Why CloudMock
+## Why CloudStub
 
 Testing AWS integrations on the JVM typically means running an external process — a Docker container, a Python runtime, or both. That adds startup time and environment dependencies to every test and CI run.
 
-CloudMock answers a simpler question: what if the mock ran inside the JVM itself?
+CloudStub answers a simpler question: what if the mock ran inside the JVM itself?
 
 ---
 
@@ -25,8 +25,8 @@ redirect the AWS SDK v2, and discovers service modules via `ServiceLoader`. Each
 installable JAR that registers its stubs through the `StubRegistrar` SPI. The underlying HTTP server (WireMock) is
 completely hidden — you never interact with it directly.
 
-First-party modules target the AWS SDK for Java **v2**. Teams still on **v1** can redirect their clients to CloudMock
-with the `cloudmock-sdk-v1` companion — see [SDK v1 Support](sdk-v1.md).
+First-party modules target the AWS SDK for Java **v2**. Teams still on **v1** can redirect their clients to CloudStub
+with the `cloudstub-sdk-v1` companion — see [SDK v1 Support](sdk-v1.md).
 
 ---
 
@@ -34,7 +34,7 @@ with the `cloudmock-sdk-v1` companion — see [SDK v1 Support](sdk-v1.md).
 
 ```java
 
-@ExtendWith(CloudMockExtension.class)
+@ExtendWith(CloudStubExtension.class)
 class OrderServiceTest {
 
     @Test

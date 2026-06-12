@@ -1,25 +1,25 @@
 # Console
 
-The CloudMock Console is a web interface for a running [standalone](standalone.md) CloudMock
+The CloudStub Console is a web interface for a running [standalone](standalone.md) CloudStub
 instance. It gives you visual access to mock state — loaded modules, request history, and per-service
 operations — without touching the terminal or writing code. Open it in a browser, point it at your
 instance, and you see what the mock is doing.
 
 Like the [CLI](cli.md), the console is a **thin client over the [REST API](rest-api.md)**. It has no
-dependency on CloudMock internals, WireMock, or any service module — it only speaks HTTP to
+dependency on CloudStub internals, WireMock, or any service module — it only speaks HTTP to
 `/api/status` and `/api/<service>/…`. It builds its navigation at runtime from `GET /api/status`, so
 an instance with more modules loaded simply shows more services; the console itself never changes.
 
 ## Install
 
 The console ships in its own repository,
-[cloud-mock/cloudmock-console](https://github.com/cloud-mock/cloudmock-console) — it is released
+[cloudstub/cloudstub-console](https://github.com/cloudstub/cloudstub-console) — it is released
 independently and is an optional install, not part of the core distribution. It is an Angular
 application; building it requires Node.js 20+.
 
 ```
-git clone https://github.com/cloud-mock/cloudmock-console
-cd cloudmock-console
+git clone https://github.com/cloudstub/cloudstub-console
+cd cloudstub-console
 npm install
 ```
 
@@ -74,11 +74,11 @@ as modules load or state changes.
 
 Because everything is driven by `/api/status`, the console needs no change when a module is added:
 
-- A module that implements [`CloudMockApiService`](module-authoring.md#8-exposing-cli-commands-via-the-rest-api)
+- A module that implements [`CloudStubApiService`](module-authoring.md#8-exposing-cli-commands-via-the-rest-api)
   contributes routes under `/api/<service>/…`, each advertising a command name and parameters.
-- Start CloudMock with that module on the classpath and a panel for it appears in the service
+- Start CloudStub with that module on the classpath and a panel for it appears in the service
   browser, with a form per route.
-- Restrict the loaded modules with `--modules=<a,b>` and the console shows only those services — a
+- Restrict the loaded services with `--services=<a,b>` and the console shows only those services — a
   service that is not loaded has no panel at all.
 
 !!! note "One state, two views"

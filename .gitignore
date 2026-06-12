@@ -31,9 +31,9 @@ bin/
 /.gradle/
 /**/build/
 
-### CloudMock ###
+### CloudStub ###
 # Standalone's default persistent state directory, written when running from the repo tree.
-.cloudmock/
+.cloudstub/
 
 # MkDocs build output (site_dir).
 /site/

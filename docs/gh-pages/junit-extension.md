@@ -1,25 +1,25 @@
 # JUnit Extension
 
-`CloudMockExtension` manages the CloudMock lifecycle around a test class and applies fault injection annotations to individual test methods.
+`CloudStubExtension` manages the CloudStub lifecycle around a test class and applies fault injection annotations to individual test methods.
 
 Compatible with JUnit 5 and JUnit 6. JUnit 4 is not supported.
 
 ## Dependency
 
-`cloudmock-junit` declares JUnit as `compileOnly` — bring your own JUnit version; the module does not force one on your classpath.
+`cloudstub-junit` declares JUnit as `compileOnly` — bring your own JUnit version; the module does not force one on your classpath.
 
 === "Gradle"
 
     ```groovy
-    testImplementation 'io.cloudmock:cloudmock-junit:0.1.0'
+    testImplementation 'io.cloudstub:cloudstub-junit:0.1.0'
     ```
 
 === "Maven"
 
     ```xml
     <dependency>
-        <groupId>io.cloudmock</groupId>
-        <artifactId>cloudmock-junit</artifactId>
+        <groupId>io.cloudstub</groupId>
+        <artifactId>cloudstub-junit</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>
     </dependency>
@@ -32,7 +32,7 @@ Compatible with JUnit 5 and JUnit 6. JUnit 4 is not supported.
 The simplest form. Service modules on the classpath are discovered via `ServiceLoader` automatically.
 
 ```java
-@ExtendWith(CloudMockExtension.class)
+@ExtendWith(CloudStubExtension.class)
 class MyTest {
 
     @Test
@@ -57,8 +57,8 @@ Use this form when you need the server port directly (e.g. to build clients once
 class MyTest {
 
     @RegisterExtension
-    static CloudMockExtension cloudMock = new CloudMockExtension()
-            .withService(new CloudMockSqsService());         // (1)!
+    static CloudStubExtension cloudMock = new CloudStubExtension()
+            .withService(new CloudStubSqsService());         // (1)!
 
     static SqsClient sqsClient;
 
@@ -83,14 +83,14 @@ class MyTest {
 
 ## Lifecycle
 
-`CloudMockExtension` creates one `CloudMock` instance per test class. The lifecycle is:
+`CloudStubExtension` creates one `CloudStub` instance per test class. The lifecycle is:
 
 ```
-beforeAll  → CloudMock.start()   (server up, aws.endpoint-url set)
+beforeAll  → CloudStub.start()   (server up, aws.endpoint-url set)
 beforeEach → fault annotations applied
 test runs
 afterEach  → all faults cleared
-afterAll   → CloudMock.stop()    (server down, aws.endpoint-url cleared)
+afterAll   → CloudStub.stop()    (server down, aws.endpoint-url cleared)
 ```
 
 Each test class gets its own independent instance. One class stopping never affects another class's running instance.
@@ -100,7 +100,7 @@ Each test class gets its own independent instance. One class stopping never affe
 Fault annotations can be placed on individual test methods. Faults are always cleared after each test, even if the test throws.
 
 ```java
-@ExtendWith(CloudMockExtension.class)
+@ExtendWith(CloudStubExtension.class)
 class ResilienceTest {
 
     @SimulateThrottle(service = "sqs")

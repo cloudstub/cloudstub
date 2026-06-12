@@ -1,11 +1,11 @@
-# CloudMock Codegen
+# CloudStub Codegen
 
-CloudMock Codegen takes a Smithy service model as input and produces a complete `CloudMockService` implementation — the
+CloudStub Codegen takes a Smithy service model as input and produces a complete `CloudStubService` implementation — the
 Java class, Handlebars response templates, and the `META-INF/services` registration file.
 
 ## When to use it
 
-Use CloudMock Codegen when you need to add support for an AWS service that has a Smithy model. For services with only a
+Use CloudStub Codegen when you need to add support for an AWS service that has a Smithy model. For services with only a
 handful of operations, writing the module by hand (following the [Module Authoring Guide](module-authoring.md)) may be
 faster. Codegen pays off for services with many operations (20+).
 
@@ -16,7 +16,7 @@ faster. Codegen pays off for services with many operations (20+).
 Inside this repository, run the generator in one step — no fat JAR build required:
 
 ```
-./gradlew :cloudmock-codegen:run --args="--model <path-or-url> --output <dir>"
+./gradlew :cloudstub-codegen:run --args="--model <path-or-url> --output <dir>"
 ```
 
 The task's working directory is pinned to the repo root, so relative `--model` and `--output` paths resolve from the
@@ -26,7 +26,7 @@ To check a model without generating anything, use the `validate` task — it rep
 protocol, and operations, then exits without writing files:
 
 ```
-./gradlew :cloudmock-codegen:validate --args="--model <path>"
+./gradlew :cloudstub-codegen:validate --args="--model <path>"
 ```
 
 ### Standalone / distribution (`java -jar`)
@@ -35,9 +35,9 @@ Outside the monorepo — and in CI — the codegen ships as an executable fat JA
 model:
 
 ```
-./gradlew :cloudmock-codegen:shadowJar
+./gradlew :cloudstub-codegen:shadowJar
 
-java -jar cloudmock-codegen/build/libs/cloudmock-codegen.jar \
+java -jar cloudstub-codegen/build/libs/cloudstub-codegen.jar \
     --model <path-or-url> \
     [--output <dir>] \
     [--core-version <version>] \
@@ -50,15 +50,15 @@ Both invocation paths share the same entry point and produce identical output fo
 |------------------|----------|-------------------|-------------------------------------------------------------------------------------|
 | `--model`        | yes      | —                 | Path or `https://` URL to a single Smithy model file (`.smithy` IDL or `.json` AST) |
 | `--output`       | no       | `./<module-name>` | Directory to write the generated module into                                        |
-| `--core-version` | no       | `0.1.0-SNAPSHOT`  | `cloudmock-core` version pinned in the generated `build.gradle`                     |
+| `--core-version` | no       | `0.1.0-SNAPSHOT`  | `cloudstub-core` version pinned in the generated `build.gradle`                     |
 | `--validate`     | no       | —                 | Validate the model and report what would be generated, without writing any files    |
 
 **Example:**
 
 ```
-java -jar cloudmock-codegen/build/libs/cloudmock-codegen.jar \
+java -jar cloudstub-codegen/build/libs/cloudstub-codegen.jar \
     --model models/kinesis.smithy \
-    --output cloudmock-kinesis
+    --output cloudstub-kinesis
 ```
 
 The `--model` argument accepts:
@@ -78,13 +78,13 @@ Constraints:
 
 The codegen writes a complete, compilable module skeleton:
 
-- `build.gradle` — `compileOnly`/`testImplementation` on `cloudmock-core` at the pinned `--core-version`
-- The `CloudMock<Service>Service` class — one `register*Stub` call per operation, each loading its body from the
+- `build.gradle` — `compileOnly`/`testImplementation` on `cloudstub-core` at the pinned `--core-version`
+- The `CloudStub<Service>Service` class — one `register*Stub` call per operation, each loading its body from the
   classpath via a generated `loadTemplate(name)` helper
-- `META-INF/services/io.cloudmock.core.spi.CloudMockService` — registers the generated class for `ServiceLoader`
+- `META-INF/services/io.cloudstub.core.spi.CloudStubService` — registers the generated class for `ServiceLoader`
   discovery
 - One `src/main/resources/templates/<Operation>.hbs` template per operation
-- A `CloudMock<Service>ServiceTest` skeleton with one stubbed `@Test` per operation
+- A `CloudStub<Service>ServiceTest` skeleton with one stubbed `@Test` per operation
 
 Response templates are **minimal placeholders**, not finished responses. Each `.hbs` file opens with a
 `{{! REVIEW REQUIRED ... }}` comment listing the operation's output shape and its members, so you know what to fill in.
@@ -125,8 +125,8 @@ The generated output is a starting point, not a finished module. Always review a
    pattern in the [Module Authoring Guide](module-authoring.md#6-write-the-module-test).
 
 4. **Check for custom Handlebars helpers.** If a response requires an MD5 checksum or other derived field, use
-   CloudMock's `{{md5 ...}}` helper or WireMock's built-in helpers. The codegen uses only `{{randomValue type='UUID'}}`
+   CloudStub's `{{md5 ...}}` helper or WireMock's built-in helpers. The codegen uses only `{{randomValue type='UUID'}}`
    and `{{jsonPath ...}}` by default.
 
-5. **Enforce module isolation.** Confirm that `build.gradle` uses `compileOnly` for `cloudmock-core` and declares no
-   dependencies on other `cloudmock-*` modules.
+5. **Enforce module isolation.** Confirm that `build.gradle` uses `compileOnly` for `cloudstub-core` and declares no
+   dependencies on other `cloudstub-*` modules.

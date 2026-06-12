@@ -4,14 +4,14 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/gh-pages/**'
-      - 'mkdocs.yml'
-      - '.github/workflows/docs.yml'
+      - "docs/gh-pages/**"
+      - "mkdocs.yml"
+      - ".github/workflows/docs.yml"
       # Module source feeds the aggregated Javadoc, so a source change redeploys the site to keep
       # the API reference in sync.
-      - '**/src/main/java/**'
-      - 'build.gradle'
-      - 'gradle/libs.versions.toml'
+      - "**/src/main/java/**"
+      - "build.gradle"
+      - "gradle/libs.versions.toml"
 
 jobs:
   deploy:
@@ -30,11 +30,11 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v5.0.2
         with:
-          gradle-version: '8.8'
+          gradle-version: "8.8"
 
       - uses: actions/setup-python@v6.0.0
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       - name: Install MkDocs Material
         run: pip install mkdocs-material

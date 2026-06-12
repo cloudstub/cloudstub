@@ -1,5 +1,0 @@
-dependencies {
-    compileOnly project(':cloudmock-core')
-    testImplementation project(':cloudmock-core')
-    testImplementation libs.aws.sqs
-}

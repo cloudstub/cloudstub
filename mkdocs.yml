@@ -1,8 +1,8 @@
-site_name: CloudMock
+site_name: CloudStub
 site_description: Embedded, containerless AWS mock for JVM integration tests
-site_url: https://cloud-mock.github.io/cloudmock/
-repo_url: https://github.com/cloud-mock/cloudmock
-repo_name: cloud-mock/cloudmock
+site_url: https://cloudstub.github.io/cloudstub/
+repo_url: https://github.com/cloudstub/cloudstub
+repo_name: cloudstub/cloudstub
 edit_uri: edit/main/docs/gh-pages/
 docs_dir: docs/gh-pages
 
@@ -43,7 +43,7 @@ nav:
       - Logging: logging.md
       - SDK v1 Support: sdk-v1.md
   - Module Authoring: module-authoring.md
-  - CloudMock Codegen: codegen.md
+  - CloudStub Codegen: codegen.md
 
 plugins:
   - search

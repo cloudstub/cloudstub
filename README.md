@@ -1,36 +1,36 @@
-# CloudMock
+# CloudStub
 
-[![CI](https://github.com/cloud-mock/cloudmock/actions/workflows/ci.yml/badge.svg)](https://github.com/cloud-mock/cloudmock/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/cloud-mock/cloudmock/actions/workflows/codeql.yml/badge.svg)](https://github.com/cloud-mock/cloudmock/actions/workflows/codeql.yml)
+[![CI](https://github.com/cloudstub/cloudstub/actions/workflows/ci.yml/badge.svg)](https://github.com/cloudstub/cloudstub/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/cloudstub/cloudstub/actions/workflows/codeql.yml/badge.svg)](https://github.com/cloudstub/cloudstub/actions/workflows/codeql.yml)
 
 > An ultra-lightweight, containerless AWS mock framework for the JVM.
 
-## What is CloudMock?
+## What is CloudStub?
 
-CloudMock lets you test AWS service integrations without Docker, without credentials, and without waiting for a
+CloudStub lets you test AWS service integrations without Docker, without credentials, and without waiting for a
 container to spin up. It runs entirely in-process inside the JVM, starts in milliseconds, and loads only the service
 modules your project actually needs.
 
-## Why CloudMock
+## Why CloudStub
 
 Testing AWS integrations on the JVM typically means running an external process — a Docker container, a Python runtime, or both. That adds startup time and environment dependencies to every test and CI run.
 
-CloudMock runs inside the JVM itself. No container, no external process, no extra runtime.
+CloudStub runs inside the JVM itself. No container, no external process, no extra runtime.
 
 ## Installation
 
-Add `cloudmock-core`, the JUnit extension, and the service module(s) you need.
+Add `cloudstub-core`, the JUnit extension, and the service module(s) you need.
 
 **Gradle**
 
 ```groovy
 dependencies {
-    testImplementation 'io.cloudmock:cloudmock-core:0.1.0'
-    testImplementation 'io.cloudmock:cloudmock-junit:0.1.0'
+    testImplementation 'io.cloudstub:cloudstub-core:0.1.0'
+    testImplementation 'io.cloudstub:cloudstub-junit:0.1.0'
 
     // Service modules — add only what your project uses
-    testImplementation 'io.cloudmock:cloudmock-sqs:0.1.0'
-    testImplementation 'io.cloudmock:cloudmock-secretsmanager:0.1.0'
+    testImplementation 'io.cloudstub:cloudstub-sqs:0.1.0'
+    testImplementation 'io.cloudstub:cloudstub-secretsmanager:0.1.0'
 
     // Matching AWS SDK v2 clients
     testImplementation 'software.amazon.awssdk:sqs:2.25.70'
@@ -44,20 +44,20 @@ dependencies {
 
 <dependencies>
     <dependency>
-        <groupId>io.cloudmock</groupId>
-        <artifactId>cloudmock-core</artifactId>
+        <groupId>io.cloudstub</groupId>
+        <artifactId>cloudstub-core</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>io.cloudmock</groupId>
-        <artifactId>cloudmock-junit</artifactId>
+        <groupId>io.cloudstub</groupId>
+        <artifactId>cloudstub-junit</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>io.cloudmock</groupId>
-        <artifactId>cloudmock-sqs</artifactId>
+        <groupId>io.cloudstub</groupId>
+        <artifactId>cloudstub-sqs</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>
     </dependency>
@@ -67,14 +67,14 @@ dependencies {
 ## Quickstart
 
 ```java
-import io.cloudmock.core.CloudMock;
+import io.cloudstub.core.CloudStub;
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 import java.net.URI;
 
-CloudMock cloudMock = new CloudMock();
+CloudStub cloudMock = new CloudStub();
 cloudMock.start();
 
 SqsClient sqs = SqsClient.builder()
@@ -90,32 +90,32 @@ assertNotNull(queueUrl);
 cloudMock.stop();
 ```
 
-`CloudMock.start()` sets `aws.endpoint-url` automatically, so all AWS SDK v2 clients in the same JVM are redirected
+`CloudStub.start()` sets `aws.endpoint-url` automatically, so all AWS SDK v2 clients in the same JVM are redirected
 with no further configuration. For full JUnit lifecycle management, fault injection, and `@ExtendWith` usage, see the
-[Getting Started guide](https://cloud-mock.github.io/cloudmock/getting-started/).
+[Getting Started guide](https://cloudstub.github.io/cloudstub/getting-started/).
 
 ## Standalone mode
 
-Besides running embedded in tests, CloudMock ships as a long-lived standalone server for local development — start it
+Besides running embedded in tests, CloudStub ships as a long-lived standalone server for local development — start it
 once, leave it running, and point any application that reads `AWS_ENDPOINT_URL` at it. No Docker, no daemon.
 
 ```
-./gradlew :cloudmock-standalone:shadowJar
-java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar
+./gradlew :cloudstub-standalone:shadowJar
+java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs,secretsmanager
 ```
 
-The server binds to port `4566` by default (override with `--port=<n>` or `CLOUDMOCK_PORT`). All bundled modules are
-enabled unless you select a subset with `--modules=sqs,secretsmanager` (or `CLOUDMOCK_MODULES`). `Ctrl-C` shuts it down
-cleanly.
+The server binds to port `4566` by default (override with `--port=<n>` or `CLOUDSTUB_PORT`). Services are opt-in: choose
+which ones to enable with `--services=sqs,secretsmanager` (or `CLOUDSTUB_SERVICES`). With no `--services` the server
+starts but serves nothing and prints a warning telling you how to enable services. `Ctrl-C` shuts it down cleanly.
 
 ```
 export AWS_ENDPOINT_URL=http://localhost:4566
 ./gradlew bootRun
 ```
 
-A companion CLI (`clm` / `cloudmock`) drives a running instance from the terminal — inspect status, send test data,
+A companion CLI (`clm` / `cloudstub`) drives a running instance from the terminal — inspect status, send test data,
 reset services — without the AWS CLI. It is a thin HTTP client that discovers its commands from the server at runtime,
-and ships in its own repository: [cloud-mock/cloudmock-cli](https://github.com/cloud-mock/cloudmock-cli).
+and ships in its own repository: [cloudstub/cloudstub-cli](https://github.com/cloudstub/cloudstub-cli).
 
 ```
 clm status
@@ -123,44 +123,44 @@ clm sqs send-message --queue orders --body "hello"
 ```
 
 > Standalone mode serves the same stateless, templated responses as embedded mode — it does not persist state across
-> calls. See the [Standalone Mode guide](https://cloud-mock.github.io/cloudmock/standalone/) and
-> [CLI guide](https://cloud-mock.github.io/cloudmock/cli/) for full details.
+> calls. See the [Standalone Mode guide](https://cloudstub.github.io/cloudstub/standalone/) and
+> [CLI guide](https://cloudstub.github.io/cloudstub/cli/) for full details.
 
 ## Supported services
 
 | Module                     | Service         |
 | -------------------------- | --------------- |
-| `cloudmock-sqs`            | Amazon SQS      |
-| `cloudmock-secretsmanager` | Secrets Manager |
-| `cloudmock-s3`             | Amazon S3       |
-| `cloudmock-sns`            | Amazon SNS      |
+| `cloudstub-sqs`            | Amazon SQS      |
+| `cloudstub-secretsmanager` | Secrets Manager |
+| `cloudstub-s3`             | Amazon S3       |
+| `cloudstub-sns`            | Amazon SNS      |
 
 **Tooling**
 
 | Module              | Purpose                                                                        |
 | ------------------- | ------------------------------------------------------------------------------ |
-| `cloudmock-junit`   | JUnit extension (JUnit 5 and 6) — `@ExtendWith` + fault injection              |
-| `cloudmock-codegen` | Stub generator — produces a module skeleton from a Smithy model                |
-| `cloudmock-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |
+| `cloudstub-junit`   | JUnit extension (JUnit 5 and 6) — `@ExtendWith` + fault injection              |
+| `cloudstub-codegen` | Stub generator — produces a module skeleton from a Smithy model                |
+| `cloudstub-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |
 
-The `clm` / `cloudmock` command-line client ships separately at
-[cloud-mock/cloudmock-cli](https://github.com/cloud-mock/cloudmock-cli).
+The `clm` / `cloudstub` command-line client ships separately at
+[cloudstub/cloudstub-cli](https://github.com/cloudstub/cloudstub-cli).
 
 ## Scope and limitations
 
-CloudMock validates that your application calls AWS correctly and handles responses properly. It is not a reimplementation of AWS. Service-level behaviours like FIFO ordering, multipart upload lifecycle, conditional expressions, and IAM policy evaluation are out of scope. Tests that depend on these behaviours should run against a real AWS environment.
+CloudStub validates that your application calls AWS correctly and handles responses properly. It is not a reimplementation of AWS. Service-level behaviours like FIFO ordering, multipart upload lifecycle, conditional expressions, and IAM policy evaluation are out of scope. Tests that depend on these behaviours should run against a real AWS environment.
 
-AWS SDK v2 is fully supported with automatic zero-config redirection. SDK v1 users can use cloudmock-sdk-v1 for a one-line per-client redirect.
+AWS SDK v2 is fully supported with automatic zero-config redirection. SDK v1 users can use cloudstub-sdk-v1 for a one-line per-client redirect.
 
 ## Contributing
 
 If a module you need doesn't exist yet, you can build it. Each AWS service is an independent module implementing a
 simple
-two-method SPI (`CloudMockService` + `StubRegistrar`).
+two-method SPI (`CloudStubService` + `StubRegistrar`).
 
-- **New module:** follow the [Module Authoring Guide](https://cloud-mock.github.io/cloudmock/module-authoring/)
+- **New module:** follow the [Module Authoring Guide](https://cloudstub.github.io/cloudstub/module-authoring/)
 - **New feature or bug:** open an issue in the [`issues/`](issues/) directory following the existing format
-- **Stub generation:** use the [codegen tool](https://cloud-mock.github.io/cloudmock/codegen/) to generate a module
+- **Stub generation:** use the [codegen tool](https://cloudstub.github.io/cloudstub/codegen/) to generate a module
   skeleton from a Smithy model
 
-Full documentation: **[CloudMock](https://cloud-mock.github.io/cloudmock/)**
+Full documentation: **[CloudStub](https://cloudstub.github.io/cloudstub/)**

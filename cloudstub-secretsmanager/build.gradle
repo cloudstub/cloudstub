@@ -1,0 +1,5 @@
+dependencies {
+    compileOnly project(':cloudstub-core')
+    testImplementation project(':cloudstub-core')
+    testImplementation libs.aws.secretsmanager
+}

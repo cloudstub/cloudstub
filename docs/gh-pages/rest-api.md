@@ -1,6 +1,6 @@
 # REST API
 
-When running in standalone mode CloudMock exposes a REST API on a secondary port (`4567` by default).
+When running in standalone mode CloudStub exposes a REST API on a secondary port (`4567` by default).
 The API and the AWS mock port (`4566`) run in the same process — no extra server to start.
 
 ## Configuration
@@ -8,28 +8,28 @@ The API and the AWS mock port (`4566`) run in the same process — no extra serv
 | Mechanism            | Example                   |
 |----------------------|---------------------------|
 | CLI flag             | `--api-port=9001`         |
-| Environment variable | `CLOUDMOCK_API_PORT=9001` |
+| Environment variable | `CLOUDSTUB_API_PORT=9001` |
 | Default              | `4567`                    |
 
-Precedence: `--api-port` flag → `CLOUDMOCK_API_PORT` env var → default `4567`.
+Precedence: `--api-port` flag → `CLOUDSTUB_API_PORT` env var → default `4567`.
 
 === "CLI flag"
 
     ```
-    java -jar cloudmock-standalone.jar --api-port=9001
+    java -jar cloudstub-standalone.jar --api-port=9001
     ```
 
 === "Environment variable"
 
     ```
-    CLOUDMOCK_API_PORT=9001 java -jar cloudmock-standalone.jar
+    CLOUDSTUB_API_PORT=9001 java -jar cloudstub-standalone.jar
     ```
 
 The API port is printed at startup alongside the mock port:
 
 ```
-CloudMock started on port 4566
-CloudMock API on port 4567
+CloudStub started on port 4566
+CloudStub API on port 4567
 ```
 
 ## Why a separate port?
@@ -192,7 +192,7 @@ and `"serviceId": null`. They are the most common source of integration issues; 
 field to diagnose why a stub did not match.
 
 The history is capped at the last 1000 requests by default so a long-lived process does not grow
-without bound. Change the cap with `--max-history=<n>` (or `CLOUDMOCK_MAX_HISTORY`); pass
+without bound. Change the cap with `--max-history=<n>` (or `CLOUDSTUB_MAX_HISTORY`); pass
 `--max-history=unlimited` to retain everything.
 
 ---
@@ -200,7 +200,7 @@ without bound. Change the cap with `--max-history=<n>` (or `CLOUDMOCK_MAX_HISTOR
 ### `GET /api/openapi.json`
 
 Returns an OpenAPI 3.0 spec auto-generated from all registered routes, including any routes
-contributed by module-specific `CloudMockApiService` implementations.
+contributed by module-specific `CloudStubApiService` implementations.
 
 ```
 GET /api/openapi.json
@@ -211,8 +211,8 @@ The spec updates automatically when modules are added or removed — no manual m
 ## Module routes
 
 Modules can expose their own routes under `/api/<serviceId>/…` by implementing the
-`CloudMockApiService` SPI interface. If a module JAR is not on the classpath — or the module is
-disabled with `--modules` — its routes do not exist; loading the module makes them available
+`CloudStubApiService` SPI interface. If a module JAR is not on the classpath — or the service is
+not enabled with `--services` — its routes do not exist; loading the module makes them available
 automatically. Each route may advertise a `command` name and `params`, which the [CLI](cli.md)
 turns into a `clm <service> <command>` subcommand.
 
@@ -220,4 +220,4 @@ Parameters are passed as query-string values (`POST /api/sqs/send-message?queue=
 the request body is not read.
 
 See [Module Authoring](module-authoring.md#8-exposing-cli-commands-via-the-rest-api) for details on
-implementing `CloudMockApiService`.
+implementing `CloudStubApiService`.

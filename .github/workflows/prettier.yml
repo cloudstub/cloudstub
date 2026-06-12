@@ -2,9 +2,9 @@ name: Prettier
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 # Least-privilege default for the whole workflow; the format job widens to contents: write.
@@ -22,31 +22,3 @@ jobs:
 
       - name: Check markdown formatting
         run: npx --yes prettier@3.3.3 --check "**/*.md"
-
-  # Auto-fixes formatting and commits the result. Runs only on push to main (or a manual
-  # dispatch), never on pull_request, so it cannot create a commit loop on contributor branches.
-  format:
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v6.0.2
-
-      - uses: actions/setup-node@v4
-
-      - name: Format markdown
-        run: npx --yes prettier@3.3.3 --write "**/*.md"
-
-      - name: Commit formatting changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet; then
-            echo "No formatting changes to commit."
-          else
-            git add -A
-            git commit -m "Apply Prettier formatting to markdown"
-            git push
-          fi
