@@ -6,19 +6,34 @@
 apply plugin: 'application'
 apply plugin: 'io.github.goooler.shadow'
 
+configurations {
+    // Collects module jars that integration tests copy into a temp plugin directory. Not a
+    // compile/runtime dependency — the standalone fat JAR does not bundle these; they are loaded
+    // at runtime via PluginLoader from the plugin directory.
+    integrationTestModuleJars {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
+
 dependencies {
     implementation project(':cloudstub-core')
     implementation libs.jackson.databind
     implementation libs.slf4j.api
     runtimeOnly libs.slf4j.simple
-    runtimeOnly project(':cloudstub-sqs')
-    runtimeOnly project(':cloudstub-sns')
-    runtimeOnly project(':cloudstub-secretsmanager')
-    runtimeOnly project(':cloudstub-s3')
 
     testImplementation project(':cloudstub-core')
     testImplementation libs.aws.sqs
     testImplementation libs.slf4j.simple
+    // Unit tests that exercise the state cross-surface (StatefulCrossSurfaceTest) and request
+    // history (ApiServerIntegrationTest) need the SQS module discoverable via ServiceLoader.
+    // testRuntimeOnly is test-only and is exempt from the inter-module isolation check.
+    testRuntimeOnly project(':cloudstub-sqs')
+
+    integrationTestModuleJars project(':cloudstub-sqs')
+    integrationTestModuleJars project(':cloudstub-sns')
+    integrationTestModuleJars project(':cloudstub-secretsmanager')
+    integrationTestModuleJars project(':cloudstub-s3')
 }
 
 application {
@@ -53,10 +68,18 @@ shadowJar {
     mergeServiceFiles()
 }
 
+// Copies resolved module jars into build/integrationTest/modules so the subprocess launched by
+// integration tests has a populated plugin directory to point at via --modules-dir.
+tasks.register('copyModuleJars', Copy) {
+    from configurations.integrationTestModuleJars
+    into "${buildDir}/integrationTest/modules"
+}
+
 // The end-to-end tests in src/integrationTest launch the fat JAR as a subprocess, so they need it
 // built first and pointed at via a system property. Unit tests (src/test) run in-process and do
 // not require the JAR, so this is scoped to the integrationTest task, not test.
 tasks.named('integrationTest') {
-    dependsOn shadowJar
+    dependsOn shadowJar, copyModuleJars
     systemProperty 'cloudstub.standalone.jar', shadowJar.archiveFile.get().asFile.absolutePath
+    systemProperty 'cloudstub.standalone.modules.dir', "${buildDir}/integrationTest/modules"
 }

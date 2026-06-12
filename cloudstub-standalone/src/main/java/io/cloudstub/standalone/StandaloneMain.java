@@ -3,10 +3,8 @@ package io.cloudstub.standalone;
 import io.cloudstub.core.CloudStub;
 import io.cloudstub.core.spi.CloudStubApiService;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +26,18 @@ public final class StandaloneMain {
         int port = PortResolver.resolve(args);
         int apiPort = ApiPortResolver.resolve(args);
         int maxHistory = MaxHistoryResolver.resolve(args);
-        List<String> available = ServiceDiscovery.discoverServiceIds();
-        Set<String> requested = ServiceSelector.resolve(args);
-        List<String> enabled = resolveEnabled(available, requested);
         Path storeDir = StoreDirectoryResolver.resolve(args);
 
+        Path modulesDir = ModulesDirResolver.resolve(args);
+        ClassLoader pluginLoader = PluginLoader.load(modulesDir);
+
+        List<String> available = ServiceDiscovery.discoverServiceIds(pluginLoader);
+        Set<String> requested = ServiceSelector.resolve(args);
+        List<String> enabled = resolveEnabled(available, requested);
+
+        System.out.println(
+                "[CloudStub] Plugin directory: "
+                        + (modulesDir != null ? modulesDir.toAbsolutePath() : "(none)"));
         System.out.println("[CloudStub] Available services: " + join(available));
         System.out.println("[CloudStub] Enabled services: " + join(enabled));
         if (enabled.isEmpty()) {
@@ -63,9 +68,14 @@ public final class StandaloneMain {
         // API routes must track the enabled modules: a disabled service has no stubs, so it must
         // not advertise REST routes (or CLI commands) either, otherwise the two views disagree.
         List<CloudStubApiService> apiServices =
-                discoverApiServices().stream()
+                ServiceDiscovery.discoverApiServices(pluginLoader).stream()
                         .filter(svc -> enabled.contains(svc.serviceId()))
                         .toList();
+
+        // ModuleInitializer (inside CloudStub.start()) uses the thread's context classloader for
+        // ServiceLoader discovery. Point it at the plugin classloader so the module jars loaded
+        // from the plugin directory are visible when stubs are registered.
+        Thread.currentThread().setContextClassLoader(pluginLoader);
 
         try (cloudMock;
                 ApiServer apiServer = new ApiServer(cloudMock, apiPort, apiServices)) {
@@ -105,14 +115,6 @@ public final class StandaloneMain {
             System.exit(1);
         }
         return requested.stream().toList();
-    }
-
-    private static List<CloudStubApiService> discoverApiServices() {
-        List<CloudStubApiService> services = new ArrayList<>();
-        ServiceLoader.load(
-                        CloudStubApiService.class, Thread.currentThread().getContextClassLoader())
-                .forEach(services::add);
-        return services;
     }
 
     private static String join(Collection<String> ids) {

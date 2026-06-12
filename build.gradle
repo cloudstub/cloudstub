@@ -109,10 +109,7 @@ subprojects {
     // Service modules may depend on cloudstub-core (the SPI lives there), but no service module
     // may depend on another service module at compile or runtime. Test code is exempt so that
     // integration test modules (e.g. cloudstub-junit tests) can combine multiple modules.
-    // cloudstub-standalone is also exempt: its entire purpose is to bundle all service modules
-    // into a single runnable fat JAR.
     afterEvaluate {
-        if (project.name == 'cloudstub-standalone') return
         ['compileClasspath', 'runtimeClasspath'].each { cfgName ->
             configurations.findByName(cfgName)?.allDependencies?.each { dep ->
                 if (dep.group == 'io.cloudstub' && dep.name != 'cloudstub-core') {
@@ -126,16 +123,14 @@ subprojects {
         }
     }
 
-    if (project.name != 'cloudstub-standalone') {
-        configurations.matching { !it.name.toLowerCase().contains('test') }.configureEach {
-            resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-                if (details.requested.group == 'io.cloudstub' && details.requested.name != 'cloudstub-core') {
-                    throw new GradleException(
-                        "Module isolation violation in '${project.name}': " +
-                        "transitive dependency on '${details.requested.group}:${details.requested.name}' is forbidden. " +
-                        "cloudstub-* service modules must not depend on each other."
-                    )
-                }
+    configurations.matching { !it.name.toLowerCase().contains('test') }.configureEach {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'io.cloudstub' && details.requested.name != 'cloudstub-core') {
+                throw new GradleException(
+                    "Module isolation violation in '${project.name}': " +
+                    "transitive dependency on '${details.requested.group}:${details.requested.name}' is forbidden. " +
+                    "cloudstub-* service modules must not depend on each other."
+                )
             }
         }
     }
