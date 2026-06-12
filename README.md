@@ -128,8 +128,9 @@ clm status
 clm sqs send-message --queue orders --body "hello"
 ```
 
-> Standalone mode serves the same stateless, templated responses as embedded mode — it does not persist state across
-> calls. See the [Standalone Mode guide](https://cloudstub.github.io/cloudstub/standalone/) and
+> Standalone mode shares the same core engine and state backend as embedded mode: stateful modules return live data
+> (a `SendMessage` is returned by a later `ReceiveMessage`), and state is persistent by default (use `--store-dir=none`
+> for in-memory). See the [Standalone Mode guide](https://cloudstub.github.io/cloudstub/standalone/) and
 > [CLI guide](https://cloudstub.github.io/cloudstub/cli/) for full details.
 
 ## Supported services

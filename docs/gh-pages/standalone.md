@@ -201,13 +201,6 @@ Each module is a separate jar; drop the ones you want into the plugin directory:
 | `cloudstub-secretsmanager` | Secrets Manager | JSON / X-Amz-Target |
 | `cloudstub-s3`             | S3              | REST path           |
 
-!!! warning "Responses are stateless"
-    CloudStub returns templated responses derived from each request — it does **not** store state across calls. In
-    standalone mode this means a message sent with `SendMessage` is **not** returned by a later `ReceiveMessage`; the
-    receive call returns a synthetic placeholder message instead. Standalone mode is for exercising request/response
-    wiring against a long-lived endpoint, not for stateful end-to-end flows. A stateful backend is tracked separately
-    as a future design (state store interface).
-
 !!! note "Out-of-scope behaviours"
     CloudStub does not simulate IAM, DynamoDB conditional expressions, SQS FIFO ordering, or S3 multipart upload
     lifecycle. See the [architecture overview](index.md#how-it-works) for the full list.
