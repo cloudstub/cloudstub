@@ -121,9 +121,9 @@ curl -X POST http://localhost:4566 \
 
 ## Troubleshooting
 
-| Symptom                           | Fix                                                                  |
-| --------------------------------- | -------------------------------------------------------------------- |
-| `JAR not found`                   | Run `./gradlew :cloudstub-standalone:shadowJar` or use `--build`     |
-| `Server did not start within 10s` | Check `/tmp/cloudstub-smoke.log` for the cause                       |
-| `Address already in use`          | Another process holds the port — kill it or use `--port=N`           |
+| Symptom                           | Fix                                                                   |
+| --------------------------------- | --------------------------------------------------------------------- |
+| `JAR not found`                   | Run `./gradlew :cloudstub-standalone:shadowJar` or use `--build`      |
+| `Server did not start within 10s` | Check `/tmp/cloudstub-smoke.log` for the cause                        |
+| `Address already in use`          | Another process holds the port — kill it or use `--port=N`            |
 | `Unknown service(s): ...`         | Service name typo; valid IDs are `sqs`, `sns`, `secretsmanager`, `s3` |

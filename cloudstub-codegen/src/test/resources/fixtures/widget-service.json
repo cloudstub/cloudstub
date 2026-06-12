@@ -15,7 +15,7 @@
     },
     "com.example#CreateWidget": {
       "type": "operation",
-      "input":  { "target": "com.example#CreateWidgetInput" },
+      "input": { "target": "com.example#CreateWidgetInput" },
       "output": { "target": "com.example#CreateWidgetOutput" }
     },
     "com.example#CreateWidgetInput": {
@@ -34,7 +34,7 @@
     },
     "com.example#DeleteWidget": {
       "type": "operation",
-      "input":  { "target": "com.example#DeleteWidgetInput" },
+      "input": { "target": "com.example#DeleteWidgetInput" },
       "output": { "target": "smithy.api#Unit" }
     },
     "com.example#DeleteWidgetInput": {

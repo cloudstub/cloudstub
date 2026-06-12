@@ -2,9 +2,9 @@ name: Prettier
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 # Least-privilege default for the whole workflow; the format job widens to contents: write.
