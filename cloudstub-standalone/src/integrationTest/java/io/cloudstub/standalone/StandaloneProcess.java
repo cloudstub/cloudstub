@@ -1,5 +1,7 @@
 package io.cloudstub.standalone;
 
+import org.jspecify.annotations.NonNull;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.BufferedReader;
@@ -42,14 +44,8 @@ final class StandaloneProcess implements AutoCloseable {
         if (modulesDir != null) {
             command.add("--modules-dir=" + modulesDir);
         }
-        command.addAll(List.of(extraArgs));
 
-        ProcessBuilder pb = new ProcessBuilder(command);
-        pb.redirectErrorStream(true);
-        StandaloneProcess sp = new StandaloneProcess(pb.start());
-        sp.drainOutput();
-        sp.awaitReady(port);
-        return sp;
+        return getStandaloneProcess(port, command, extraArgs);
     }
 
     /**
@@ -70,6 +66,12 @@ final class StandaloneProcess implements AutoCloseable {
                                 "--port=" + port,
                                 "--api-port=" + (port + 1000),
                                 "--modules-dir=" + modulesDir.toAbsolutePath()));
+
+        return getStandaloneProcess(port, command, extraArgs);
+    }
+
+    @NonNull
+    private static StandaloneProcess getStandaloneProcess(int port, List<String> command, String[] extraArgs) throws IOException, InterruptedException {
         command.addAll(List.of(extraArgs));
 
         ProcessBuilder pb = new ProcessBuilder(command);
