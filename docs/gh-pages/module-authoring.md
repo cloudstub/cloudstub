@@ -1,10 +1,10 @@
 # Module Authoring Guide
 
-This guide walks through building a CloudMock service module from scratch. At the end you will have a working module
+This guide walks through building a CloudStub service module from scratch. At the end you will have a working module
 that integrates with the core engine via `ServiceLoader`, registers its stubs through `StubRegistrar`, and is tested
 with real AWS SDK v2 clients.
 
-Use `cloudmock-sqs` and `cloudmock-secretsmanager` as reference implementations throughout.
+Use `cloudstub-sqs` and `cloudstub-secretsmanager` as reference implementations throughout.
 
 ---
 
@@ -25,45 +25,45 @@ Check the AWS SDK v2 source or Smithy model for your target service to confirm w
 ## 2. Create the Gradle subproject
 
 ```
-cloudmock-myservice/
+cloudstub-myservice/
 ├── build.gradle
 └── src/
     ├── main/
-    │   ├── java/io/cloudmock/myservice/CloudMockMyServiceService.java
-    │   └── resources/META-INF/services/io.cloudmock.core.spi.CloudMockService
+    │   ├── java/io/cloudstub/myservice/CloudStubMyServiceService.java
+    │   └── resources/META-INF/services/io.cloudstub.core.spi.CloudStubService
     └── test/
-        └── java/io/cloudmock/myservice/CloudMockMyServiceTest.java
+        └── java/io/cloudstub/myservice/CloudStubMyServiceTest.java
 ```
 
 ```groovy
-// cloudmock-myservice/build.gradle
+// cloudstub-myservice/build.gradle
 dependencies {
-    compileOnly project(':cloudmock-core')      // SPI only — not bundled in the module JAR
-    testImplementation project(':cloudmock-core')
+    compileOnly project(':cloudstub-core')      // SPI only — not bundled in the module JAR
+    testImplementation project(':cloudstub-core')
     testImplementation 'software.amazon.awssdk:myservice:2.25.70'
 }
 ```
 
-`compileOnly` keeps `cloudmock-core` off the module's runtime classpath. The core engine loads the module at runtime,
+`compileOnly` keeps `cloudstub-core` off the module's runtime classpath. The core engine loads the module at runtime,
 not the other way around.
 
 Register the new subproject in `settings.gradle`:
 
 ```groovy
-include 'cloudmock-myservice'
+include 'cloudstub-myservice'
 ```
 
 ---
 
-## 3. Implement `CloudMockService`
+## 3. Implement `CloudStubService`
 
 ```java
-package io.cloudmock.myservice;
+package io.cloudstub.myservice;
 
-import io.cloudmock.core.spi.CloudMockService;
-import io.cloudmock.core.spi.StubRegistrar;
+import io.cloudstub.core.spi.CloudStubService;
+import io.cloudstub.core.spi.StubRegistrar;
 
-public class CloudMockMyServiceService implements CloudMockService {
+public class CloudStubMyServiceService implements CloudStubService {
 
     @Override
     public String serviceId() {
@@ -95,7 +95,7 @@ public class CloudMockMyServiceService implements CloudMockService {
 
 ## 4. Write response templates
 
-Templates are [Handlebars](https://handlebarsjs.com/) strings evaluated per request. CloudMock provides helpers on top
+Templates are [Handlebars](https://handlebarsjs.com/) strings evaluated per request. CloudStub provides helpers on top
 of WireMock's built-in set.
 
 ### Built-in WireMock helpers
@@ -106,7 +106,7 @@ of WireMock's built-in set.
 {{now}}                                   → current timestamp
 ```
 
-### CloudMock custom helpers
+### CloudStub custom helpers
 
 ```
 {{md5 'some string'}}                     → MD5 hex digest (used for SQS message checksums)
@@ -144,32 +144,32 @@ The `{{jsonPath}}` syntax is the same.
 
 ## 5. Register via `META-INF/services`
 
-Create the file `src/main/resources/META-INF/services/io.cloudmock.core.spi.CloudMockService` containing the fully
+Create the file `src/main/resources/META-INF/services/io.cloudstub.core.spi.CloudStubService` containing the fully
 qualified class name of your implementation:
 
 ```
-io.cloudmock.myservice.CloudMockMyServiceService
+io.cloudstub.myservice.CloudStubMyServiceService
 ```
 
-This is standard Java `ServiceLoader` registration. When the module JAR is on the classpath, `CloudMock.start()`
+This is standard Java `ServiceLoader` registration. When the module JAR is on the classpath, `CloudStub.start()`
 discovers and calls `register()` automatically.
 
 ---
 
 ## 6. Write the module test
 
-Test your module by driving real AWS SDK v2 clients against a live `CloudMock` instance. The goal is to verify that the
+Test your module by driving real AWS SDK v2 clients against a live `CloudStub` instance. The goal is to verify that the
 SDK can parse your responses without error — not to reproduce AWS semantics.
 
 ```java
-class CloudMockMyServiceTest {
+class CloudStubMyServiceTest {
 
-    static CloudMock cloudMock;
+    static CloudStub cloudMock;
     static MyServiceClient client;
 
     @BeforeAll
     static void start() {
-        cloudMock = new CloudMock().withService(new CloudMockMyServiceService()); // (1)!
+        cloudMock = new CloudStub().withService(new CloudStubMyServiceService()); // (1)!
         cloudMock.start();
         client = MyServiceClient.builder()
             .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
@@ -205,7 +205,7 @@ This is enforced by Gradle:
 ```groovy
 // This will fail the build:
 dependencies {
-    implementation project(':cloudmock-sqs')   // ← forbidden in a service module
+    implementation project(':cloudstub-sqs')   // ← forbidden in a service module
 }
 ```
 
@@ -215,36 +215,36 @@ dependencies {
 
 ## 8. Exposing CLI commands via the REST API
 
-`CloudMockService` registers the AWS wire-protocol stubs your module serves on the mock port. A
+`CloudStubService` registers the AWS wire-protocol stubs your module serves on the mock port. A
 module may *also* expose a small REST surface under `/api/<serviceId>/…` by implementing the
-optional `CloudMockApiService` SPI. This is what the [CLI](cli.md) drives: each route you register
+optional `CloudStubApiService` SPI. This is what the [CLI](cli.md) drives: each route you register
 advertises a command name and parameters in `/api/status`, and the CLI turns it into
 `clm <serviceId> <command>` automatically — no change to the CLI is needed.
 
-`CloudMockApiService` depends only on core SPI types (no WireMock, no AWS SDK, no picocli). Handlers
+`CloudStubApiService` depends only on core SPI types (no WireMock, no AWS SDK, no picocli). Handlers
 return an `ApiResponse(statusCode, body)` whose `body` map is serialised to JSON. Parameters arrive
 as query-string values via `ApiRequest.queryParams()`; the request body is not read.
 
 ```java
-package io.cloudmock.myservice;
+package io.cloudstub.myservice;
 
-import io.cloudmock.core.spi.CloudMockApiService;
-import io.cloudmock.core.spi.HttpMethod;
-import io.cloudmock.core.spi.restapi.ApiParam;
-import io.cloudmock.core.spi.restapi.CloudMockApiContext;
+import io.cloudstub.core.spi.CloudStubApiService;
+import io.cloudstub.core.spi.HttpMethod;
+import io.cloudstub.core.spi.restapi.ApiParam;
+import io.cloudstub.core.spi.restapi.CloudStubApiContext;
 
 import java.util.List;
 import java.util.Map;
 
-public class CloudMockMyServiceApiService implements CloudMockApiService {
+public class CloudStubMyServiceApiService implements CloudStubApiService {
 
     @Override
     public String serviceId() {
-        return "myservice"; // must match CloudMockService.serviceId()
+        return "myservice"; // must match CloudStubService.serviceId()
     }
 
     @Override
-    public void registerRoutes(CloudMockApiContext context) {
+    public void registerRoutes(CloudStubApiContext context) {
         // context.stateStore() is the same store the module's stubs use — read/write it here to
         // return live data instead of synthetic responses.
         var r = context.registrar();
@@ -254,7 +254,7 @@ public class CloudMockMyServiceApiService implements CloudMockApiService {
             "describe-widget",                                // CLI command name
             "Describe a widget",                              // help text
             List.of(new ApiParam("id", true, "Widget id")),  // params → CLI options
-            req -> new io.cloudmock.core.spi.restapi.ApiResponse(200, Map.of(
+            req -> new io.cloudstub.core.spi.restapi.ApiResponse(200, Map.of(
                 "id", req.queryParams().getOrDefault("id", ""),
                 "status", "ACTIVE")));
     }
@@ -262,10 +262,10 @@ public class CloudMockMyServiceApiService implements CloudMockApiService {
 ```
 
 Register it alongside the stub service with a second `ServiceLoader` file,
-`src/main/resources/META-INF/services/io.cloudmock.core.spi.CloudMockApiService`:
+`src/main/resources/META-INF/services/io.cloudstub.core.spi.CloudStubApiService`:
 
 ```
-io.cloudmock.myservice.CloudMockMyServiceApiService
+io.cloudstub.myservice.CloudStubMyServiceApiService
 ```
 
 Now `clm myservice describe-widget --id w-123` works against any standalone instance that has the
@@ -275,7 +275,7 @@ are not registered, keeping the stub view and the API view consistent.
 !!! note "State-backed or synthetic — your call"
     Handlers receive the shared `StateStore` via `context.stateStore()`, so they can read and write the
     same data as the module's stubs (use the same key scheme on both surfaces so they can't drift).
-    `CloudMockSqsApiService` does this — a message sent through the AWS SDK is returned by its
+    `CloudStubSqsApiService` does this — a message sent through the AWS SDK is returned by its
     `receive-message` route. A handler that ignores the store simply stays synthetic.
 
 ---
@@ -284,10 +284,10 @@ are not registered, keeping the stub view and the API view consistent.
 
 | Module                     | Protocol used       | Reference for                                             |
 |----------------------------|---------------------|-----------------------------------------------------------|
-| `cloudmock-sqs`            | JSON / X-Amz-Target | Header-matched stubs, UUID + MD5 helpers, array responses |
-| `cloudmock-secretsmanager` | JSON / X-Amz-Target | ARN construction, nested JSON responses                   |
-| `cloudmock-sns`            | XML / Form URL      | `Action`-matched stubs, XML responses                     |
-| `cloudmock-s3`             | REST path           | HTTP method + path-regex stubs, XML responses             |
+| `cloudstub-sqs`            | JSON / X-Amz-Target | Header-matched stubs, UUID + MD5 helpers, array responses |
+| `cloudstub-secretsmanager` | JSON / X-Amz-Target | ARN construction, nested JSON responses                   |
+| `cloudstub-sns`            | XML / Form URL      | `Action`-matched stubs, XML responses                     |
+| `cloudstub-s3`             | REST path           | HTTP method + path-regex stubs, XML responses             |
 
-For `CloudMockApiService` (§8), `CloudMockSqsApiService`, `CloudMockS3ApiService`, and
-`CloudMockSecretsManagerApiService` are the reference implementations.
+For `CloudStubApiService` (§8), `CloudStubSqsApiService`, `CloudStubS3ApiService`, and
+`CloudStubSecretsManagerApiService` are the reference implementations.

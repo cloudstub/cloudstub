@@ -1,6 +1,6 @@
 # Fault Injection
 
-CloudMock can simulate three categories of AWS failure at the test-method level. Faults are applied by annotating individual test methods and are automatically cleared after each test, even if the test throws.
+CloudStub can simulate three categories of AWS failure at the test-method level. Faults are applied by annotating individual test methods and are automatically cleared after each test, even if the test throws.
 
 ## Annotations
 
@@ -56,7 +56,7 @@ void allRequestsFailWithConnectionReset() {
 
 ## Cleanup contract
 
-`CloudMockExtension` clears all faults after **every** test method, including tests that throw. This means:
+`CloudStubExtension` clears all faults after **every** test method, including tests that throw. This means:
 
 - A fault applied in test N is guaranteed to be gone for test N+1.
 - Tests do not need to call `clearFaults()` manually.
@@ -92,7 +92,7 @@ void bothServicesThrottled() {
 
 ## Programmatic fault injection
 
-When using `CloudMock` directly (without `CloudMockExtension`), faults are managed manually.
+When using `CloudStub` directly (without `CloudStubExtension`), faults are managed manually.
 
 ```java
 cloudMock.simulateThrottle("sqs");
@@ -100,4 +100,4 @@ cloudMock.simulateThrottle("sqs");
 cloudMock.clearFaults("sqs");   // or clearAllFaults()
 ```
 
-The programmatic API is also available when `CloudMockExtension` is used via `@RegisterExtension`, but the annotation-driven approach is preferred for test-method-level granularity.
+The programmatic API is also available when `CloudStubExtension` is used via `@RegisterExtension`, but the annotation-driven approach is preferred for test-method-level granularity.

@@ -1,0 +1,60 @@
+import org.gradle.process.CommandLineArgumentProvider
+
+// The application plugin adds `run` so the generator can be invoked in one step from the repo root
+// (./gradlew :cloudstub-codegen:run). The shadow plugin still produces the distributable fat JAR;
+// the two coexist by design. Application is applied first so the shadow plugin's application
+// integration (start scripts, distribution) sees the configured main class.
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+dependencies {
+    implementation libs.smithy.model
+    implementation libs.smithy.aws.traits
+}
+
+application {
+    mainClass = 'io.cloudstub.codegen.Main'
+}
+
+// Publish only the shadow (fat) JAR, matching the publication shape from before the application
+// plugin was applied. With the application plugin present, shadow leaves the thin-jar
+// apiElements/runtimeElements variants in the published component; skip them so a Gradle consumer
+// resolves the fat JAR (shadowRuntimeElements), not the thin jar plus its Smithy dependencies.
+components.java.withVariantsFromConfiguration(configurations.apiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.runtimeElements) { skip() }
+
+// Run the generator from the repo root so relative --model/--output paths resolve identically to the
+// `java -jar` invocation (without this, JavaExec runs from the subproject directory).
+//   ./gradlew :cloudstub-codegen:run --args="--model <path-or-url> --output <dir>"
+run {
+    workingDir = rootProject.projectDir
+}
+
+// Validate a Smithy model without generating any output. --validate is injected here so callers pass
+// only their model:  ./gradlew :cloudstub-codegen:validate --args="--model <path>"
+tasks.register('validate', JavaExec) {
+    group = 'application'
+    description = 'Validate a Smithy model without generating output.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.cloudstub.codegen.Main'
+    workingDir = rootProject.projectDir
+    argumentProviders.add({ ['--validate'] } as CommandLineArgumentProvider)
+}
+
+// Give the regular JAR an 'original' classifier so the shadow JAR (no classifier) stays the single
+// primary artifact. Applying the application plugin otherwise pulls the plain jar into the shadow
+// publication alongside the shadow JAR, colliding on the (jar, no-classifier) coordinate.
+jar {
+    manifest {
+        attributes 'Main-Class': 'io.cloudstub.codegen.Main'
+    }
+    archiveClassifier.set('original')
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    archiveBaseName.set('cloudstub-codegen')
+    archiveVersion.set('')
+    mergeServiceFiles()                    // merges META-INF/services/* (Smithy trait registrations)
+    append('META-INF/smithy/manifest')     // merges Smithy model manifests so discoverModels() works
+}

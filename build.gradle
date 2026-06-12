@@ -28,14 +28,14 @@ subprojects {
         }
     }
 
-    group = 'io.cloudmock'
+    group = 'io.cloudstub'
     version = '0.1.0-SNAPSHOT'
 
-    // Example projects (the cloudmock-example container and its junit5/junit6 children) are
+    // Example projects (the cloudstub-example container and its junit5/junit6 children) are
     // demonstration apps, not libraries — they are never published. Excluding them here keeps
-    // publishing self-correcting: no io.cloudmock:junit5 / :junit6 / :cloudmock-example artifacts
+    // publishing self-correcting: no io.cloudstub:junit5 / :junit6 / :cloudstub-example artifacts
     // leak to a repository regardless of how the example tree is restructured.
-    def publishable = project.path != ':cloudmock-example' && !project.path.startsWith(':cloudmock-example:')
+    def publishable = project.path != ':cloudstub-example' && !project.path.startsWith(':cloudstub-example:')
     if (publishable) {
         apply plugin: 'maven-publish'
     }
@@ -60,7 +60,7 @@ subprojects {
     }
 
     // Integration tests live in their own source set (src/integrationTest/java) so end-to-end
-    // tests that boot the full CloudMock engine are not mixed with fast unit tests. The
+    // tests that boot the full CloudStub engine are not mixed with fast unit tests. The
     // integrationTest configurations extend the test ones, so integration tests reuse the test
     // dependency set and (because the config name contains "test") are exempt from the
     // inter-module isolation check below. The `integrationTest` task is deliberately NOT wired
@@ -91,7 +91,7 @@ subprojects {
     }
 
     // Publishing is configured in afterEvaluate so that modules applying the
-    // Shadow plugin (cloudmock-core) can publish the shadow JAR via components.shadow
+    // Shadow plugin (cloudstub-core) can publish the shadow JAR via components.shadow
     // rather than the empty components.java.
     afterEvaluate {
         if (publishable) {
@@ -106,34 +106,34 @@ subprojects {
         }
     }
 
-    // Service modules may depend on cloudmock-core (the SPI lives there), but no service module
+    // Service modules may depend on cloudstub-core (the SPI lives there), but no service module
     // may depend on another service module at compile or runtime. Test code is exempt so that
-    // integration test modules (e.g. cloudmock-junit tests) can combine multiple modules.
-    // cloudmock-standalone is also exempt: its entire purpose is to bundle all service modules
+    // integration test modules (e.g. cloudstub-junit tests) can combine multiple modules.
+    // cloudstub-standalone is also exempt: its entire purpose is to bundle all service modules
     // into a single runnable fat JAR.
     afterEvaluate {
-        if (project.name == 'cloudmock-standalone') return
+        if (project.name == 'cloudstub-standalone') return
         ['compileClasspath', 'runtimeClasspath'].each { cfgName ->
             configurations.findByName(cfgName)?.allDependencies?.each { dep ->
-                if (dep.group == 'io.cloudmock' && dep.name != 'cloudmock-core') {
+                if (dep.group == 'io.cloudstub' && dep.name != 'cloudstub-core') {
                     throw new GradleException(
                         "Module isolation violation in '${project.name}': " +
                         "declared dependency on '${dep.group}:${dep.name}' is forbidden. " +
-                        "cloudmock-* service modules must not depend on each other."
+                        "cloudstub-* service modules must not depend on each other."
                     )
                 }
             }
         }
     }
 
-    if (project.name != 'cloudmock-standalone') {
+    if (project.name != 'cloudstub-standalone') {
         configurations.matching { !it.name.toLowerCase().contains('test') }.configureEach {
             resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-                if (details.requested.group == 'io.cloudmock' && details.requested.name != 'cloudmock-core') {
+                if (details.requested.group == 'io.cloudstub' && details.requested.name != 'cloudstub-core') {
                     throw new GradleException(
                         "Module isolation violation in '${project.name}': " +
                         "transitive dependency on '${details.requested.group}:${details.requested.name}' is forbidden. " +
-                        "cloudmock-* service modules must not depend on each other."
+                        "cloudstub-* service modules must not depend on each other."
                     )
                 }
             }
@@ -141,13 +141,13 @@ subprojects {
     }
 }
 
-// Verifies cloudmock-junit works under both supported JUnit versions: the junit5 example pins
+// Verifies cloudstub-junit works under both supported JUnit versions: the junit5 example pins
 // JUnit 5, the junit6 example runs on JUnit 6, both exercising the extension end to end. JUnit 4
 // is not supported. Run from the repo root: ./gradlew checkCompatibility
 tasks.register('checkCompatibility') {
     group = 'verification'
-    description = 'Runs cloudmock-junit against both JUnit 5 and JUnit 6 via the example suites.'
-    dependsOn ':cloudmock-example:junit5:test', ':cloudmock-example:junit6:test'
+    description = 'Runs cloudstub-junit against both JUnit 5 and JUnit 6 via the example suites.'
+    dependsOn ':cloudstub-example:junit5:test', ':cloudstub-example:junit6:test'
 }
 
 // Aggregated Javadoc for the public (published) modules, written to docs/api/ so the API
@@ -157,7 +157,7 @@ tasks.register('generateDocs', Javadoc) {
     group = 'documentation'
     description = 'Generates aggregated Javadoc for the public modules into docs/api/.'
     destinationDir = file("$rootDir/docs/api")
-    title = 'CloudMock API'
+    title = 'CloudStub API'
     // Doc warnings (missing tags in modules not yet fully documented) must not fail the build;
     // the goal is a published reference, not lint enforcement.
     failOnError = false
@@ -169,7 +169,7 @@ tasks.register('generateDocs', Javadoc) {
 gradle.projectsEvaluated {
     def docModules = subprojects.findAll {
         it.plugins.hasPlugin('java') &&
-            it.path != ':cloudmock-example' && !it.path.startsWith(':cloudmock-example:')
+            it.path != ':cloudstub-example' && !it.path.startsWith(':cloudstub-example:')
     }
     tasks.named('generateDocs', Javadoc) {
         // Javadoc parses .java sources and resolves references against the classpath; it does not

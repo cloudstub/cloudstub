@@ -1,6 +1,6 @@
 # Logging
 
-CloudMock uses SLF4J as its logging facade. No logging implementation is bundled — you bring your own.
+CloudStub uses SLF4J as its logging facade. No logging implementation is bundled — you bring your own.
 
 ## Default output (standalone mode)
 
@@ -9,7 +9,7 @@ In standalone mode the JAR ships `slf4j-simple`, which writes all log output to 
 Startup produces output similar to:
 
 ```
-INFO CloudMock - CloudMock started on port 4566
+INFO CloudStub - CloudStub started on port 4566
 INFO ModuleInitializer - Registered module: sqs (8 stub(s))
 INFO ModuleInitializer - Registered module: sns (42 stub(s))
 INFO ModuleInitializer - Registered module: secretsmanager (5 stub(s))
@@ -19,26 +19,26 @@ INFO ModuleInitializer - Registered module: s3 (107 stub(s))
 Each matched request is logged at INFO:
 
 ```
-INFO CloudMockResponseTransformer - sqs AmazonSQS.SendMessage -> 200
+INFO CloudStubResponseTransformer - sqs AmazonSQS.SendMessage -> 200
 ```
 
 Fault-injected requests include a tag:
 
 ```
-INFO CloudMockResponseTransformer - sqs AmazonSQS.SendMessage -> 400 [throttled]
-INFO CloudMockResponseTransformer - sqs AmazonSQS.SendMessage -> 200 [timeout]
+INFO CloudStubResponseTransformer - sqs AmazonSQS.SendMessage -> 400 [throttled]
+INFO CloudStubResponseTransformer - sqs AmazonSQS.SendMessage -> 200 [timeout]
 ```
 
 Unmatched requests are logged at WARN with the method, URL, `X-Amz-Target`, and `Content-Type` headers:
 
 ```
-WARN CloudMockResponseTransformer - Unmatched request: POST / (X-Amz-Target: AmazonSQS.UnknownOp, Content-Type: application/x-amz-json-1.0)
+WARN CloudStubResponseTransformer - Unmatched request: POST / (X-Amz-Target: AmazonSQS.UnknownOp, Content-Type: application/x-amz-json-1.0)
 ```
 
 Shutdown produces:
 
 ```
-INFO CloudMock - CloudMock stopped
+INFO CloudStub - CloudStub stopped
 ```
 
 ## Log levels
@@ -53,19 +53,19 @@ INFO CloudMock - CloudMock stopped
 
 ### Standalone mode
 
-Pass the `cloudmock.debug` system property or set the `CLOUDMOCK_DEBUG` environment variable before the first logger
+Pass the `cloudstub.debug` system property or set the `CLOUDSTUB_DEBUG` environment variable before the first logger
 is acquired. Both promote the root level from INFO to DEBUG.
 
 === "System property"
 
     ```
-    java -Dcloudmock.debug=true -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar
+    java -Dcloudstub.debug=true -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
     ```
 
 === "Environment variable"
 
     ```
-    CLOUDMOCK_DEBUG=true java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar
+    CLOUDSTUB_DEBUG=true java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
     ```
 
 ### Embedded mode
@@ -73,14 +73,14 @@ is acquired. Both promote the root level from INFO to DEBUG.
 Configure DEBUG on your own logging implementation. For Logback, add a logger entry to `logback-test.xml`:
 
 ```xml
-<logger name="io.cloudmock" level="DEBUG"/>
+<logger name="io.cloudstub" level="DEBUG"/>
 ```
 
 ## Custom logging implementation
 
 In standalone mode you can replace `slf4j-simple` with any SLF4J-compatible implementation by placing its JAR on the
 classpath ahead of the standalone JAR. In embedded mode, add your preferred implementation to your test dependencies —
-CloudMock will bind to it automatically.
+CloudStub will bind to it automatically.
 
 ### Logback example (embedded / Spring Boot)
 
@@ -104,7 +104,7 @@ Configure a logger in `src/test/resources/logback-test.xml`:
     </encoder>
   </appender>
 
-  <logger name="io.cloudmock" level="INFO"/>
+  <logger name="io.cloudstub" level="INFO"/>
 
   <root level="WARN">
     <appender-ref ref="STDOUT"/>

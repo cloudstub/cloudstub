@@ -1,0 +1,5 @@
+dependencies {
+    compileOnly libs.aws.v1.core
+    testImplementation project(':cloudstub-core')
+    testImplementation libs.aws.v1.sqs
+}
