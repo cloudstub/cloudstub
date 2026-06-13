@@ -1,17 +1,11 @@
-// The application plugin adds `run` so CloudStub can be started in local mode from the repo
-// root (./gradlew :cloudstub-local:run) without first building the fat JAR. The entry point
-// lives in this module (LocalMain), so the application plugin is applied here, not on
-// cloudstub-core. Application is applied first so the shadow plugin's application integration sees
-// the configured main class; the two coexist by design.
+// application enables `:cloudstub-local:run`; applied before shadow so shadow's application
+// integration sees the configured mainClass.
 apply plugin: 'application'
 apply plugin: 'io.github.goooler.shadow'
 
 configurations {
-    // Collects the in-repo module jars used to populate a plugin directory for local dev (`run`)
-    // and the integration-test subprocess. This is NOT a compile/runtime dependency — the
-    // local fat JAR does not bundle these; they are loaded at runtime via PluginLoader from
-    // the plugin directory. The name contains "test" so it stays exempt from the inter-module
-    // isolation check (it is a jar-collection bucket, not this module's own classpath).
+    // In-repo module jars copied into a plugin directory for `run` and the integration-test
+    // subprocess — loaded at runtime via PluginLoader, never bundled into the fat JAR.
     integrationTestModuleJars {
         canBeResolved = true
         canBeConsumed = false
@@ -27,9 +21,7 @@ dependencies {
     testImplementation project(':cloudstub-core')
     testImplementation libs.aws.sqs
     testImplementation libs.slf4j.simple
-    // Unit tests that exercise the state cross-surface (StatefulCrossSurfaceTest) and request
-    // history (ApiServerIntegrationTest) need the SQS module discoverable via ServiceLoader.
-    // testRuntimeOnly is test-only and is exempt from the inter-module isolation check.
+    // StatefulCrossSurfaceTest / ApiServerIntegrationTest need SQS discoverable via ServiceLoader.
     testRuntimeOnly project(':cloudstub-sqs')
 
     integrationTestModuleJars project(':cloudstub-sqs')
@@ -42,19 +34,13 @@ application {
     mainClass = 'io.cloudstub.local.LocalMain'
 }
 
-// Publish only the shadow (fat) JAR, matching the publication shape from before the application
-// plugin was applied. With the application plugin present, shadow leaves the thin-jar
-// apiElements/runtimeElements variants in the published component; skip them so a Gradle consumer
-// resolves the fat JAR (shadowRuntimeElements), not the thin jar plus its dependencies.
+// Publish only the shadow (fat) JAR — skip the thin-jar apiElements/runtimeElements variants the
+// application plugin leaves on the component, so consumers resolve the fat JAR.
 components.java.withVariantsFromConfiguration(configurations.apiElements) { skip() }
 components.java.withVariantsFromConfiguration(configurations.runtimeElements) { skip() }
 
-// Start from the repo root so the persistent `.cloudstub` store directory and any relative paths
-// resolve identically to the `java -jar` invocation.
-//   ./gradlew :cloudstub-local:run --args="--services=sqs,sns,secretsmanager,s3"
-// The fat JAR no longer bundles modules, so make the in-repo module jars discoverable by pointing
-// the plugin directory at the copied jars via CLOUDSTUB_MODULES_DIR. Services remain opt-in: pass
-// --services (or CLOUDSTUB_SERVICES) to enable the ones you want.
+// Run from the repo root so relative paths (the persistent `.cloudstub` dir) match `java -jar`.
+// The fat JAR bundles no modules, so point the plugin dir at the copied jars; services stay opt-in.
 run {
     workingDir = rootProject.projectDir
     dependsOn 'copyModuleJars'
@@ -75,16 +61,12 @@ shadowJar {
     mergeServiceFiles()
 }
 
-// Copies the in-repo module jars into build/modules so both the `run` task and the integration-test
-// subprocess have a populated plugin directory to point at (via CLOUDSTUB_MODULES_DIR / --modules-dir).
 tasks.register('copyModuleJars', Copy) {
     from configurations.integrationTestModuleJars
     into "${buildDir}/modules"
 }
 
-// The end-to-end tests in src/integrationTest launch the fat JAR as a subprocess, so they need it
-// built first and pointed at via a system property. Unit tests (src/test) run in-process and do
-// not require the JAR, so this is scoped to the integrationTest task, not test.
+// integrationTest launches the fat JAR as a subprocess: build it and pass its path + plugin dir.
 tasks.named('integrationTest') {
     dependsOn shadowJar, copyModuleJars
     systemProperty 'cloudstub.local.jar', shadowJar.archiveFile.get().asFile.absolutePath

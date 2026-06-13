@@ -1,18 +1,12 @@
 // Maven publication configuration, applied per-subproject from the root build.gradle via
-// `apply from:`. `project` here is the subproject the script is applied to.
-//
-// Module classes:
-//   - not published yet: examples, scaffolding, and the services not yet rolled out
-//   - plain library modules: published via the vanniktech plugin (POM + -sources + -javadoc)
-//   - shadow/tool modules (core, local, codegen): publish their shadow (fat) JAR as primary
+// `apply from:`. Module classification comes from gradle/modules.gradle.
 
 def isExample = project.path == ':cloudstub-example' || project.path.startsWith(':cloudstub-example:')
-def isShadowModule = project.name in ['cloudstub-core', 'cloudstub-local', 'cloudstub-codegen']
-// Scaffolding (not implemented) plus the service modules rolled out one issue at a time — sqs is
-// published first; sns/secretsmanager/s3 follow in later issues.
-def notPublishedYet = ['cloudstub-dynamodb', 'cloudstub-lambda',
-                       'cloudstub-sns', 'cloudstub-secretsmanager', 'cloudstub-s3']
-def publishable = !isExample && !(project.name in notPublishedYet)
+def isShadowModule = project.name in rootProject.shadowModules
+def isService = project.name in rootProject.serviceModules
+// Services publish only once rolled out; non-services (core, junit, testing, local, codegen,
+// sdk-v1) publish as soon as they exist.
+def publishable = !isExample && (isService ? project.name in rootProject.publishedServices : true)
 
 // Plain library modules: the vanniktech plugin builds the -sources/-javadoc JARs and a complete
 // POM. With no signing/remote repo configured, publishToMavenLocal still works.

@@ -1,0 +1,12 @@
+// Single source of truth for module classification, read by the isolation guard (build.gradle)
+// and the publication wiring (gradle/publishing.gradle).
+
+// Every service module — all are policed by the isolation guard regardless of publish status.
+ext.serviceModules = ['cloudstub-sqs', 'cloudstub-sns', 'cloudstub-secretsmanager',
+                      'cloudstub-s3', 'cloudstub-dynamodb', 'cloudstub-lambda']
+
+// Modules whose primary published artifact is the shadow (fat) JAR.
+ext.shadowModules = ['cloudstub-core', 'cloudstub-local', 'cloudstub-codegen']
+
+// Services rolled out so far; add the next one here (and its pomInfo) when its publishing is validated.
+ext.publishedServices = ['cloudstub-sqs']

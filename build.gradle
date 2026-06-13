@@ -7,6 +7,9 @@ buildscript {
     }
 }
 
+// Module classification (serviceModules / shadowModules / publishedServices) as root ext properties.
+apply from: rootProject.file('gradle/modules.gradle')
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'com.diffplug.spotless'
@@ -72,12 +75,10 @@ subprojects {
         shouldRunAfter tasks.named('test')
     }
 
-    // Service modules stay independently installable: a service module may depend, among our own
-    // modules, only on cloudstub-core. Non-services (core, junit, testing, local, codegen, sdk-v1)
-    // are aggregators/tools, free to depend on others. Gradle natively rejects dependency cycles.
-    def serviceModules = ['cloudstub-sqs', 'cloudstub-sns', 'cloudstub-secretsmanager',
-                          'cloudstub-s3', 'cloudstub-dynamodb', 'cloudstub-lambda']
-    if (project.name in serviceModules) {
+    // Service modules stay independently installable: each may depend, among our own modules, only
+    // on cloudstub-core. Non-services (aggregators/tools) are free to depend on others. Gradle
+    // natively rejects dependency cycles.
+    if (project.name in rootProject.serviceModules) {
         afterEvaluate {
             ['compileClasspath', 'runtimeClasspath'].each { cfgName ->
                 configurations.findByName(cfgName)?.allDependencies?.each { dep ->
