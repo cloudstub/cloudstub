@@ -8,69 +8,89 @@ def isService = project.name in rootProject.serviceModules
 // sdk-v1) publish as soon as they exist.
 def publishable = !isExample && (isService ? project.name in rootProject.publishedServices : true)
 
-// Plain library modules: the vanniktech plugin builds the -sources/-javadoc JARs and a complete
-// POM. With no signing/remote repo configured, publishToMavenLocal still works.
-if (publishable && !isShadowModule) {
-    apply plugin: 'java-library'
-    apply plugin: 'com.vanniktech.maven.publish'
+// POM name/description per published module. Shared by both publication paths below.
+def pomInfo = [
+    'cloudstub-core'   : ['CloudStub Core',
+        'CloudStub core engine: embedded HTTP server and the CloudStubService SPI.'],
+    'cloudstub-junit'  : ['CloudStub JUnit',
+        'JUnit 5 and 6 extension for CloudStub: lifecycle management and AWS fault injection.'],
+    'cloudstub-testing': ['CloudStub Testing',
+        'Aggregator that brings in cloudstub-core and cloudstub-junit for testing.'],
+    'cloudstub-local'  : ['CloudStub Local',
+        'Runnable CloudStub server: a local AWS mock that loads service modules from a plugin directory.'],
+    'cloudstub-codegen': ['CloudStub Codegen',
+        'Smithy-to-CloudStub stub generator, distributed as a runnable tool JAR.'],
+    'cloudstub-sqs'    : ['CloudStub SQS',
+        'CloudStub stub module for Amazon SQS with stateful send/receive backed by the state store.'],
+    'cloudstub-sdk-v1' : ['CloudStub AWS SDK v1 Support',
+        'CloudStub companion library for AWS SDK v1 consumers.'],
+]
 
-    def pomInfo = [
-        'cloudstub-junit'  : ['CloudStub JUnit',
-            'JUnit 5 and 6 extension for CloudStub: lifecycle management and AWS fault injection.'],
-        'cloudstub-testing': ['CloudStub Testing',
-            'Aggregator that brings in cloudstub-core and cloudstub-junit for testing.'],
-        'cloudstub-sqs'    : ['CloudStub SQS',
-            'CloudStub stub module for Amazon SQS with stateful send/receive backed by the state store.'],
-        'cloudstub-sdk-v1' : ['CloudStub AWS SDK v1 Support',
-            'CloudStub companion library for AWS SDK v1 consumers.'],
-    ]
+// Populate a MavenPom with the project-wide coordinates plus the module's name/description, so the
+// vanniktech (library) and maven-publish (shadow) paths cannot drift.
+def configurePom = { pom, info ->
+    pom.name = info[0]
+    pom.description = info[1]
+    pom.inceptionYear = '2026'
+    pom.url = 'https://github.com/cloudstub/cloudstub'
+    pom.licenses {
+        license {
+            name = 'The Apache License, Version 2.0'
+            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution = 'repo'
+        }
+    }
+    pom.developers {
+        developer {
+            id = 'cloudstub'
+            name = 'CloudStub'
+            url = 'https://github.com/cloudstub'
+        }
+    }
+    pom.scm {
+        url = 'https://github.com/cloudstub/cloudstub'
+        connection = 'scm:git:https://github.com/cloudstub/cloudstub.git'
+        developerConnection = 'scm:git:ssh://git@github.com/cloudstub/cloudstub.git'
+    }
+}
+
+if (publishable) {
     def info = pomInfo[project.name]
     if (info == null) {
         throw new GradleException(
             "No pomInfo entry for published module '${project.name}' — add its name/description " +
-            "to pomInfo in gradle/publishing.gradle (it was likely just added to publishedServices).")
+            "to the pomInfo map in gradle/publishing.gradle.")
     }
 
-    mavenPublishing {
-        pom {
-            name = info[0]
-            description = info[1]
-            inceptionYear = '2026'
-            url = 'https://github.com/cloudstub/cloudstub'
-            licenses {
-                license {
-                    name = 'The Apache License, Version 2.0'
-                    url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution = 'repo'
-                }
-            }
-            developers {
-                developer {
-                    id = 'cloudstub'
-                    name = 'CloudStub'
-                    url = 'https://github.com/cloudstub'
-                }
-            }
-            scm {
-                url = 'https://github.com/cloudstub/cloudstub'
-                connection = 'scm:git:https://github.com/cloudstub/cloudstub.git'
-                developerConnection = 'scm:git:ssh://git@github.com/cloudstub/cloudstub.git'
-            }
+    if (!isShadowModule) {
+        // Plain library modules: the vanniktech plugin builds the -sources/-javadoc JARs and the
+        // POM. With no signing/remote repo configured, publishToMavenLocal still works.
+        apply plugin: 'java-library'
+        apply plugin: 'com.vanniktech.maven.publish'
+
+        mavenPublishing {
+            pom { configurePom(delegate, info) }
         }
-    }
-}
+    } else {
+        // Shadow/tool modules publish their shadow (fat) JAR as the primary artifact. vanniktech has
+        // no shadow support, so they stay on maven-publish. withSourcesJar/withJavadocJar add the
+        // -sources/-javadoc JARs to the shadow component (Central requires both); the POM is set below.
+        apply plugin: 'maven-publish'
 
-// Shadow/tool modules publish their shadow (fat) JAR. In afterEvaluate so components.shadow
-// exists; scoped to shadow modules so the vanniktech modules above aren't double-published.
-if (publishable && isShadowModule) {
-    apply plugin: 'maven-publish'
+        java {
+            withSourcesJar()
+            withJavadocJar()
+        }
 
-    afterEvaluate {
-        publishing {
-            publications {
-                mavenJava(MavenPublication) {
-                    from(components.findByName('shadow') ?: components.java)
-                    artifactId = project.name
+        // afterEvaluate so components.shadow exists.
+        afterEvaluate {
+            publishing {
+                publications {
+                    mavenJava(MavenPublication) {
+                        from(components.findByName('shadow') ?: components.java)
+                        artifactId = project.name
+                        pom { configurePom(delegate, info) }
+                    }
                 }
             }
         }
