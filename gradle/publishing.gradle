@@ -23,6 +23,8 @@ if (publishable && !isShadowModule) {
     def pomInfo = [
         'cloudstub-junit'  : ['CloudStub JUnit',
             'JUnit 5 and 6 extension for CloudStub: lifecycle management and AWS fault injection.'],
+        'cloudstub-testing': ['CloudStub Testing',
+            'Aggregator that brings in cloudstub-core and cloudstub-junit for testing.'],
         'cloudstub-sqs'    : ['CloudStub SQS',
             'CloudStub stub module for Amazon SQS with stateful send/receive backed by the state store.'],
         'cloudstub-sdk-v1' : ['CloudStub AWS SDK v1 Support',

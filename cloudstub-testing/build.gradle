@@ -1,0 +1,5 @@
+// Aggregator: a single test dependency that brings in the engine and the JUnit extension.
+dependencies {
+    api project(':cloudstub-core')
+    api project(':cloudstub-junit')
+}
