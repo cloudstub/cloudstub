@@ -54,6 +54,13 @@ def configurePom = { pom, info ->
     }
 }
 
+// PGP signing inputs, shared by both publication paths (vanniktech reads these property names
+// directly). Supply via env/Gradle properties (ORG_GRADLE_PROJECT_signingInMemoryKey, …); never
+// committed. Absent key → signing is skipped, so publishToMavenLocal works for local smoke testing.
+def signingKey = findProperty('signingInMemoryKey')
+def signingKeyId = findProperty('signingInMemoryKeyId')
+def signingPassword = findProperty('signingInMemoryKeyPassword')
+
 if (publishable) {
     def info = pomInfo[project.name]
     if (info == null) {
@@ -69,6 +76,7 @@ if (publishable) {
         apply plugin: 'com.vanniktech.maven.publish'
 
         mavenPublishing {
+            signAllPublications()
             pom { configurePom(delegate, info) }
         }
     } else {
@@ -76,6 +84,7 @@ if (publishable) {
         // no shadow support, so they stay on maven-publish. withSourcesJar/withJavadocJar add the
         // -sources/-javadoc JARs to the shadow component (Central requires both); the POM is set below.
         apply plugin: 'maven-publish'
+        apply plugin: 'signing'
 
         java {
             withSourcesJar()
@@ -92,6 +101,24 @@ if (publishable) {
                         pom { configurePom(delegate, info) }
                     }
                 }
+            }
+            signing {
+                // Sign only when a key is supplied, and require it only for a non-local publish, so
+                // publishToMavenLocal works without a key. Mirrors vanniktech on the library path.
+                required = {
+                    gradle.taskGraph.allTasks.any {
+                        it.name.startsWith('publish') && !it.name.contains('MavenLocal')
+                    }
+                }
+                if (signingKey) {
+                    if (signingKeyId) {
+                        useInMemoryPgpKeys(signingKeyId.toString(), signingKey.toString(),
+                            (signingPassword ?: '').toString())
+                    } else {
+                        useInMemoryPgpKeys(signingKey.toString(), (signingPassword ?: '').toString())
+                    }
+                }
+                sign publishing.publications.mavenJava
             }
         }
     }
