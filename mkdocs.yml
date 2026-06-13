@@ -44,6 +44,7 @@ nav:
       - SDK v1 Support: sdk-v1.md
   - Module Authoring: module-authoring.md
   - CloudStub Codegen: codegen.md
+  - Changelog: changelog.md
   - Javadoc: javadoc/index.html
 
 plugins:

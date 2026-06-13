@@ -6,6 +6,7 @@ on:
     paths:
       - "docs/gh-pages/**"
       - "mkdocs.yml"
+      - "CHANGELOG.md"
       - ".github/workflows/docs.yml"
       # Module source feeds the aggregated Javadoc, so a source change redeploys the site to keep
       # the API reference in sync.
@@ -47,6 +48,9 @@ jobs:
           # Javadoc bundles third-party license texts as Markdown (legal/*.md). MkDocs would render
           # them as orphan pages; drop them so only the API HTML/CSS/JS is published.
           find docs/gh-pages/javadoc -name '*.md' -delete
+
+      - name: Copy changelog into site
+        run: cp CHANGELOG.md docs/gh-pages/changelog.md
 
       - name: Deploy to GitHub Pages
         run: mkdocs gh-deploy --force
