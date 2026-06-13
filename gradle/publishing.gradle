@@ -54,13 +54,11 @@ def configurePom = { pom, info ->
     }
 }
 
-// PGP signing inputs, shared by both publication paths (vanniktech reads these property names
-// directly). Supply via env/Gradle properties (ORG_GRADLE_PROJECT_signingInMemoryKey, …); never
-// committed. Absent key → signing is skipped, so publishToMavenLocal works for local smoke testing.
-def signingKey = findProperty('signingInMemoryKey')
-def signingKeyId = findProperty('signingInMemoryKeyId')
-def signingPassword = findProperty('signingInMemoryKeyPassword')
-
+// Both paths sign via vanniktech's signAllPublications(), which reads the in-memory PGP key from the
+// signingInMemoryKey / -KeyId / -KeyPassword properties (supply via env/Gradle properties, never
+// committed) and only requires a signature for a remote, non-snapshot publish — so publishToMavenLocal
+// works without a key. The Sonatype Central Portal upload (publishToMavenCentral) authenticates with
+// the mavenCentralUsername / mavenCentralPassword properties (a Central user token).
 if (publishable) {
     def info = pomInfo[project.name]
     if (info == null) {
@@ -70,22 +68,28 @@ if (publishable) {
     }
 
     if (!isShadowModule) {
-        // Plain library modules: the vanniktech plugin builds the -sources/-javadoc JARs and the
-        // POM. With no signing/remote repo configured, publishToMavenLocal still works.
+        // Plain library modules: the vanniktech plugin builds the -sources/-javadoc JARs and the POM.
         apply plugin: 'java-library'
         apply plugin: 'com.vanniktech.maven.publish'
 
         mavenPublishing {
+            publishToMavenCentral("CENTRAL_PORTAL")
             signAllPublications()
             pom { configurePom(delegate, info) }
         }
     } else {
         // Shadow/tool modules publish their shadow (fat) JAR as the primary artifact. vanniktech has
-        // no shadow support, so they stay on maven-publish. withSourcesJar/withJavadocJar add the
-        // -sources/-javadoc JARs to the shadow component (Central requires both); the POM is set below.
-        apply plugin: 'maven-publish'
-        apply plugin: 'signing'
+        // no shadow auto-config, so we hand-build the mavenJava publication and apply its base plugin
+        // only for the Central Portal upload + signing machinery, which act on that publication.
+        apply plugin: 'com.vanniktech.maven.publish.base'
 
+        mavenPublishing {
+            publishToMavenCentral("CENTRAL_PORTAL")
+            signAllPublications()
+        }
+
+        // withSourcesJar/withJavadocJar add the -sources/-javadoc JARs to the shadow component
+        // (Central requires both).
         java {
             withSourcesJar()
             withJavadocJar()
@@ -101,24 +105,6 @@ if (publishable) {
                         pom { configurePom(delegate, info) }
                     }
                 }
-            }
-            signing {
-                // Sign only when a key is supplied, and require it only for a non-local publish, so
-                // publishToMavenLocal works without a key. Mirrors vanniktech on the library path.
-                required = {
-                    gradle.taskGraph.allTasks.any {
-                        it.name.startsWith('publish') && !it.name.contains('MavenLocal')
-                    }
-                }
-                if (signingKey) {
-                    if (signingKeyId) {
-                        useInMemoryPgpKeys(signingKeyId.toString(), signingKey.toString(),
-                            (signingPassword ?: '').toString())
-                    } else {
-                        useInMemoryPgpKeys(signingKey.toString(), (signingPassword ?: '').toString())
-                    }
-                }
-                sign publishing.publications.mavenJava
             }
         }
     }
