@@ -6,10 +6,10 @@ How to publish CloudStub artifacts to Maven Central (Sonatype Central Portal).
 
 - A Sonatype Central account with the `io.github.cloudstub` namespace verified.
 - A PGP key whose **public** half is published to a keyserver (e.g. `keyserver.ubuntu.com`).
-- The following in `~/.gradle/gradle.properties` (or as `ORG_GRADLE_PROJECT_*` environment variables) — all secrets, never committed:
-  - `mavenCentralUsername` / `mavenCentralPassword` — a Central **user token** (Portal → Account → Generate User Token), not the web login.
-  - `signingInMemoryKey` — the ASCII-armored private key (`gpg --armor --export-secret-keys <KEY_ID>`).
-  - `signingInMemoryKeyPassword` — the key's passphrase.
+- Four encrypted secrets set in the GitHub repository (Settings → Secrets and variables → Actions):
+  - `ORG_GRADLE_PROJECT_mavenCentralUsername` / `ORG_GRADLE_PROJECT_mavenCentralPassword` — a Central **user token** (Portal → Account → Generate User Token), not the web login.
+  - `ORG_GRADLE_PROJECT_signingInMemoryKey` — the ASCII-armored private key (`gpg --armor --export-secret-keys <KEY_ID>`).
+  - `ORG_GRADLE_PROJECT_signingInMemoryKeyPassword` — the key's passphrase.
 
 ## What gets published
 
@@ -27,6 +27,21 @@ The build defaults to `0.1.0-SNAPSHOT`. Override it at release time with `-Pvers
 Central rejects `-SNAPSHOT` for releases. Maven orders `0.1.0-beta.1 < 0.1.0`, so a stable release supersedes the betas. Publishing with the default `-SNAPSHOT` version instead routes to the Portal snapshot repository.
 
 ## Procedure
+
+### Tag-driven release (primary)
+
+Push a version tag; the `.github/workflows/release.yml` workflow picks it up, derives the version by
+stripping the leading `v`, and runs `publishAndReleaseToMavenCentral`:
+
+```
+git tag v0.1.0-beta.1
+git push origin v0.1.0-beta.1
+```
+
+### Manual fallback
+
+If CI is unavailable, run from a machine that has the credentials in `~/.gradle/gradle.properties`
+or as `ORG_GRADLE_PROJECT_*` environment variables:
 
 1. Upload to a staging deployment, then review and release it manually in the Portal:
 
