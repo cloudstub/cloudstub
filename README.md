@@ -153,7 +153,7 @@ The `clm` / `cloudstub` command-line client ships separately at
 
 ## Scope and limitations
 
-CloudStub validates that your application calls AWS correctly and handles responses properly. It is not a reimplementation of AWS. Service-level behaviours like FIFO ordering, multipart upload lifecycle, conditional expressions, and IAM policy evaluation are out of scope. Tests that depend on these behaviours should run against a real AWS environment.
+CloudStub validates that your application calls AWS correctly and handles responses properly. It is not a reimplementation of AWS. Service-level behaviours like FIFO ordering, multipart upload lifecycle, conditional expressions, and IAM policy evaluation are deferred for later — candidates for implementation as CloudStub matures (see the [Roadmap](ROADMAP.md)). Until then, tests that depend on these behaviours should run against a real AWS environment.
 
 AWS SDK v2 is fully supported with automatic zero-config redirection. SDK v1 users can use cloudstub-sdk-v1 for a one-line per-client redirect.
 
@@ -163,8 +163,9 @@ If a module you need doesn't exist yet, you can build it. Each AWS service is an
 simple
 two-method SPI (`CloudStubService` + `StubRegistrar`).
 
-- **New module:** follow the [Module Authoring Guide](https://cloudstub.github.io/cloudstub/module-authoring/)
-- **New feature or bug:** open an issue in the [`issues/`](issues/) directory following the existing format
+- **New module:** follow the [Module Authoring Guide](https://cloudstub.github.io/cloudstub/module-authoring/) — see
+  the [Roadmap](ROADMAP.md) for the targeted services and their status
+- **New feature or bug:** open an issue on the [GitHub issue tracker](https://github.com/cloudstub/cloudstub/issues)
 - **Stub generation:** use the [codegen tool](https://cloudstub.github.io/cloudstub/codegen/) to generate a module
   skeleton from a Smithy model
 
