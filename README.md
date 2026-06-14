@@ -93,19 +93,24 @@ Besides running embedded in tests, CloudStub ships as a long-lived standalone se
 once, leave it running, and point any application that reads `AWS_ENDPOINT_URL` at it. No Docker, no daemon.
 
 The standalone JAR is a thin server runtime: the launcher plus `cloudstub-core`, with **no service modules bundled**.
-Download the module jars you want and drop them in a plugin directory (default `./modules`), then start the server:
+Just declare the services you want — by default the launcher fetches each absent module jar from Maven Central into the
+plugin directory, verifies it, and loads it:
 
 ```
-mkdir -p modules
-# drop cloudstub-sqs.jar, cloudstub-s3.jar, … into ./modules
 java -jar cloudstub-local.jar --services=sqs,secretsmanager
 ```
 
-The launcher loads every jar in the plugin directory; point it elsewhere with `--modules-dir=<path>` (or
-`CLOUDSTUB_MODULES_DIR`). `--modules-dir` controls what is **available** (which module jars are on the classpath);
-`--services` narrows what is **enabled** among those. The server binds to port `4566` by default (override with
-`--port=<n>` or `CLOUDSTUB_PORT`). Services are opt-in: with no `--services` the server starts but serves nothing and
-prints a warning telling you how to enable services. `Ctrl-C` shuts it down cleanly.
+The plugin directory (default `./modules`) is the cache: a jar already present is never re-downloaded. The download
+version defaults to the running core version (override with `--module-version`), every download is checksum-verified,
+and the source is Maven Central (mirror via `--maven-base-url` / `CLOUDSTUB_MAVEN_BASE_URL`). For offline / air-gapped
+runs, disable auto-download with `--no-download` (or `CLOUDSTUB_AUTO_DOWNLOAD=false`) and drop the module jars in the
+plugin directory yourself — a declared-but-missing service then fails fast instead of reaching the network.
+
+Point the launcher at a different plugin directory with `--modules-dir=<path>` (or `CLOUDSTUB_MODULES_DIR`).
+`--modules-dir` controls what is **available** (which module jars are on the classpath); `--services` narrows what is
+**enabled** among those. The server binds to port `4566` by default (override with `--port=<n>` or `CLOUDSTUB_PORT`).
+Services are opt-in: with no `--services` the server starts but serves nothing and prints a warning telling you how to
+enable services. `Ctrl-C` shuts it down cleanly.
 
 ```
 export AWS_ENDPOINT_URL=http://localhost:4566

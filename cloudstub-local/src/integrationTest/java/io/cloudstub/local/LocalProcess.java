@@ -53,6 +53,16 @@ final class LocalProcess implements AutoCloseable {
      */
     static LocalProcess startWithModulesDir(int port, Path modulesDir, String... extraArgs)
             throws Exception {
+        return startWithEnv(port, modulesDir, java.util.Map.of(), extraArgs);
+    }
+
+    /**
+     * Starts the server with an explicit modules directory and extra environment variables. Used by
+     * auto-download tests to point {@code CLOUDSTUB_MAVEN_BASE_URL} at a stub repository.
+     */
+    static LocalProcess startWithEnv(
+            int port, Path modulesDir, java.util.Map<String, String> env, String... extraArgs)
+            throws Exception {
         String jarPath = System.getProperty("cloudstub.local.jar");
         assertNotNull(jarPath, "cloudstub.local.jar system property must be set");
 
@@ -65,8 +75,15 @@ final class LocalProcess implements AutoCloseable {
                                 "--port=" + port,
                                 "--api-port=" + (port + 1000),
                                 "--modules-dir=" + modulesDir.toAbsolutePath()));
+        command.addAll(List.of(extraArgs));
 
-        return getLocalProcess(port, command, extraArgs);
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.environment().putAll(env);
+        pb.redirectErrorStream(true);
+        LocalProcess sp = new LocalProcess(pb.start());
+        sp.drainOutput();
+        sp.awaitReady(port);
+        return sp;
     }
 
     @NonNull

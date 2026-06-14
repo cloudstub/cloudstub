@@ -6,6 +6,21 @@ dependencies {
     testImplementation libs.slf4j.simple
 }
 
+// Stamp the project version into a classpath resource so CoreVersion can report the running core
+// version at runtime — used to default the auto-download module version.
+def versionResourceDir = layout.buildDirectory.dir('generated/version')
+def generateVersionProperties = tasks.register('generateVersionProperties') {
+    inputs.property('version', project.version)
+    outputs.dir(versionResourceDir)
+    doLast {
+        def file = versionResourceDir.get()
+                .file('io/cloudstub/core/download/version.properties').asFile
+        file.parentFile.mkdirs()
+        file.text = "version=${project.version}\n"
+    }
+}
+sourceSets.main.resources.srcDir(generateVersionProperties)
+
 shadowJar {
     archiveClassifier.set('')
 
