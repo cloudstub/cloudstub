@@ -767,6 +767,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#verify-a-service-end-to-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify a service end to end
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#stop-the-server" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1195,6 +1206,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#verify-a-service-end-to-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify a service end to end
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#stop-the-server" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1402,10 +1424,15 @@ with the <a href="../console/">Console</a>.</p>
 </span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">        </span><span class="n">AwsBasicCredentials</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;test&quot;</span><span class="p">)))</span>
 </span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 </span></code></pre></div>
+<h2 id="verify-a-service-end-to-end">Verify a service end to end</h2>
+<p>The <code>cloudstub-example</code> app ships profile-gated demo runners for manual end-to-end checks against a running server. With the server started above (<code>--services=sqs</code>), run the SQS demo:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>./gradlew :cloudstub-example:junit6:runExample -Pdemo=sqs
+</span></code></pre></div>
+<p>It publishes messages, peeks them with <code>ReceiveMessage</code>, then consumes them with <code>ReceiveMessage</code> + <code>DeleteMessage</code>, and logs the round-trip. See <a href="../spring-boot/#run-the-app-against-a-standalone-server">Spring Boot Integration</a> for details.</p>
 <h2 id="stop-the-server">Stop the server</h2>
 <p>Press <code>Ctrl-C</code> or send <code>SIGTERM</code>. CloudStub prints a shutdown message and exits cleanly — no stack trace:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>^C
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>[CloudStub] Shutting down...
+<div class="highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>^C
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>[CloudStub] Shutting down...
 </span></code></pre></div>
 <h2 id="logging">Logging</h2>
 <p>By default, CloudStub writes INFO-level output to stdout via <code>slf4j-simple</code>. To enable DEBUG output (stub
