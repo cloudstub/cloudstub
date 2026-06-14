@@ -390,7 +390,9 @@ _None open._ The former question — versioning and compatibility policy between
 versions — is resolved by the **SPI evolution policy** above: modules version independently and pin only a minimum core
 via `CloudStub-Core-Min-Version`; additive changes bump the minor, breaking changes bump the major.
 
-## Out of scope
+## Deferred behaviors
 
-CloudStub does not simulate: SQS FIFO deduplication/ordering, S3 multipart upload lifecycle, DynamoDB conditional
-expressions/transactions, IAM policy evaluation. Tests requiring these semantics should use LocalStack or real AWS.
+CloudStub does not yet simulate: SQS FIFO deduplication/ordering, S3 multipart upload lifecycle, DynamoDB conditional
+expressions/transactions, IAM policy evaluation. These are deferred for later — candidates for implementation as
+CloudStub matures (see ROADMAP.md). Until a behavior is implemented, tests that depend on it should run against real
+AWS.
