@@ -65,8 +65,8 @@ under `**/build/**` and `**/generated/**` (codegen output) are excluded.
 
 Markdown is formatted with Prettier (`.prettierrc.json`), checked by the `Prettier` GitHub Actions
 workflow on every push and pull request. Run `npx prettier --write "**/*.md"` to fix locally. The
-`issues/` directory and `docs/gh-pages/` (MkDocs Material source, whose admonition syntax a
-CommonMark formatter would break) are excluded via `.prettierignore`.
+`docs/gh-pages/` directory (MkDocs Material source, whose admonition syntax a CommonMark formatter
+would break) is excluded via `.prettierignore`.
 
 The `clm` / `cloudstub` CLI lives in its own repository (`cloudstub/cloudstub-cli`), not in this
 monorepo — see the **CLI** section below.
@@ -343,9 +343,10 @@ An infrastructure issue (a store, a transformer, a registrar, any shared plumbin
 exists** — it is done when a real consumer exercises it end to end through the running system. A module on the request
 path, the admin API, or an end-to-end test must read and write the new infrastructure for the issue to close; building
 the mechanism, wiring its lifecycle, and exposing it to callers is necessary but not sufficient. This rule exists
-because [0035](issues/0035-implement-state-store.md) shipped a complete, lifecycle-managed, persistent, thread-safe
-state store that **nothing on the request path actually read or wrote**, so the server still served stateless
-responses; the gap was only closed later by [0044](issues/0044-stateful-stub-handlers.md). Acceptance criteria for an
+because [#82](https://github.com/cloudstub/cloudstub/issues/82) shipped a complete, lifecycle-managed, persistent,
+thread-safe state store that **nothing on the request path actually read or wrote**, so the server still served
+stateless responses; the gap was only closed later by [#91](https://github.com/cloudstub/cloudstub/issues/91).
+Acceptance criteria for an
 infra issue must therefore name the consumer that proves it works, not just the artifact that was built.
 
 ## Request routing protocols

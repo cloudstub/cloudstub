@@ -165,7 +165,7 @@ two-method SPI (`CloudStubService` + `StubRegistrar`).
 
 - **New module:** follow the [Module Authoring Guide](https://cloudstub.github.io/cloudstub/module-authoring/) — see
   the [Roadmap](ROADMAP.md) for the targeted services and their status
-- **New feature or bug:** open an issue in the [`issues/`](issues/) directory following the existing format
+- **New feature or bug:** open an issue on the [GitHub issue tracker](https://github.com/cloudstub/cloudstub/issues)
 - **Stub generation:** use the [codegen tool](https://cloudstub.github.io/cloudstub/codegen/) to generate a module
   skeleton from a Smithy model
 
