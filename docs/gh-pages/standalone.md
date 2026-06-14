@@ -175,6 +175,16 @@ SqsClient sqs = SqsClient.builder()
     .build();
 ```
 
+## Verify a service end to end
+
+The `cloudstub-example` app ships profile-gated demo runners for manual end-to-end checks against a running server. With the server started above (`--services=sqs`), run the SQS demo:
+
+```
+./gradlew :cloudstub-example:junit6:runExample -Pdemo=sqs
+```
+
+It publishes messages, peeks them with `ReceiveMessage`, then consumes them with `ReceiveMessage` + `DeleteMessage`, and logs the round-trip. See [Spring Boot Integration](spring-boot.md#run-the-app-against-a-standalone-server) for details.
+
 ## Stop the server
 
 Press `Ctrl-C` or send `SIGTERM`. CloudStub prints a shutdown message and exits cleanly — no stack trace:

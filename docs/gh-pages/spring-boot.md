@@ -28,7 +28,7 @@ public class AwsConfig {
 
 1. The `:` default means the property is optional. In production `aws.endpoint-url` is absent and the SDK uses real AWS endpoints. In tests CloudStub sets it before the context starts.
 
-Your services are plain Spring `@Service` classes with no CloudStub imports — see [`EventPublisher`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/src/main/java/io/cloudstub/example/service/EventPublisher.java) and [`SecretLoader`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/src/main/java/io/cloudstub/example/service/SecretLoader.java) in `cloudstub-example` for the full code.
+Your services are plain Spring `@Service` classes with no CloudStub imports — see [`EventPublisher`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/service/EventPublisher.java) and [`SecretLoader`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/service/SecretLoader.java) in `cloudstub-example` for the full code.
 
 ## Integration tests
 
@@ -56,8 +56,31 @@ class EventPublisherIntegrationTest {
 
 See the full working tests in `cloudstub-example`:
 
-- [`EventPublisherIntegrationTest`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/src/test/java/io/cloudstub/example/EventPublisherIntegrationTest.java)
-- [`SecretLoaderIntegrationTest`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/src/test/java/io/cloudstub/example/SecretLoaderIntegrationTest.java)
+- [`EventPublisherIntegrationTest`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/test/java/io/cloudstub/example/EventPublisherIntegrationTest.java)
+- [`SecretLoaderIntegrationTest`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/test/java/io/cloudstub/example/SecretLoaderIntegrationTest.java)
+
+## Run the app against a standalone server
+
+Besides the integration tests, the example app can run against a [standalone CloudStub server](standalone.md) for manual end-to-end verification of a service through the real AWS SDK client path. A `@Profile`-gated [`CommandLineRunner`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/runner/SqsDemoRunner.java) exercises a service and logs the result; it is inactive during the test suite.
+
+Start the server with the SQS module, then run the app under the `sqs` profile:
+
+```
+# terminal 1 — standalone server
+./gradlew :cloudstub-local:run --args="--services=sqs"
+
+# terminal 2 — example app, pointed at the server
+./gradlew :cloudstub-example:junit6:runExample -Pdemo=sqs
+```
+
+`runExample` is one generic task: `-Pdemo=<serviceId>` selects the matching `@Profile` runner and `-Pendpoint=<url>` overrides the default `http://localhost:4566`. A demo for another service is a new `@Profile("<serviceId>")` runner — no build change.
+
+The SQS runner publishes messages, then shows the two distinct read operations:
+
+- `EventPublisher.poll()` — a `ReceiveMessage` peek; the messages stay in the queue.
+- `EventPublisher.consume()` — `ReceiveMessage` followed by `DeleteMessage` for each; the full consume cycle, so the messages do not come back.
+
+This mirrors real SQS: receive is non-destructive, and an explicit delete is required to remove a message.
 
 ## Dependencies
 
