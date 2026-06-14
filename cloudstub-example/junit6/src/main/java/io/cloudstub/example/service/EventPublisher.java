@@ -29,7 +29,10 @@ public class EventPublisher {
         return sqs.sendMessage(b -> b.queueUrl(queueUrl).messageBody(payload)).messageId();
     }
 
-    /** Polls for up to 10 pending messages and returns their bodies. */
+    /**
+     * Receives up to 10 pending messages and returns their bodies without removing them. A peek:
+     * the messages stay in the queue and a later call returns them again.
+     */
     public List<String> poll() {
         if (queueUrl == null) {
             return List.of();
@@ -40,5 +43,23 @@ public class EventPublisher {
                 .stream()
                 .map(Message::body)
                 .toList();
+    }
+
+    /**
+     * Receives up to 10 pending messages, deletes each from the queue, and returns their bodies.
+     * The full SQS consume cycle (receive then delete), so consumed messages do not come back.
+     */
+    public List<String> consume() {
+        if (queueUrl == null) {
+            return List.of();
+        }
+
+        // Do something with the messages, then delete them from the queue.
+        List<Message> messages =
+                sqs.receiveMessage(b -> b.queueUrl(queueUrl).maxNumberOfMessages(10)).messages();
+        for (Message message : messages) {
+            sqs.deleteMessage(b -> b.queueUrl(queueUrl).receiptHandle(message.receiptHandle()));
+        }
+        return messages.stream().map(Message::body).toList();
     }
 }
