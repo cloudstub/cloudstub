@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
  * Exercises {@link EventPublisher} against a running SQS endpoint and logs the results. Active only
  * under the {@code sqs} Spring profile, so it never runs during the test suite.
  *
- * <p>Run against a standalone CloudStub server with {@code --aws.endpoint-url=http://localhost:4566}
- * to verify the SQS module end to end.
+ * <p>Run against a standalone CloudStub server with {@code
+ * --aws.endpoint-url=http://localhost:4566} to verify the SQS module end to end.
  */
 @Component
 @Profile("sqs")
