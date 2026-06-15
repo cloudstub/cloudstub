@@ -4,9 +4,7 @@ import io.cloudstub.core.spi.CloudStubContext;
 import io.cloudstub.core.spi.CloudStubService;
 import io.cloudstub.core.spi.HttpMethod;
 import io.cloudstub.core.spi.StubRegistrar;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import io.cloudstub.core.spi.StubTemplates;
 
 /**
  * CloudStub service module for S3.
@@ -33,295 +31,455 @@ public class CloudStubS3Service implements CloudStubService {
         // this
         // catch-all would shadow them. Same ordering rationale as the CreateBucket/DeleteBucket
         // catch-alls.
-        registrar.registerRestStub(HttpMethod.GET, "/[^/]+", loadTemplate("ListObjects"));
+        registrar.registerRestStub(
+                HttpMethod.GET,
+                "/[^/]+",
+                StubTemplates.load(CloudStubS3Service.class, "ListObjects"));
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+/.+?x-id=AbortMultipartUpload",
-                loadTemplate("AbortMultipartUpload"));
+                StubTemplates.load(CloudStubS3Service.class, "AbortMultipartUpload"));
         registrar.registerRestStub(
-                HttpMethod.POST, "/[^/]+/.+", loadTemplate("CompleteMultipartUpload"));
+                HttpMethod.POST,
+                "/[^/]+/.+",
+                StubTemplates.load(CloudStubS3Service.class, "CompleteMultipartUpload"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+/.+?x-id=CopyObject", loadTemplate("CopyObject"));
-        registrar.registerRestStub(HttpMethod.PUT, "/[^/]+", loadTemplate("CreateBucket"));
+                HttpMethod.PUT,
+                "/[^/]+/.+?x-id=CopyObject",
+                StubTemplates.load(CloudStubS3Service.class, "CopyObject"));
+        registrar.registerRestStub(
+                HttpMethod.PUT,
+                "/[^/]+",
+                StubTemplates.load(CloudStubS3Service.class, "CreateBucket"));
         registrar.registerRestStub(
                 HttpMethod.POST,
                 "/[^/]+?metadataConfiguration",
-                loadTemplate("CreateBucketMetadataConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "CreateBucketMetadataConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.POST,
                 "/[^/]+?metadataTable",
-                loadTemplate("CreateBucketMetadataTableConfiguration"));
+                StubTemplates.load(
+                        CloudStubS3Service.class, "CreateBucketMetadataTableConfiguration"));
         registrar.registerRestStub(
-                HttpMethod.POST, "/[^/]+/.+?uploads", loadTemplate("CreateMultipartUpload"));
-        registrar.registerRestStub(HttpMethod.GET, "/[^/]+?session", loadTemplate("CreateSession"));
-        registrar.registerRestStub(HttpMethod.DELETE, "/[^/]+", loadTemplate("DeleteBucket"));
+                HttpMethod.POST,
+                "/[^/]+/.+?uploads",
+                StubTemplates.load(CloudStubS3Service.class, "CreateMultipartUpload"));
+        registrar.registerRestStub(
+                HttpMethod.GET,
+                "/[^/]+?session",
+                StubTemplates.load(CloudStubS3Service.class, "CreateSession"));
+        registrar.registerRestStub(
+                HttpMethod.DELETE,
+                "/[^/]+",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucket"));
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?analytics",
-                loadTemplate("DeleteBucketAnalyticsConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketAnalyticsConfiguration"));
         registrar.registerRestStub(
-                HttpMethod.DELETE, "/[^/]+?cors", loadTemplate("DeleteBucketCors"));
+                HttpMethod.DELETE,
+                "/[^/]+?cors",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketCors"));
         registrar.registerRestStub(
-                HttpMethod.DELETE, "/[^/]+?encryption", loadTemplate("DeleteBucketEncryption"));
+                HttpMethod.DELETE,
+                "/[^/]+?encryption",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketEncryption"));
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?intelligent-tiering",
-                loadTemplate("DeleteBucketIntelligentTieringConfiguration"));
+                StubTemplates.load(
+                        CloudStubS3Service.class, "DeleteBucketIntelligentTieringConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?inventory",
-                loadTemplate("DeleteBucketInventoryConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketInventoryConfiguration"));
         registrar.registerRestStub(
-                HttpMethod.DELETE, "/[^/]+?lifecycle", loadTemplate("DeleteBucketLifecycle"));
+                HttpMethod.DELETE,
+                "/[^/]+?lifecycle",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketLifecycle"));
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?metadataConfiguration",
-                loadTemplate("DeleteBucketMetadataConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketMetadataConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?metadataTable",
-                loadTemplate("DeleteBucketMetadataTableConfiguration"));
+                StubTemplates.load(
+                        CloudStubS3Service.class, "DeleteBucketMetadataTableConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?metrics",
-                loadTemplate("DeleteBucketMetricsConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketMetricsConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?ownershipControls",
-                loadTemplate("DeleteBucketOwnershipControls"));
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketOwnershipControls"));
         registrar.registerRestStub(
-                HttpMethod.DELETE, "/[^/]+?policy", loadTemplate("DeleteBucketPolicy"));
+                HttpMethod.DELETE,
+                "/[^/]+?policy",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketPolicy"));
         registrar.registerRestStub(
-                HttpMethod.DELETE, "/[^/]+?replication", loadTemplate("DeleteBucketReplication"));
+                HttpMethod.DELETE,
+                "/[^/]+?replication",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketReplication"));
         registrar.registerRestStub(
-                HttpMethod.DELETE, "/[^/]+?tagging", loadTemplate("DeleteBucketTagging"));
+                HttpMethod.DELETE,
+                "/[^/]+?tagging",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketTagging"));
         registrar.registerRestStub(
-                HttpMethod.DELETE, "/[^/]+?website", loadTemplate("DeleteBucketWebsite"));
+                HttpMethod.DELETE,
+                "/[^/]+?website",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketWebsite"));
         // AWS SDK v2 omits ?x-id=DeleteObject when endpointOverride is set; use a plain catch-all.
         // Sub-resource stubs (DeleteObjectTagging etc.) are registered later and win via LIFO.
-        registrar.registerRestStub(HttpMethod.DELETE, "/[^/]+/.+", loadTemplate("DeleteObject"));
         registrar.registerRestStub(
-                HttpMethod.DELETE, "/[^/]+/.+?tagging", loadTemplate("DeleteObjectTagging"));
-        registrar.registerRestStub(HttpMethod.POST, "/[^/]+?delete", loadTemplate("DeleteObjects"));
+                HttpMethod.DELETE,
+                "/[^/]+/.+",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteObject"));
+        registrar.registerRestStub(
+                HttpMethod.DELETE,
+                "/[^/]+/.+?tagging",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteObjectTagging"));
+        registrar.registerRestStub(
+                HttpMethod.POST,
+                "/[^/]+?delete",
+                StubTemplates.load(CloudStubS3Service.class, "DeleteObjects"));
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?publicAccessBlock",
-                loadTemplate("DeletePublicAccessBlock"));
-        registrar.registerRestStub(HttpMethod.GET, "/[^/]+?abac", loadTemplate("GetBucketAbac"));
+                StubTemplates.load(CloudStubS3Service.class, "DeletePublicAccessBlock"));
+        registrar.registerRestStub(
+                HttpMethod.GET,
+                "/[^/]+?abac",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketAbac"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?accelerate",
-                loadTemplate("GetBucketAccelerateConfiguration"));
-        registrar.registerRestStub(HttpMethod.GET, "/[^/]+?acl", loadTemplate("GetBucketAcl"));
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketAccelerateConfiguration"));
+        registrar.registerRestStub(
+                HttpMethod.GET,
+                "/[^/]+?acl",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketAcl"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?analytics&x-id=GetBucketAnalyticsConfiguration",
-                loadTemplate("GetBucketAnalyticsConfiguration"));
-        registrar.registerRestStub(HttpMethod.GET, "/[^/]+?cors", loadTemplate("GetBucketCors"));
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketAnalyticsConfiguration"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?encryption", loadTemplate("GetBucketEncryption"));
+                HttpMethod.GET,
+                "/[^/]+?cors",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketCors"));
+        registrar.registerRestStub(
+                HttpMethod.GET,
+                "/[^/]+?encryption",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketEncryption"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?intelligent-tiering&x-id=GetBucketIntelligentTieringConfiguration",
-                loadTemplate("GetBucketIntelligentTieringConfiguration"));
+                StubTemplates.load(
+                        CloudStubS3Service.class, "GetBucketIntelligentTieringConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?inventory&x-id=GetBucketInventoryConfiguration",
-                loadTemplate("GetBucketInventoryConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketInventoryConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?lifecycle",
-                loadTemplate("GetBucketLifecycleConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketLifecycleConfiguration"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?location", loadTemplate("GetBucketLocation"));
+                HttpMethod.GET,
+                "/[^/]+?location",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketLocation"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?logging", loadTemplate("GetBucketLogging"));
+                HttpMethod.GET,
+                "/[^/]+?logging",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketLogging"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?metadataConfiguration",
-                loadTemplate("GetBucketMetadataConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketMetadataConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?metadataTable",
-                loadTemplate("GetBucketMetadataTableConfiguration"));
+                StubTemplates.load(
+                        CloudStubS3Service.class, "GetBucketMetadataTableConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?metrics&x-id=GetBucketMetricsConfiguration",
-                loadTemplate("GetBucketMetricsConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketMetricsConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?notification",
-                loadTemplate("GetBucketNotificationConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketNotificationConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?ownershipControls",
-                loadTemplate("GetBucketOwnershipControls"));
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketOwnershipControls"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?policy", loadTemplate("GetBucketPolicy"));
+                HttpMethod.GET,
+                "/[^/]+?policy",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketPolicy"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?policyStatus", loadTemplate("GetBucketPolicyStatus"));
+                HttpMethod.GET,
+                "/[^/]+?policyStatus",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketPolicyStatus"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?replication", loadTemplate("GetBucketReplication"));
+                HttpMethod.GET,
+                "/[^/]+?replication",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketReplication"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?requestPayment", loadTemplate("GetBucketRequestPayment"));
+                HttpMethod.GET,
+                "/[^/]+?requestPayment",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketRequestPayment"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?tagging", loadTemplate("GetBucketTagging"));
+                HttpMethod.GET,
+                "/[^/]+?tagging",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketTagging"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?versioning", loadTemplate("GetBucketVersioning"));
+                HttpMethod.GET,
+                "/[^/]+?versioning",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketVersioning"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?website", loadTemplate("GetBucketWebsite"));
+                HttpMethod.GET,
+                "/[^/]+?website",
+                StubTemplates.load(CloudStubS3Service.class, "GetBucketWebsite"));
         // AWS SDK v2 omits ?x-id=GetObject when endpointOverride is set; use a plain catch-all.
         // Sub-resource stubs (GetObjectAcl, GetObjectTagging etc.) are registered later and win via
         // LIFO.
-        registrar.registerRestStub(HttpMethod.GET, "/[^/]+/.+", loadTemplate("GetObject"));
-        registrar.registerRestStub(HttpMethod.GET, "/[^/]+/.+?acl", loadTemplate("GetObjectAcl"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+/.+?attributes", loadTemplate("GetObjectAttributes"));
+                HttpMethod.GET,
+                "/[^/]+/.+",
+                StubTemplates.load(CloudStubS3Service.class, "GetObject"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+/.+?legal-hold", loadTemplate("GetObjectLegalHold"));
+                HttpMethod.GET,
+                "/[^/]+/.+?acl",
+                StubTemplates.load(CloudStubS3Service.class, "GetObjectAcl"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?object-lock", loadTemplate("GetObjectLockConfiguration"));
+                HttpMethod.GET,
+                "/[^/]+/.+?attributes",
+                StubTemplates.load(CloudStubS3Service.class, "GetObjectAttributes"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+/.+?retention", loadTemplate("GetObjectRetention"));
+                HttpMethod.GET,
+                "/[^/]+/.+?legal-hold",
+                StubTemplates.load(CloudStubS3Service.class, "GetObjectLegalHold"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+/.+?tagging", loadTemplate("GetObjectTagging"));
+                HttpMethod.GET,
+                "/[^/]+?object-lock",
+                StubTemplates.load(CloudStubS3Service.class, "GetObjectLockConfiguration"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+/.+?torrent", loadTemplate("GetObjectTorrent"));
+                HttpMethod.GET,
+                "/[^/]+/.+?retention",
+                StubTemplates.load(CloudStubS3Service.class, "GetObjectRetention"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?publicAccessBlock", loadTemplate("GetPublicAccessBlock"));
-        registrar.registerRestStub(HttpMethod.HEAD, "/[^/]+", loadTemplate("HeadBucket"));
-        registrar.registerRestStub(HttpMethod.HEAD, "/[^/]+/.+", loadTemplate("HeadObject"));
+                HttpMethod.GET,
+                "/[^/]+/.+?tagging",
+                StubTemplates.load(CloudStubS3Service.class, "GetObjectTagging"));
+        registrar.registerRestStub(
+                HttpMethod.GET,
+                "/[^/]+/.+?torrent",
+                StubTemplates.load(CloudStubS3Service.class, "GetObjectTorrent"));
+        registrar.registerRestStub(
+                HttpMethod.GET,
+                "/[^/]+?publicAccessBlock",
+                StubTemplates.load(CloudStubS3Service.class, "GetPublicAccessBlock"));
+        registrar.registerRestStub(
+                HttpMethod.HEAD,
+                "/[^/]+",
+                StubTemplates.load(CloudStubS3Service.class, "HeadBucket"));
+        registrar.registerRestStub(
+                HttpMethod.HEAD,
+                "/[^/]+/.+",
+                StubTemplates.load(CloudStubS3Service.class, "HeadObject"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?analytics&x-id=ListBucketAnalyticsConfigurations",
-                loadTemplate("ListBucketAnalyticsConfigurations"));
+                StubTemplates.load(CloudStubS3Service.class, "ListBucketAnalyticsConfigurations"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?intelligent-tiering&x-id=ListBucketIntelligentTieringConfigurations",
-                loadTemplate("ListBucketIntelligentTieringConfigurations"));
+                StubTemplates.load(
+                        CloudStubS3Service.class, "ListBucketIntelligentTieringConfigurations"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?inventory&x-id=ListBucketInventoryConfigurations",
-                loadTemplate("ListBucketInventoryConfigurations"));
+                StubTemplates.load(CloudStubS3Service.class, "ListBucketInventoryConfigurations"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?metrics&x-id=ListBucketMetricsConfigurations",
-                loadTemplate("ListBucketMetricsConfigurations"));
+                StubTemplates.load(CloudStubS3Service.class, "ListBucketMetricsConfigurations"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/?x-id=ListBuckets", loadTemplate("ListBuckets"));
+                HttpMethod.GET,
+                "/?x-id=ListBuckets",
+                StubTemplates.load(CloudStubS3Service.class, "ListBuckets"));
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/?x-id=ListDirectoryBuckets",
-                loadTemplate("ListDirectoryBuckets"));
+                StubTemplates.load(CloudStubS3Service.class, "ListDirectoryBuckets"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?uploads", loadTemplate("ListMultipartUploads"));
+                HttpMethod.GET,
+                "/[^/]+?uploads",
+                StubTemplates.load(CloudStubS3Service.class, "ListMultipartUploads"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+?versions", loadTemplate("ListObjectVersions"));
+                HttpMethod.GET,
+                "/[^/]+?versions",
+                StubTemplates.load(CloudStubS3Service.class, "ListObjectVersions"));
         // ListObjects (v1) catch-all is registered at the top of this method (see comment there).
         // Match list-type=2 anywhere in the query so ListObjectsV2 requests carrying prefix,
         // max-keys,
         // continuation-token, etc. still route here instead of falling through to the v1 catch-all.
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+\\?(.*&)?list-type=2(&.*)?", loadTemplate("ListObjectsV2"));
+                HttpMethod.GET,
+                "/[^/]+\\?(.*&)?list-type=2(&.*)?",
+                StubTemplates.load(CloudStubS3Service.class, "ListObjectsV2"));
         registrar.registerRestStub(
-                HttpMethod.GET, "/[^/]+/.+?x-id=ListParts", loadTemplate("ListParts"));
-        registrar.registerRestStub(HttpMethod.PUT, "/[^/]+?abac", loadTemplate("PutBucketAbac"));
+                HttpMethod.GET,
+                "/[^/]+/.+?x-id=ListParts",
+                StubTemplates.load(CloudStubS3Service.class, "ListParts"));
+        registrar.registerRestStub(
+                HttpMethod.PUT,
+                "/[^/]+?abac",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketAbac"));
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?accelerate",
-                loadTemplate("PutBucketAccelerateConfiguration"));
-        registrar.registerRestStub(HttpMethod.PUT, "/[^/]+?acl", loadTemplate("PutBucketAcl"));
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketAccelerateConfiguration"));
+        registrar.registerRestStub(
+                HttpMethod.PUT,
+                "/[^/]+?acl",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketAcl"));
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?analytics",
-                loadTemplate("PutBucketAnalyticsConfiguration"));
-        registrar.registerRestStub(HttpMethod.PUT, "/[^/]+?cors", loadTemplate("PutBucketCors"));
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketAnalyticsConfiguration"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?encryption", loadTemplate("PutBucketEncryption"));
+                HttpMethod.PUT,
+                "/[^/]+?cors",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketCors"));
+        registrar.registerRestStub(
+                HttpMethod.PUT,
+                "/[^/]+?encryption",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketEncryption"));
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?intelligent-tiering",
-                loadTemplate("PutBucketIntelligentTieringConfiguration"));
+                StubTemplates.load(
+                        CloudStubS3Service.class, "PutBucketIntelligentTieringConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?inventory",
-                loadTemplate("PutBucketInventoryConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketInventoryConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?lifecycle",
-                loadTemplate("PutBucketLifecycleConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketLifecycleConfiguration"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?logging", loadTemplate("PutBucketLogging"));
+                HttpMethod.PUT,
+                "/[^/]+?logging",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketLogging"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?metrics", loadTemplate("PutBucketMetricsConfiguration"));
+                HttpMethod.PUT,
+                "/[^/]+?metrics",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketMetricsConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?notification",
-                loadTemplate("PutBucketNotificationConfiguration"));
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketNotificationConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?ownershipControls",
-                loadTemplate("PutBucketOwnershipControls"));
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketOwnershipControls"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?policy", loadTemplate("PutBucketPolicy"));
+                HttpMethod.PUT,
+                "/[^/]+?policy",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketPolicy"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?replication", loadTemplate("PutBucketReplication"));
+                HttpMethod.PUT,
+                "/[^/]+?replication",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketReplication"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?requestPayment", loadTemplate("PutBucketRequestPayment"));
+                HttpMethod.PUT,
+                "/[^/]+?requestPayment",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketRequestPayment"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?tagging", loadTemplate("PutBucketTagging"));
+                HttpMethod.PUT,
+                "/[^/]+?tagging",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketTagging"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?versioning", loadTemplate("PutBucketVersioning"));
+                HttpMethod.PUT,
+                "/[^/]+?versioning",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketVersioning"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?website", loadTemplate("PutBucketWebsite"));
+                HttpMethod.PUT,
+                "/[^/]+?website",
+                StubTemplates.load(CloudStubS3Service.class, "PutBucketWebsite"));
         // AWS SDK v2 omits ?x-id=PutObject when endpointOverride is set; use a plain catch-all.
         // Sub-resource stubs (PutObjectAcl, PutObjectTagging etc.) are registered later and win via
         // LIFO.
-        registrar.registerRestStub(HttpMethod.PUT, "/[^/]+/.+", loadTemplate("PutObject"));
-        registrar.registerRestStub(HttpMethod.PUT, "/[^/]+/.+?acl", loadTemplate("PutObjectAcl"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+/.+?legal-hold", loadTemplate("PutObjectLegalHold"));
+                HttpMethod.PUT,
+                "/[^/]+/.+",
+                StubTemplates.load(CloudStubS3Service.class, "PutObject"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?object-lock", loadTemplate("PutObjectLockConfiguration"));
+                HttpMethod.PUT,
+                "/[^/]+/.+?acl",
+                StubTemplates.load(CloudStubS3Service.class, "PutObjectAcl"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+/.+?retention", loadTemplate("PutObjectRetention"));
+                HttpMethod.PUT,
+                "/[^/]+/.+?legal-hold",
+                StubTemplates.load(CloudStubS3Service.class, "PutObjectLegalHold"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+/.+?tagging", loadTemplate("PutObjectTagging"));
+                HttpMethod.PUT,
+                "/[^/]+?object-lock",
+                StubTemplates.load(CloudStubS3Service.class, "PutObjectLockConfiguration"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+?publicAccessBlock", loadTemplate("PutPublicAccessBlock"));
+                HttpMethod.PUT,
+                "/[^/]+/.+?retention",
+                StubTemplates.load(CloudStubS3Service.class, "PutObjectRetention"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+/.+?renameObject", loadTemplate("RenameObject"));
+                HttpMethod.PUT,
+                "/[^/]+/.+?tagging",
+                StubTemplates.load(CloudStubS3Service.class, "PutObjectTagging"));
         registrar.registerRestStub(
-                HttpMethod.POST, "/[^/]+/.+?restore", loadTemplate("RestoreObject"));
+                HttpMethod.PUT,
+                "/[^/]+?publicAccessBlock",
+                StubTemplates.load(CloudStubS3Service.class, "PutPublicAccessBlock"));
+        registrar.registerRestStub(
+                HttpMethod.PUT,
+                "/[^/]+/.+?renameObject",
+                StubTemplates.load(CloudStubS3Service.class, "RenameObject"));
+        registrar.registerRestStub(
+                HttpMethod.POST,
+                "/[^/]+/.+?restore",
+                StubTemplates.load(CloudStubS3Service.class, "RestoreObject"));
         registrar.registerRestStub(
                 HttpMethod.POST,
                 "/[^/]+/.+?select&select-type=2",
-                loadTemplate("SelectObjectContent"));
+                StubTemplates.load(CloudStubS3Service.class, "SelectObjectContent"));
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?metadataInventoryTable",
-                loadTemplate("UpdateBucketMetadataInventoryTableConfiguration"));
+                StubTemplates.load(
+                        CloudStubS3Service.class,
+                        "UpdateBucketMetadataInventoryTableConfiguration"));
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?metadataJournalTable",
-                loadTemplate("UpdateBucketMetadataJournalTableConfiguration"));
+                StubTemplates.load(
+                        CloudStubS3Service.class, "UpdateBucketMetadataJournalTableConfiguration"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+/.+?encryption", loadTemplate("UpdateObjectEncryption"));
+                HttpMethod.PUT,
+                "/[^/]+/.+?encryption",
+                StubTemplates.load(CloudStubS3Service.class, "UpdateObjectEncryption"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+/.+?x-id=UploadPart", loadTemplate("UploadPart"));
+                HttpMethod.PUT,
+                "/[^/]+/.+?x-id=UploadPart",
+                StubTemplates.load(CloudStubS3Service.class, "UploadPart"));
         registrar.registerRestStub(
-                HttpMethod.PUT, "/[^/]+/.+?x-id=UploadPartCopy", loadTemplate("UploadPartCopy"));
+                HttpMethod.PUT,
+                "/[^/]+/.+?x-id=UploadPartCopy",
+                StubTemplates.load(CloudStubS3Service.class, "UploadPartCopy"));
         registrar.registerRestStub(
-                HttpMethod.POST, "/WriteGetObjectResponse", loadTemplate("WriteGetObjectResponse"));
-    }
-
-    private static String loadTemplate(String name) {
-        String path = "/templates/" + name + ".hbs";
-        try (InputStream in = CloudStubS3Service.class.getResourceAsStream(path)) {
-            if (in == null) throw new IllegalStateException("Template not found: " + path);
-            return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).trim();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+                HttpMethod.POST,
+                "/WriteGetObjectResponse",
+                StubTemplates.load(CloudStubS3Service.class, "WriteGetObjectResponse"));
     }
 }

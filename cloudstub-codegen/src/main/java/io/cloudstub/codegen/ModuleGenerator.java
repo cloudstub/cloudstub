@@ -31,7 +31,6 @@ import software.amazon.smithy.model.validation.ValidationEvent;
  */
 public class ModuleGenerator {
 
-    // Stand-in core version for the discarded build.gradle produced during a validation dry run.
     private static final String VALIDATION_CORE_VERSION = "0.0.0";
 
     private final boolean verbose;
@@ -231,12 +230,10 @@ public class ModuleGenerator {
         sb.append("import io.cloudstub.core.spi.CloudStubContext;\n");
         sb.append("import io.cloudstub.core.spi.CloudStubService;\n");
         sb.append("import io.cloudstub.core.spi.StubRegistrar;\n");
+        sb.append("import io.cloudstub.core.spi.StubTemplates;\n");
         if (protocol.isRest()) {
             sb.append("import io.cloudstub.core.spi.HttpMethod;\n");
         }
-        sb.append("import java.io.IOException;\n");
-        sb.append("import java.io.InputStream;\n");
-        sb.append("import java.io.UncheckedIOException;\n");
         sb.append("\n");
         sb.append(
                 """
@@ -284,13 +281,17 @@ public class ModuleGenerator {
                 case JSON_TARGET ->
                         sb.append("        registrar.registerJsonTargetStub(TARGET_PREFIX + \"")
                                 .append(opName)
-                                .append("\", loadTemplate(\"")
+                                .append("\", StubTemplates.load(")
+                                .append(simpleClassName)
+                                .append(".class, \"")
                                 .append(opName)
                                 .append("\"));\n");
                 case FORM_URL ->
                         sb.append("        registrar.registerXmlFormStub(\"")
                                 .append(opName)
-                                .append("\", loadTemplate(\"")
+                                .append("\", StubTemplates.load(")
+                                .append(simpleClassName)
+                                .append(".class, \"")
                                 .append(opName)
                                 .append("\"));\n");
                 case REST_JSON, REST_XML -> {
@@ -299,27 +300,14 @@ public class ModuleGenerator {
                             .append(mp[0])
                             .append(", \"")
                             .append(mp[1])
-                            .append("\", loadTemplate(\"")
+                            .append("\", StubTemplates.load(")
+                            .append(simpleClassName)
+                            .append(".class, \"")
                             .append(opName)
                             .append("\"));\n");
                 }
             }
         }
-        sb.append("    }\n\n");
-
-        sb.append("    private static String loadTemplate(String name) {\n");
-        sb.append("        String path = \"/templates/\" + name + \".hbs\";\n");
-        sb.append("        try (InputStream in = ")
-                .append(simpleClassName)
-                .append(".class.getResourceAsStream(path)) {\n");
-        sb.append("            if (in == null)\n");
-        sb.append(
-                "                throw new IllegalStateException(\"Template not found: \" + path);\n");
-        sb.append("            return new String(in.readAllBytes(),\n");
-        sb.append("                    java.nio.charset.StandardCharsets.UTF_8).trim();\n");
-        sb.append("        } catch (IOException e) {\n");
-        sb.append("            throw new UncheckedIOException(e);\n");
-        sb.append("        }\n");
         sb.append("    }\n}\n");
 
         String path = "src/main/java/" + pkg.replace('.', '/') + "/" + simpleClassName + ".java";

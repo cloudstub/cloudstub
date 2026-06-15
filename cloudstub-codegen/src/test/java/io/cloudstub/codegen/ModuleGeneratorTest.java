@@ -63,8 +63,12 @@ class ModuleGeneratorTest {
                 serviceClass.contains("registerJsonTargetStub"),
                 "service class must use JSON target protocol");
         assertTrue(
-                serviceClass.contains("loadTemplate("),
-                "service class must load templates from classpath");
+                serviceClass.contains(
+                        "StubTemplates.load(CloudStubTestServiceService.class, \"CreateFoo\")"),
+                "service class must load templates via the shared StubTemplates helper");
+        assertFalse(
+                serviceClass.contains("private static String loadTemplate"),
+                "service class must not inline a private loadTemplate method");
         assertFalse(
                 serviceClass.contains("private static final String CREATE_FOO"),
                 "service class must not inline operation templates as constants");
