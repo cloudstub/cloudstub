@@ -1,8 +1,11 @@
 package io.cloudstub.local;
 
 import io.cloudstub.core.CloudStub;
+import io.cloudstub.core.download.ModuleDownloadException;
+import io.cloudstub.core.download.ModuleDownloader;
 import io.cloudstub.core.spi.CloudStubApiService;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -29,11 +32,22 @@ public final class LocalMain {
         Path storeDir = StoreDirectoryResolver.resolve(args);
 
         Path modulesDir = ModulesDirResolver.resolve(args);
+        Set<String> requested = ServiceSelector.resolve(args);
+        boolean autoDownload = AutoDownloadResolver.isEnabled(args);
+
+        if (requested != null && autoDownload) {
+            modulesDir =
+                    provisionMissing(
+                            requested,
+                            modulesDir,
+                            ModuleVersionResolver.resolve(args),
+                            MavenBaseUrlResolver.resolve(args));
+        }
+
         ClassLoader pluginLoader = PluginLoader.load(modulesDir);
 
         List<String> available = ServiceDiscovery.discoverServiceIds(pluginLoader);
-        Set<String> requested = ServiceSelector.resolve(args);
-        List<String> enabled = resolveEnabled(available, requested);
+        List<String> enabled = resolveEnabled(available, requested, autoDownload);
 
         System.out.println(
                 "[CloudStub] Plugin directory: "
@@ -99,7 +113,41 @@ public final class LocalMain {
         }
     }
 
-    private static List<String> resolveEnabled(List<String> available, Set<String> requested) {
+    /**
+     * Provisions any requested service whose jar is absent from the plugin directory by downloading
+     * it from Maven Central. Returns the directory the modules are loaded from — the resolved
+     * directory, or the default {@code ./modules} created on demand when none was resolved.
+     */
+    private static Path provisionMissing(
+            Set<String> requested, Path modulesDir, String version, String mavenBaseUrl) {
+        Path targetDir = modulesDir != null ? modulesDir : Path.of(ModulesDirResolver.DEFAULT_DIR);
+        ModuleDownloader downloader = new ModuleDownloader(mavenBaseUrl);
+        List<String> downloaded = new ArrayList<>();
+        for (String service : requested) {
+            if (ModuleDownloader.isCached(targetDir, service, version)) {
+                continue;
+            }
+            try {
+                Path jar = downloader.download(service, version, targetDir);
+                System.out.println(
+                        "[CloudStub] Downloaded "
+                                + ModuleDownloader.coordinate(service, version)
+                                + " -> "
+                                + jar.toAbsolutePath());
+                downloaded.add(service);
+            } catch (ModuleDownloadException e) {
+                System.err.println("[CloudStub] ERROR: " + e.getMessage());
+                System.exit(1);
+            }
+        }
+        if (modulesDir == null && !downloaded.isEmpty()) {
+            return targetDir;
+        }
+        return modulesDir;
+    }
+
+    private static List<String> resolveEnabled(
+            List<String> available, Set<String> requested, boolean autoDownload) {
         if (requested == null) {
             // No --services / CLOUDSTUB_SERVICES selection: load nothing. Services are opt-in,
             // matching embedded mode where only modules placed on the classpath load.
@@ -112,6 +160,12 @@ public final class LocalMain {
                             + join(unknown)
                             + ". Available: "
                             + join(available));
+            if (!autoDownload) {
+                System.err.println(
+                        "[CloudStub]          Auto-download is disabled. Drop the module jar into"
+                                + " the plugin directory, or enable auto-download (omit"
+                                + " --no-download / set CLOUDSTUB_AUTO_DOWNLOAD=true).");
+            }
             System.exit(1);
         }
         return requested.stream().toList();

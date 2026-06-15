@@ -166,6 +166,25 @@ loaded at runtime from a plugin directory. It is the drop-in replacement for Loc
   modules on the classpath load. Backed by `CloudStub.withEnabledServices(Collection<String>)` in core, which filters
   `ServiceLoader` discovery (the launcher always passes the resolved set, empty when nothing is selected). Naming an
   unknown service fails fast. Modules added via `withService` bypass the filter.
+- **Service auto-download:** on by default — a service declared via `--services` whose jar is absent from the plugin
+  directory is fetched from Maven Central (`io.github.cloudstub:cloudstub-<service>:<version>`), checksum-verified,
+  written into the plugin directory, then loaded, before the plugin classloader is built. The plugin directory is the
+  cache, keyed by exact version: the requested version (or a user-placed unversioned `cloudstub-<service>.jar`) is
+  never re-downloaded, but a request for a different version is fetched rather than satisfied by a stale cached jar — so
+  a core upgrade pulls the matching module instead of silently reusing the old one. A fresh download prunes any other
+  versioned jar of that service so the plugin classloader never sees two copies of one module. When no `--modules-dir`
+  is set, the default `./modules` is created to receive a download. The download version defaults to the running core
+  version (`CoreVersion.current()`, read from a build-stamped resource), overridable with `--module-version` /
+  `CLOUDSTUB_MODULE_VERSION`. Integrity is verified against the strongest published checksum (SHA-512 → SHA-256 →
+  SHA-1); a mismatch, a missing checksum, or any transport error (including a transport failure fetching a checksum — it
+  does not silently downgrade to a weaker algorithm) fails fast with a message naming the service and coordinate and how
+  to supply the jar manually.
+  Disable with `--no-download` / `CLOUDSTUB_AUTO_DOWNLOAD=false` for offline/air-gapped runs (a declared-but-missing
+  service then fails fast without reaching the network). The source is the fixed Central host, overridable to a single
+  mirror via `--maven-base-url` / `CLOUDSTUB_MAVEN_BASE_URL`. The download engine is `io.cloudstub.core.download`
+  (`ModuleDownloader`, `CoreVersion`) in **core**, so embedded/testing can reuse it; the CLI-arg resolvers
+  (`AutoDownloadResolver`, `ModuleVersionResolver`, `MavenBaseUrlResolver`) live in `cloudstub-local`. PGP `.asc`
+  signature verification is not performed (deferred); integrity rests on checksum verification of the bytes fetched.
 - **Shutdown:** `Ctrl-C` / `SIGTERM` triggers a clean WireMock shutdown via a JVM shutdown hook, no stack trace
 - **State:** standalone and embedded mode share the same core engine and the same state behaviour. Modules built on
   the stateful handler overloads (issue #0044) return live data — e.g. SQS `ReceiveMessage` returns the payloads of

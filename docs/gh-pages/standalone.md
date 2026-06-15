@@ -57,6 +57,47 @@ Plugin directory precedence: `--modules-dir` flag → `CLOUDSTUB_MODULES_DIR` en
 explicitly provided `--modules-dir` that does not exist fails fast with a clear error; a missing or empty default
 `./modules` is **not** fatal — the server starts and serves nothing.
 
+## Auto-download modules
+
+You usually do **not** need to copy module jars by hand. Auto-download is **on by default**: when you declare a
+service with `--services` (or `CLOUDSTUB_SERVICES`) and its jar is not already in the plugin directory, the launcher
+fetches `io.github.cloudstub:cloudstub-<service>:<version>` from Maven Central, verifies it, writes it into the
+plugin directory, and loads it. `--services` becomes the single source of truth — declare what you want and it
+appears:
+
+```
+java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs
+```
+
+- **Version:** defaults to the running `cloudstub-core` version, so a downloaded module matches the SPI the core
+  provides. Override with `--module-version=<v>` or `CLOUDSTUB_MODULE_VERSION`. (Development builds are `-SNAPSHOT`,
+  which is not published to Central — point `--module-version` at a released version such as `0.1.0-beta.1`.)
+- **Cache:** the plugin directory is the cache. A jar that is already present is **never** re-downloaded, so the
+  next start is offline-fast. When no `--modules-dir` is set and a download is needed, the default `./modules`
+  directory is created to hold it.
+- **Integrity:** every download is checksum-verified (the strongest published of SHA-512 / SHA-256 / SHA-1) before
+  the jar is trusted and loaded. A mismatch fails the start.
+- **Source:** the canonical Maven Central host. Point at an internal mirror with `--maven-base-url=<url>` or
+  `CLOUDSTUB_MAVEN_BASE_URL` (a single Maven-layout repository root — not a general multi-repository resolver).
+
+### Disable auto-download (offline / air-gapped)
+
+Turn auto-download off with `--no-download` or `CLOUDSTUB_AUTO_DOWNLOAD=false`. A declared service whose jar is then
+missing fails fast rather than reaching the network:
+
+```
+java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs --no-download
+```
+
+```
+[CloudStub] Unknown service(s): sqs. Available: (none)
+[CloudStub]          Auto-download is disabled. Drop the module jar into the plugin directory, or enable
+[CloudStub]          auto-download (omit --no-download / set CLOUDSTUB_AUTO_DOWNLOAD=true).
+```
+
+A failed download (offline, unknown service, HTTP error) likewise fails fast, naming the service and the coordinate
+attempted and telling you how to supply the jar manually.
+
 ## Start the server
 
 === "Default port (4566)"
@@ -150,6 +191,13 @@ The **Plugin directory** line shows where module jars are loaded from; the **Ava
 discovered in that directory; the **Enabled** line lists the ones actually serving requests. If a stub is not being
 served, check that its module jar is in the plugin directory (Available) and that its service appears on the Enabled
 line.
+
+On a first run, any module fetched by [auto-download](#auto-download-modules) prints a line before the summary,
+naming the coordinate, version, and destination, so downloaded jars are distinguished from pre-present ones:
+
+```
+[CloudStub] Downloaded io.github.cloudstub:cloudstub-sqs:0.1.0-beta.1 -> /path/to/modules/cloudstub-sqs-0.1.0-beta.1.jar
+```
 
 The REST API is available at `http://localhost:4567` — see [REST API](rest-api.md) for the full reference, drive
 the instance from the terminal with the [CLI](cli.md) (`clm` / `cloudstub`), or inspect it visually in the browser
