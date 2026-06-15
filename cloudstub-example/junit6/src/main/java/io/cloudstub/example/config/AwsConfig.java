@@ -15,9 +15,10 @@ import software.amazon.awssdk.services.sqs.SqsClientBuilder;
 public class AwsConfig {
 
     /**
-     * When {@code aws.endpoint-url} is set (e.g. by CloudStub or LocalStack before the Spring
-     * context starts), the clients are redirected to that address automatically. In production the
-     * property is absent and the SDK uses the default regional endpoints.
+     * When {@code aws.endpoint-url} is set — by CloudStub before the Spring context starts in
+     * tests, or by the {@code local} profile for a standalone run — the clients are redirected to
+     * that address automatically. Under the {@code prod} profile (or no profile) the property is
+     * absent and the SDK uses the default regional endpoints.
      */
     @Bean
     SqsClient sqsClient(@Value("${aws.endpoint-url:}") String endpointUrl) {

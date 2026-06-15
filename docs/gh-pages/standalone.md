@@ -262,16 +262,29 @@ namespaced under `cloudstub.` with room to grow.
 [CloudStub] ERROR: unknown key(s) in config file 'cloudstub.properties': cloudstub.prot. Known keys: ...
 ```
 
-## Point your application at it
+## Point an application at CloudStub
 
-Set `AWS_ENDPOINT_URL` (AWS SDK v2 reads this automatically) before starting your application:
+In **embedded mode** no endpoint configuration is needed: `CloudStubExtension` sets the
+`aws.endpoint-url` system property to its embedded port before any AWS client is built, so SDK v2 clients in the
+test JVM are redirected automatically. In **standalone mode** CloudStub is a separate process, so the application
+must be told where it is. Three forms supply the endpoint — pick by how the client is built:
+
+| Form                                    | Applies when                                                                                       |
+|-----------------------------------------|----------------------------------------------------------------------------------------------------|
+| `AWS_ENDPOINT_URL` environment variable | Any AWS SDK v2 client — the SDK reads it automatically, no code change.                             |
+| `aws.endpoint-url` Spring property      | A Spring Boot app whose client beans read the property (see [Spring Boot](spring-boot.md)).         |
+| `endpointOverride(...)` on the builder  | A hand-built client, or anywhere you need explicit per-client control.                              |
+
+### Environment variable (no code change)
+
+AWS SDK v2 reads `AWS_ENDPOINT_URL` on its own, so this works without touching the client code:
 
 ```
 export AWS_ENDPOINT_URL=http://localhost:4566
 ./gradlew bootRun
 ```
 
-Or configure it directly in your application's AWS client builder:
+### Manual override on the client builder
 
 ```java
 SqsClient sqs = SqsClient.builder()
@@ -282,15 +295,8 @@ SqsClient sqs = SqsClient.builder()
     .build();
 ```
 
-## Verify a service end to end
-
-The `cloudstub-example` app ships profile-gated demo runners for manual end-to-end checks against a running server. With the server started above (`--services=sqs`), run the SQS demo:
-
-```
-./gradlew :cloudstub-example:junit6:runExample -Pdemo=sqs
-```
-
-It publishes messages, peeks them with `ReceiveMessage`, then consumes them with `ReceiveMessage` + `DeleteMessage`, and logs the round-trip. See [Spring Boot Integration](spring-boot.md#run-the-app-against-a-standalone-server) for details.
+For the Spring property form, the `local` / `prod` profiles, an IDE run setup, and the resolution precedence
+between these forms, see [Pointing an application at CloudStub](spring-boot.md#pointing-an-application-at-cloudstub).
 
 ## Stop the server
 
