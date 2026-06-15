@@ -32,4 +32,11 @@ class MaxHistoryResolverTest {
     void noneKeywordResolvesToZero() {
         assertEquals(0, MaxHistoryResolver.resolve(new String[] {"--max-history=none"}));
     }
+
+    @Test
+    void nonNumericFlagFallsThroughToDefault() {
+        assertEquals(
+                CloudStub.DEFAULT_MAX_REQUEST_HISTORY,
+                MaxHistoryResolver.resolve(new String[] {"--max-history=abc"}));
+    }
 }
