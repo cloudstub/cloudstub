@@ -1,4 +1,4 @@
-package io.cloudstub.local;
+package io.cloudstub.local.config.resolver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

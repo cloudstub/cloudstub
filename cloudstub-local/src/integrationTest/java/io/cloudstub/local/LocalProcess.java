@@ -48,6 +48,32 @@ final class LocalProcess implements AutoCloseable {
     }
 
     /**
+     * Starts the server driven by a {@code --config} file, deliberately omitting the {@code --port}
+     * / {@code --api-port} flags so the bound port comes from the file. The config file must set
+     * {@code cloudstub.port} to {@code port}. Proves config-file resolution end to end through the
+     * running server.
+     */
+    static LocalProcess startWithConfig(int port, Path configFile, String... extraArgs)
+            throws Exception {
+        String jarPath = System.getProperty("cloudstub.local.jar");
+        assertNotNull(jarPath, "cloudstub.local.jar system property must be set");
+
+        List<String> command =
+                new ArrayList<>(
+                        List.of(
+                                "java",
+                                "-jar",
+                                jarPath,
+                                "--config=" + configFile.toAbsolutePath()));
+        String modulesDir = System.getProperty("cloudstub.local.modules.dir");
+        if (modulesDir != null) {
+            command.add("--modules-dir=" + modulesDir);
+        }
+
+        return getLocalProcess(port, command, extraArgs);
+    }
+
+    /**
      * Starts the server with an explicit modules directory, overriding the system property. Useful
      * for tests that need a custom (e.g. filtered or empty) plugin directory.
      */
