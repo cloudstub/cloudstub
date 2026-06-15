@@ -62,6 +62,9 @@ loadScripts(document, 'script');</script>
 <li><a href="io/cloudstub/core/spi/restapi/package-tree.html">io.cloudstub.core.spi.restapi</a>, </li>
 <li><a href="io/cloudstub/junit/package-tree.html">io.cloudstub.junit</a>, </li>
 <li><a href="io/cloudstub/local/package-tree.html">io.cloudstub.local</a>, </li>
+<li><a href="io/cloudstub/local/config/package-tree.html">io.cloudstub.local.config</a>, </li>
+<li><a href="io/cloudstub/local/config/exception/package-tree.html">io.cloudstub.local.config.exception</a>, </li>
+<li><a href="io/cloudstub/local/config/resolver/package-tree.html">io.cloudstub.local.config.resolver</a>, </li>
 <li><a href="io/cloudstub/s3/package-tree.html">io.cloudstub.s3</a>, </li>
 <li><a href="io/cloudstub/sdkv1/package-tree.html">io.cloudstub.sdkv1</a>, </li>
 <li><a href="io/cloudstub/secretsmanager/package-tree.html">io.cloudstub.secretsmanager</a>, </li>
@@ -74,8 +77,10 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" class="type-name-link external-link" title="class or interface in java.lang">Object</a>
 <ul>
+<li class="circle">io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/ApiPortResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">ApiPortResolver</a></li>
 <li class="circle">io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" class="type-name-link" title="class in io.cloudstub.local">ApiServer</a> (implements java.io.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Closeable.html" title="class or interface in java.io" class="external-link">Closeable</a>)</li>
 <li class="circle">io.cloudstub.core.internal.store.<a href="io/cloudstub/core/internal/store/AppendLogStateStore.html" class="type-name-link" title="class in io.cloudstub.core.internal.store">AppendLogStateStore</a> (implements io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StateStore.html" title="interface in io.cloudstub.core.spi">StateStore</a>)</li>
+<li class="circle">io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/AutoDownloadResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">AutoDownloadResolver</a></li>
 <li class="circle">io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/AwsEndpointOverride.html" class="type-name-link" title="class in io.cloudstub.core.internal">AwsEndpointOverride</a></li>
 <li class="circle">io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" class="type-name-link" title="class in io.cloudstub.core">CloudStub</a> (implements java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/AutoCloseable.html" title="class or interface in java.lang" class="external-link">AutoCloseable</a>)</li>
 <li class="circle">io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubContextImpl.html" class="type-name-link" title="class in io.cloudstub.core.internal">CloudStubContextImpl</a> (implements io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/CloudStubContext.html" title="interface in io.cloudstub.core.spi">CloudStubContext</a>)</li>
@@ -95,12 +100,18 @@ loadScripts(document, 'script');</script>
 <li class="circle">io.cloudstub.junit.<a href="io/cloudstub/junit/FaultInjectionExtension.html" class="type-name-link" title="class in io.cloudstub.junit">FaultInjectionExtension</a> (implements org.junit.jupiter.api.extension.AfterTestExecutionCallback, org.junit.jupiter.api.extension.BeforeTestExecutionCallback)</li>
 <li class="circle">io.cloudstub.core.internal.store.<a href="io/cloudstub/core/internal/store/InMemoryStateStore.html" class="type-name-link" title="class in io.cloudstub.core.internal.store">InMemoryStateStore</a> (implements io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StateStore.html" title="interface in io.cloudstub.core.spi">StateStore</a>)</li>
 <li class="circle">io.cloudstub.core.internal.store.<a href="io/cloudstub/core/internal/store/JsonFileStateStore.html" class="type-name-link" title="class in io.cloudstub.core.internal.store">JsonFileStateStore</a> (implements io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StateStore.html" title="interface in io.cloudstub.core.spi">StateStore</a>)</li>
+<li class="circle">io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" class="type-name-link" title="class in io.cloudstub.local.config">LocalConfig</a></li>
 <li class="circle">io.cloudstub.local.<a href="io/cloudstub/local/LocalMain.html" class="type-name-link" title="class in io.cloudstub.local">LocalMain</a></li>
 <li class="circle">io.cloudstub.codegen.<a href="io/cloudstub/codegen/Main.html" class="type-name-link" title="class in io.cloudstub.codegen">Main</a></li>
+<li class="circle">io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/MavenBaseUrlResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">MavenBaseUrlResolver</a></li>
+<li class="circle">io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/MaxHistoryResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">MaxHistoryResolver</a></li>
 <li class="circle">io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/Md5HandlebarsHelper.html" class="type-name-link" title="class in io.cloudstub.core.internal">Md5HandlebarsHelper</a> (implements com.github.jknack.handlebars.Helper&lt;T&gt;, com.github.tomakehurst.wiremock.extension.TemplateHelperProviderExtension)</li>
 <li class="circle">io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" class="type-name-link" title="class in io.cloudstub.core.download">ModuleDownloader</a></li>
 <li class="circle">io.cloudstub.codegen.<a href="io/cloudstub/codegen/ModuleGenerator.html" class="type-name-link" title="class in io.cloudstub.codegen">ModuleGenerator</a></li>
 <li class="circle">io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/ModuleInitializer.html" class="type-name-link" title="class in io.cloudstub.core.internal">ModuleInitializer</a></li>
+<li class="circle">io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/ModulesDirResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">ModulesDirResolver</a></li>
+<li class="circle">io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/ModuleVersionResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">ModuleVersionResolver</a></li>
+<li class="circle">io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/PortResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">PortResolver</a></li>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Record.html" class="type-name-link external-link" title="class or interface in java.lang">Record</a>
 <ul>
 <li class="circle">io.cloudstub.core.spi.restapi.<a href="io/cloudstub/core/spi/restapi/ApiParam.html" class="type-name-link" title="class in io.cloudstub.core.spi.restapi">ApiParam</a></li>
@@ -115,7 +126,9 @@ loadScripts(document, 'script');</script>
 </li>
 <li class="circle">io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/RequestHistory.html" class="type-name-link" title="class in io.cloudstub.core.internal">RequestHistory</a></li>
 <li class="circle">io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/ServiceRegistry.html" class="type-name-link" title="class in io.cloudstub.core.internal">ServiceRegistry</a></li>
+<li class="circle">io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/ServiceSelector.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">ServiceSelector</a></li>
 <li class="circle">io.cloudstub.core.internal.store.<a href="io/cloudstub/core/internal/store/StateStoreFactory.html" class="type-name-link" title="class in io.cloudstub.core.internal.store">StateStoreFactory</a></li>
+<li class="circle">io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/StoreDirectoryResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">StoreDirectoryResolver</a></li>
 <li class="circle">io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StubResponse.html" class="type-name-link" title="class in io.cloudstub.core.spi">StubResponse</a></li>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Throwable.html" class="type-name-link external-link" title="class or interface in java.lang">Throwable</a> (implements java.io.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a>)
 <ul>
@@ -130,6 +143,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">io.cloudstub.core.exception.<a href="io/cloudstub/core/exception/CloudStubNotStartedException.html" class="type-name-link" title="class in io.cloudstub.core.exception">CloudStubNotStartedException</a></li>
 </ul>
 </li>
+<li class="circle">io.cloudstub.local.config.exception.<a href="io/cloudstub/local/config/exception/LocalConfigException.html" class="type-name-link" title="class in io.cloudstub.local.config.exception">LocalConfigException</a></li>
 <li class="circle">io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloadException.html" class="type-name-link" title="class in io.cloudstub.core.download">ModuleDownloadException</a></li>
 </ul>
 </li>

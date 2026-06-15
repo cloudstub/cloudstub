@@ -784,6 +784,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration file
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resolution-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution precedence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#absent-or-malformed-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Absent or malformed files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#point-an-application-at-cloudstub" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1268,6 +1307,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration file
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resolution-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution precedence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#absent-or-malformed-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Absent or malformed files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#point-an-application-at-cloudstub" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1536,6 +1614,96 @@ naming the coordinate, version, and destination, so downloaded jars are distingu
 <p>The REST API is available at <code>http://localhost:4567</code> — see <a href="../rest-api/">REST API</a> for the full reference, drive
 the instance from the terminal with the <a href="../cli/">CLI</a> (<code>clm</code> / <code>cloudstub</code>), or inspect it visually in the browser
 with the <a href="../console/">Console</a>.</p>
+<h2 id="configuration-file">Configuration file</h2>
+<p>Every option above can also be set in an optional <code>.properties</code> file, so a developer's local CloudStub setup is
+reproducible and can be checked into version control instead of being spread across shell flags. The file is loaded
+from <code>--config=&lt;path&gt;</code>, then the <code>CLOUDSTUB_CONFIG</code> environment variable, then <code>cloudstub.properties</code> in the working
+directory.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># cloudstub.properties</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="na">cloudstub.port</span><span class="o">=</span><span class="s">4566</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="na">cloudstub.api-port</span><span class="o">=</span><span class="s">4567</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="na">cloudstub.services</span><span class="o">=</span><span class="s">sqs,s3</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="na">cloudstub.store-dir</span><span class="o">=</span><span class="s">.cloudstub</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="na">cloudstub.max-history</span><span class="o">=</span><span class="s">1000</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="na">cloudstub.modules-dir</span><span class="o">=</span><span class="s">modules</span>
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="na">cloudstub.module-version</span><span class="o">=</span><span class="s">0.1.0-beta.1</span>
+</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="na">cloudstub.maven-base-url</span><span class="o">=</span><span class="s">https://repo1.maven.org/maven2</span>
+</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="na">cloudstub.auto-download</span><span class="o">=</span><span class="s">true</span>
+</span></code></pre></div>
+<div class="highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --config=cloudstub.properties
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Equivalent flag</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cloudstub.port</code></td>
+<td><code>--port</code></td>
+<td>mock server port (integer)</td>
+</tr>
+<tr>
+<td><code>cloudstub.api-port</code></td>
+<td><code>--api-port</code></td>
+<td>REST API port (integer)</td>
+</tr>
+<tr>
+<td><code>cloudstub.services</code></td>
+<td><code>--services</code></td>
+<td>comma-separated service IDs (<code>sqs,s3</code>)</td>
+</tr>
+<tr>
+<td><code>cloudstub.store-dir</code></td>
+<td><code>--store-dir</code></td>
+<td>persistent state directory; <code>none</code> / <code>off</code> for in-memory</td>
+</tr>
+<tr>
+<td><code>cloudstub.max-history</code></td>
+<td><code>--max-history</code></td>
+<td>request-history cap (integer); <code>unlimited</code> / <code>none</code> for unbounded</td>
+</tr>
+<tr>
+<td><code>cloudstub.modules-dir</code></td>
+<td><code>--modules-dir</code></td>
+<td>plugin directory to load module jars from</td>
+</tr>
+<tr>
+<td><code>cloudstub.module-version</code></td>
+<td><code>--module-version</code></td>
+<td>version to auto-download</td>
+</tr>
+<tr>
+<td><code>cloudstub.maven-base-url</code></td>
+<td><code>--maven-base-url</code></td>
+<td>Maven repository base URL for auto-download</td>
+</tr>
+<tr>
+<td><code>cloudstub.auto-download</code></td>
+<td><code>--no-download</code></td>
+<td><code>false</code> / <code>0</code> / <code>no</code> / <code>off</code> disables auto-download</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resolution-precedence">Resolution precedence</h3>
+<p>Each option is resolved independently in this order, the first source that supplies a value winning:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>CLI flag → environment variable → config file → built-in default
+</span></code></pre></div>
+<p>A CLI flag therefore always overrides the file, and the file overrides nothing but the defaults — the same
+flag-over-environment ordering CloudStub already uses, with the file slotted in just above the defaults. The keys are
+namespaced under <code>cloudstub.</code> with room to grow.</p>
+<h3 id="absent-or-malformed-files">Absent or malformed files</h3>
+<ul>
+<li>A <strong>missing</strong> default <code>cloudstub.properties</code> is not an error — the server starts on defaults exactly as it does
+  with no file. Only a <code>--config</code> (or <code>CLOUDSTUB_CONFIG</code>) path that does not exist fails fast.</li>
+<li>A file that <strong>cannot be parsed</strong>, that contains an <strong>unknown key</strong>, or that holds a <strong>non-numeric value</strong> for a
+  numeric key fails fast with a message naming the file and the offending key, not a stack trace:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>[CloudStub] ERROR: unknown key(s) in config file &#39;cloudstub.properties&#39;: cloudstub.prot. Known keys: ...
+</span></code></pre></div>
 <h2 id="point-an-application-at-cloudstub">Point an application at CloudStub</h2>
 <p>In <strong>embedded mode</strong> no endpoint configuration is needed: <code>CloudStubExtension</code> sets the
 <code>aws.endpoint-url</code> system property to its embedded port before any AWS client is built, so SDK v2 clients in the
@@ -1565,23 +1733,23 @@ must be told where it is. Three forms supply the endpoint — pick by how the cl
 </table>
 <h3 id="environment-variable-no-code-change">Environment variable (no code change)</h3>
 <p>AWS SDK v2 reads <code>AWS_ENDPOINT_URL</code> on its own, so this works without touching the client code:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>export AWS_ENDPOINT_URL=http://localhost:4566
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>./gradlew bootRun
+<div class="highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>export AWS_ENDPOINT_URL=http://localhost:4566
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>./gradlew bootRun
 </span></code></pre></div>
 <h3 id="manual-override-on-the-client-builder">Manual override on the client builder</h3>
-<div class="highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">SqsClient</span><span class="w"> </span><span class="n">sqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SqsClient</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">    </span><span class="p">.</span><span class="na">endpointOverride</span><span class="p">(</span><span class="n">URI</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;http://localhost:4566&quot;</span><span class="p">))</span>
-</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">    </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">US_EAST_1</span><span class="p">)</span>
-</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">    </span><span class="p">.</span><span class="na">credentialsProvider</span><span class="p">(</span><span class="n">StaticCredentialsProvider</span><span class="p">.</span><span class="na">create</span><span class="p">(</span>
-</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">        </span><span class="n">AwsBasicCredentials</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;test&quot;</span><span class="p">)))</span>
-</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<div class="highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">SqsClient</span><span class="w"> </span><span class="n">sqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SqsClient</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">    </span><span class="p">.</span><span class="na">endpointOverride</span><span class="p">(</span><span class="n">URI</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;http://localhost:4566&quot;</span><span class="p">))</span>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">    </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">US_EAST_1</span><span class="p">)</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">    </span><span class="p">.</span><span class="na">credentialsProvider</span><span class="p">(</span><span class="n">StaticCredentialsProvider</span><span class="p">.</span><span class="na">create</span><span class="p">(</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">        </span><span class="n">AwsBasicCredentials</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;test&quot;</span><span class="p">)))</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 </span></code></pre></div>
 <p>For the Spring property form, the <code>local</code> / <code>prod</code> profiles, an IDE run setup, and the resolution precedence
 between these forms, see <a href="../spring-boot/#pointing-an-application-at-cloudstub">Pointing an application at CloudStub</a>.</p>
 <h2 id="stop-the-server">Stop the server</h2>
 <p>Press <code>Ctrl-C</code> or send <code>SIGTERM</code>. CloudStub prints a shutdown message and exits cleanly — no stack trace:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>^C
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>[CloudStub] Shutting down...
+<div class="highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>^C
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>[CloudStub] Shutting down...
 </span></code></pre></div>
 <h2 id="logging">Logging</h2>
 <p>By default, CloudStub writes INFO-level output to stdout via <code>slf4j-simple</code>. To enable DEBUG output (stub

@@ -50,7 +50,7 @@ loadScripts(document, 'script');</script>
 <div class="header">
 <h1>Index</h1>
 </div>
-<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a>
+<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a>
 <h2 class="title" id="I:A">A</h2>
 <dl class="index">
 <dt><a href="io/cloudstub/core/internal/CloudStubSettings.html#addExplicitService(io.cloudstub.core.spi.CloudStubService)" class="member-name-link">addExplicitService(CloudStubService)</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubSettings.html" title="class in io.cloudstub.core.internal">CloudStubSettings</a></dt>
@@ -78,6 +78,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/cloudstub/core/spi/restapi/ApiParam.html#%3Cinit%3E(java.lang.String,boolean,java.lang.String)" class="member-name-link">ApiParam(String, boolean, String)</a> - Constructor for record class io.cloudstub.core.spi.restapi.<a href="io/cloudstub/core/spi/restapi/ApiParam.html" title="class in io.cloudstub.core.spi.restapi">ApiParam</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>ApiParam</code> record class.</div>
+</dd>
+<dt><a href="io/cloudstub/local/config/resolver/ApiPortResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">ApiPortResolver</a> - Class in <a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a></dt>
+<dd>
+<div class="block">Resolves the port for the REST API server.</div>
 </dd>
 <dt><a href="io/cloudstub/core/spi/restapi/ApiRequest.html" class="type-name-link" title="class in io.cloudstub.core.spi.restapi">ApiRequest</a> - Record Class in <a href="io/cloudstub/core/spi/restapi/package-summary.html">io.cloudstub.core.spi.restapi</a></dt>
 <dd>
@@ -121,6 +125,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/CloudStubResponseTransformer.html#applyGlobally()" class="member-name-link">applyGlobally()</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubResponseTransformer.html" title="class in io.cloudstub.core.internal">CloudStubResponseTransformer</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/AutoDownloadResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">AutoDownloadResolver</a> - Class in <a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a></dt>
+<dd>
+<div class="block">Resolves whether absent service module jars are auto-downloaded from Maven Central.</div>
+</dd>
 <dt><a href="io/cloudstub/core/internal/AwsEndpointOverride.html" class="type-name-link" title="class in io.cloudstub.core.internal">AwsEndpointOverride</a> - Class in <a href="io/cloudstub/core/internal/package-summary.html">io.cloudstub.core.internal</a></dt>
 <dd>
 <div class="block">Manages the <code>aws.endpoint-url</code> system property that redirects AWS SDK v2 traffic to the
@@ -341,10 +349,16 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:D">D</h2>
 <dl class="index">
+<dt><a href="io/cloudstub/local/config/resolver/ApiPortResolver.html#DEFAULT_API_PORT" class="member-name-link">DEFAULT_API_PORT</a> - Static variable in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/ApiPortResolver.html" title="class in io.cloudstub.local.config.resolver">ApiPortResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/ModulesDirResolver.html#DEFAULT_DIR" class="member-name-link">DEFAULT_DIR</a> - Static variable in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/ModulesDirResolver.html" title="class in io.cloudstub.local.config.resolver">ModulesDirResolver</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/CloudStub.html#DEFAULT_MAX_REQUEST_HISTORY" class="member-name-link">DEFAULT_MAX_REQUEST_HISTORY</a> - Static variable in class io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></dt>
 <dd>
 <div class="block">Default cap on retained request-history entries; bounds memory in long-lived processes.</div>
 </dd>
+<dt><a href="io/cloudstub/local/config/resolver/PortResolver.html#DEFAULT_PORT" class="member-name-link">DEFAULT_PORT</a> - Static variable in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/PortResolver.html" title="class in io.cloudstub.local.config.resolver">PortResolver</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/store/AppendLogStateStore.html#delete(java.lang.String)" class="member-name-link">delete(String)</a> - Method in class io.cloudstub.core.internal.store.<a href="io/cloudstub/core/internal/store/AppendLogStateStore.html" title="class in io.cloudstub.core.internal.store">AppendLogStateStore</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/store/InMemoryStateStore.html#delete(java.lang.String)" class="member-name-link">delete(String)</a> - Method in class io.cloudstub.core.internal.store.<a href="io/cloudstub/core/internal/store/InMemoryStateStore.html" title="class in io.cloudstub.core.internal.store">InMemoryStateStore</a></dt>
@@ -369,6 +383,10 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:E">E</h2>
 <dl class="index">
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#empty()" class="member-name-link">empty()</a> - Static method in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>
+<div class="block">An empty configuration backed by no file.</div>
+</dd>
 <dt><a href="io/cloudstub/core/internal/CloudStubSettings.html#enabledServiceIds()" class="member-name-link">enabledServiceIds()</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubSettings.html" title="class in io.cloudstub.core.internal">CloudStubSettings</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/codegen/GeneratedFile.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class io.cloudstub.codegen.<a href="io/cloudstub/codegen/GeneratedFile.html" title="class in io.cloudstub.codegen">GeneratedFile</a></dt>
@@ -464,7 +482,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Retrieve the value stored under <code>key</code>, or <code>null</code> if the key does not exist.</div>
 </dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#get(java.lang.String)" class="member-name-link">get(String)</a> - Method in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/spi/HttpMethod.html#GET" class="member-name-link">GET</a> - Enum constant in enum class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/HttpMethod.html" title="enum class in io.cloudstub.core.spi">HttpMethod</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#getInt(java.lang.String)" class="member-name-link">getInt(String)</a> - Method in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/CloudStubResponseTransformer.html#getName()" class="member-name-link">getName()</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubResponseTransformer.html" title="class in io.cloudstub.core.internal">CloudStubResponseTransformer</a></dt>
 <dd>&nbsp;</dd>
@@ -574,6 +596,12 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/local/package-summary.html">io.cloudstub.local</a> - package io.cloudstub.local</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/package-summary.html">io.cloudstub.local.config</a> - package io.cloudstub.local.config</dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/exception/package-summary.html">io.cloudstub.local.config.exception</a> - package io.cloudstub.local.config.exception</dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a> - package io.cloudstub.local.config.resolver</dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/s3/package-summary.html">io.cloudstub.s3</a> - package io.cloudstub.s3</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/sdkv1/package-summary.html">io.cloudstub.sdkv1</a> - package io.cloudstub.sdkv1</dt>
@@ -589,6 +617,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns whether the jar for <code>service</code> at <code>version</code> is present in <code>dir</code> —
  either the exact versioned jar or an unversioned <code>cloudstub-&lt;service&gt;.jar</code>.</div>
 </dd>
+<dt><a href="io/cloudstub/local/config/resolver/AutoDownloadResolver.html#isEnabled(java.lang.String%5B%5D,io.cloudstub.local.config.LocalConfig)" class="member-name-link">isEnabled(String[], LocalConfig)</a> - Static method in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/AutoDownloadResolver.html" title="class in io.cloudstub.local.config.resolver">AutoDownloadResolver</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:J">J</h2>
 <dl class="index">
@@ -612,6 +642,27 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/cloudstub/core/internal/store/JsonFileStateStore.html#%3Cinit%3E(java.nio.file.Path)" class="member-name-link">JsonFileStateStore(Path)</a> - Constructor for class io.cloudstub.core.internal.store.<a href="io/cloudstub/core/internal/store/JsonFileStateStore.html" title="class in io.cloudstub.core.internal.store">JsonFileStateStore</a></dt>
 <dd>&nbsp;</dd>
 </dl>
+<h2 class="title" id="I:K">K</h2>
+<dl class="index">
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#KEY_API_PORT" class="member-name-link">KEY_API_PORT</a> - Static variable in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#KEY_AUTO_DOWNLOAD" class="member-name-link">KEY_AUTO_DOWNLOAD</a> - Static variable in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#KEY_MAVEN_BASE_URL" class="member-name-link">KEY_MAVEN_BASE_URL</a> - Static variable in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#KEY_MAX_HISTORY" class="member-name-link">KEY_MAX_HISTORY</a> - Static variable in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#KEY_MODULE_VERSION" class="member-name-link">KEY_MODULE_VERSION</a> - Static variable in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#KEY_MODULES_DIR" class="member-name-link">KEY_MODULES_DIR</a> - Static variable in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#KEY_PORT" class="member-name-link">KEY_PORT</a> - Static variable in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#KEY_SERVICES" class="member-name-link">KEY_SERVICES</a> - Static variable in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#KEY_STORE_DIR" class="member-name-link">KEY_STORE_DIR</a> - Static variable in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
+</dl>
 <h2 class="title" id="I:L">L</h2>
 <dl class="index">
 <dt><a href="io/cloudstub/core/internal/store/AppendLogStateStore.html#list(java.lang.String)" class="member-name-link">list(String)</a> - Method in class io.cloudstub.core.internal.store.<a href="io/cloudstub/core/internal/store/AppendLogStateStore.html" title="class in io.cloudstub.core.internal.store">AppendLogStateStore</a></dt>
@@ -624,6 +675,19 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">List all keys whose path begins with <code>prefix</code>.</div>
 </dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html#load(java.lang.String%5B%5D)" class="member-name-link">load(String[])</a> - Static method in class io.cloudstub.local.config.<a href="io/cloudstub/local/config/LocalConfig.html" title="class in io.cloudstub.local.config">LocalConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/LocalConfig.html" class="type-name-link" title="class in io.cloudstub.local.config">LocalConfig</a> - Class in <a href="io/cloudstub/local/config/package-summary.html">io.cloudstub.local.config</a></dt>
+<dd>
+<div class="block">Optional <code>.properties</code> configuration file for standalone mode, located from <code>
+ --config=&lt;path&gt;</code>, then <code>CLOUDSTUB_CONFIG</code>, then <code>./cloudstub.properties</code>.</div>
+</dd>
+<dt><a href="io/cloudstub/local/config/exception/LocalConfigException.html" class="type-name-link" title="class in io.cloudstub.local.config.exception">LocalConfigException</a> - Exception in <a href="io/cloudstub/local/config/exception/package-summary.html">io.cloudstub.local.config.exception</a></dt>
+<dd>
+<div class="block">Signals an unusable standalone config file.</div>
+</dd>
+<dt><a href="io/cloudstub/local/config/exception/LocalConfigException.html#%3Cinit%3E(java.lang.String)" class="member-name-link">LocalConfigException(String)</a> - Constructor for exception io.cloudstub.local.config.exception.<a href="io/cloudstub/local/config/exception/LocalConfigException.html" title="class in io.cloudstub.local.config.exception">LocalConfigException</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/local/LocalMain.html" class="type-name-link" title="class in io.cloudstub.local">LocalMain</a> - Class in <a href="io/cloudstub/local/package-summary.html">io.cloudstub.local</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/local/LocalMain.html#%3Cinit%3E()" class="member-name-link">LocalMain()</a> - Constructor for class io.cloudstub.local.<a href="io/cloudstub/local/LocalMain.html" title="class in io.cloudstub.local">LocalMain</a></dt>
@@ -648,6 +712,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/cloudstub/core/restapi/StubInfo.html#matchKey()" class="member-name-link">matchKey()</a> - Method in record class io.cloudstub.core.restapi.<a href="io/cloudstub/core/restapi/StubInfo.html" title="class in io.cloudstub.core.restapi">StubInfo</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>matchKey</code> record component.</div>
+</dd>
+<dt><a href="io/cloudstub/local/config/resolver/MavenBaseUrlResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">MavenBaseUrlResolver</a> - Class in <a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a></dt>
+<dd>
+<div class="block">Resolves the Maven repository base URL that auto-download fetches module jars from.</div>
+</dd>
+<dt><a href="io/cloudstub/local/config/resolver/MaxHistoryResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">MaxHistoryResolver</a> - Class in <a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a></dt>
+<dd>
+<div class="block">Resolves the cap on retained request-history entries for the long-lived local process.</div>
 </dd>
 <dt><a href="io/cloudstub/core/internal/CloudStubSettings.html#maxRequestHistory()" class="member-name-link">maxRequestHistory()</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubSettings.html" title="class in io.cloudstub.core.internal">CloudStubSettings</a></dt>
 <dd>&nbsp;</dd>
@@ -710,6 +782,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns a live snapshot of all loaded modules and their registered stubs.</div>
 </dd>
+<dt><a href="io/cloudstub/local/config/resolver/ModulesDirResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">ModulesDirResolver</a> - Class in <a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a></dt>
+<dd>
+<div class="block">Resolves the directory from which module jars are loaded at startup.</div>
+</dd>
 <dt><a href="io/cloudstub/core/restapi/ModuleStatus.html" class="type-name-link" title="class in io.cloudstub.core.restapi">ModuleStatus</a> - Record Class in <a href="io/cloudstub/core/restapi/package-summary.html">io.cloudstub.core.restapi</a></dt>
 <dd>
 <div class="block">Status snapshot for one loaded service module and its registered stubs.</div>
@@ -721,6 +797,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/cloudstub/core/internal/WireMockStubRegistrar.html#moduleStatuses()" class="member-name-link">moduleStatuses()</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/WireMockStubRegistrar.html" title="class in io.cloudstub.core.internal">WireMockStubRegistrar</a></dt>
 <dd>
 <div class="block">Returns a live snapshot of all modules and their registered stubs.</div>
+</dd>
+<dt><a href="io/cloudstub/local/config/resolver/ModuleVersionResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">ModuleVersionResolver</a> - Class in <a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a></dt>
+<dd>
+<div class="block">Resolves the version of the module jars to auto-download.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:N">N</h2>
@@ -772,6 +852,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/cloudstub/local/ApiServer.html#port()" class="member-name-link">port()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
 <dd>
 <div class="block">The port the API is listening on.</div>
+</dd>
+<dt><a href="io/cloudstub/local/config/resolver/PortResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">PortResolver</a> - Class in <a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a></dt>
+<dd>
+<div class="block">Resolves the port the mock server binds.</div>
 </dd>
 <dt><a href="io/cloudstub/core/spi/HttpMethod.html#POST" class="member-name-link">POST</a> - Enum constant in enum class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/HttpMethod.html" title="enum class in io.cloudstub.core.spi">HttpMethod</a></dt>
 <dd>&nbsp;</dd>
@@ -920,6 +1004,22 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/codegen/ModelResolver.html#resolve()" class="member-name-link">resolve()</a> - Method in interface io.cloudstub.codegen.<a href="io/cloudstub/codegen/ModelResolver.html" title="interface in io.cloudstub.codegen">ModelResolver</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/ApiPortResolver.html#resolve(java.lang.String%5B%5D,io.cloudstub.local.config.LocalConfig)" class="member-name-link">resolve(String[], LocalConfig)</a> - Static method in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/ApiPortResolver.html" title="class in io.cloudstub.local.config.resolver">ApiPortResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/MavenBaseUrlResolver.html#resolve(java.lang.String%5B%5D,io.cloudstub.local.config.LocalConfig)" class="member-name-link">resolve(String[], LocalConfig)</a> - Static method in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/MavenBaseUrlResolver.html" title="class in io.cloudstub.local.config.resolver">MavenBaseUrlResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/MaxHistoryResolver.html#resolve(java.lang.String%5B%5D,io.cloudstub.local.config.LocalConfig)" class="member-name-link">resolve(String[], LocalConfig)</a> - Static method in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/MaxHistoryResolver.html" title="class in io.cloudstub.local.config.resolver">MaxHistoryResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/ModulesDirResolver.html#resolve(java.lang.String%5B%5D,io.cloudstub.local.config.LocalConfig)" class="member-name-link">resolve(String[], LocalConfig)</a> - Static method in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/ModulesDirResolver.html" title="class in io.cloudstub.local.config.resolver">ModulesDirResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/ModuleVersionResolver.html#resolve(java.lang.String%5B%5D,io.cloudstub.local.config.LocalConfig)" class="member-name-link">resolve(String[], LocalConfig)</a> - Static method in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/ModuleVersionResolver.html" title="class in io.cloudstub.local.config.resolver">ModuleVersionResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/PortResolver.html#resolve(java.lang.String%5B%5D,io.cloudstub.local.config.LocalConfig)" class="member-name-link">resolve(String[], LocalConfig)</a> - Static method in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/PortResolver.html" title="class in io.cloudstub.local.config.resolver">PortResolver</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/ServiceSelector.html#resolve(java.lang.String%5B%5D,io.cloudstub.local.config.LocalConfig)" class="member-name-link">resolve(String[], LocalConfig)</a> - Static method in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/ServiceSelector.html" title="class in io.cloudstub.local.config.resolver">ServiceSelector</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/StoreDirectoryResolver.html#resolve(java.lang.String%5B%5D,io.cloudstub.local.config.LocalConfig)" class="member-name-link">resolve(String[], LocalConfig)</a> - Static method in class io.cloudstub.local.config.resolver.<a href="io/cloudstub/local/config/resolver/StoreDirectoryResolver.html" title="class in io.cloudstub.local.config.resolver">StoreDirectoryResolver</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:S">S</h2>
 <dl class="index">
@@ -973,6 +1073,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/core/internal/ServiceRegistry.html#%3Cinit%3E()" class="member-name-link">ServiceRegistry()</a> - Constructor for class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/ServiceRegistry.html" title="class in io.cloudstub.core.internal">ServiceRegistry</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/ServiceSelector.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">ServiceSelector</a> - Class in <a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a></dt>
+<dd>
+<div class="block">Resolves which services the local server should enable.</div>
+</dd>
 <dt><a href="io/cloudstub/core/internal/AwsEndpointOverride.html#set(int)" class="member-name-link">set(int)</a> - Static method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/AwsEndpointOverride.html" title="class in io.cloudstub.core.internal">AwsEndpointOverride</a></dt>
 <dd>
 <div class="block">Points the AWS SDK at <code>http://localhost:&lt;port&gt;</code>.</div>
@@ -1085,6 +1189,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/CloudStubSettings.html#storeDirectory()" class="member-name-link">storeDirectory()</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubSettings.html" title="class in io.cloudstub.core.internal">CloudStubSettings</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/config/resolver/StoreDirectoryResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">StoreDirectoryResolver</a> - Class in <a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a></dt>
+<dd>
+<div class="block">Resolves the directory used for persistent state in local mode.</div>
+</dd>
 <dt><a href="io/cloudstub/core/spi/StubHandler.html" class="type-name-link" title="interface in io.cloudstub.core.spi">StubHandler</a> - Interface in <a href="io/cloudstub/core/spi/package-summary.html">io.cloudstub.core.spi</a></dt>
 <dd>
 <div class="block">A request-time handler for a stateful stub.</div>
@@ -1242,7 +1350,7 @@ the order they are declared.</div>
 <div class="block">A <code>200 OK</code> XML response with the AWS query/XML content type.</div>
 </dd>
 </dl>
-<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a></main>
+<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a></main>
 </div>
 </div>
 </body>

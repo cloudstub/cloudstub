@@ -9,6 +9,9 @@ io.cloudstub.core.spi
 io.cloudstub.core.spi.restapi
 io.cloudstub.junit
 io.cloudstub.local
+io.cloudstub.local.config
+io.cloudstub.local.config.exception
+io.cloudstub.local.config.resolver
 io.cloudstub.s3
 io.cloudstub.sdkv1
 io.cloudstub.secretsmanager

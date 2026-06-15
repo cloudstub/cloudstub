@@ -85,8 +85,8 @@ loadScripts(document, 'script');</script>
 implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Closeable.html" title="class or interface in java.io" class="external-link">Closeable</a></span></div>
 <div class="block">Lightweight REST API server for local mode.
 
- <p>Serves on a secondary port (default 4567) so API traffic
- is always separate from the AWS mock port. Routes:
+ <p>Serves on a secondary port (default <a href="config/resolver/ApiPortResolver.html#DEFAULT_API_PORT">4567</a>) so API traffic is always
+ separate from the AWS mock port. Routes:
 
  <ul>
    <li><code>GET /api/status</code> — port, uptime, loaded modules and their stubs, all routes
