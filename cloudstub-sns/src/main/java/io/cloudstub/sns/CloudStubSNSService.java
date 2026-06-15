@@ -3,9 +3,7 @@ package io.cloudstub.sns;
 import io.cloudstub.core.spi.CloudStubContext;
 import io.cloudstub.core.spi.CloudStubService;
 import io.cloudstub.core.spi.StubRegistrar;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import io.cloudstub.core.spi.StubTemplates;
 
 /**
  * CloudStub service module for SNS.
@@ -27,82 +25,121 @@ public class CloudStubSNSService implements CloudStubService {
     @Override
     public void register(CloudStubContext context) {
         StubRegistrar registrar = context.registrar();
-        registrar.registerXmlFormStub("AddPermission", loadTemplate("AddPermission"));
         registrar.registerXmlFormStub(
-                "CheckIfPhoneNumberIsOptedOut", loadTemplate("CheckIfPhoneNumberIsOptedOut"));
-        registrar.registerXmlFormStub("ConfirmSubscription", loadTemplate("ConfirmSubscription"));
+                "AddPermission", StubTemplates.load(CloudStubSNSService.class, "AddPermission"));
         registrar.registerXmlFormStub(
-                "CreatePlatformApplication", loadTemplate("CreatePlatformApplication"));
+                "CheckIfPhoneNumberIsOptedOut",
+                StubTemplates.load(CloudStubSNSService.class, "CheckIfPhoneNumberIsOptedOut"));
         registrar.registerXmlFormStub(
-                "CreatePlatformEndpoint", loadTemplate("CreatePlatformEndpoint"));
+                "ConfirmSubscription",
+                StubTemplates.load(CloudStubSNSService.class, "ConfirmSubscription"));
         registrar.registerXmlFormStub(
-                "CreateSMSSandboxPhoneNumber", loadTemplate("CreateSMSSandboxPhoneNumber"));
-        registrar.registerXmlFormStub("CreateTopic", loadTemplate("CreateTopic"));
-        registrar.registerXmlFormStub("DeleteEndpoint", loadTemplate("DeleteEndpoint"));
+                "CreatePlatformApplication",
+                StubTemplates.load(CloudStubSNSService.class, "CreatePlatformApplication"));
         registrar.registerXmlFormStub(
-                "DeletePlatformApplication", loadTemplate("DeletePlatformApplication"));
+                "CreatePlatformEndpoint",
+                StubTemplates.load(CloudStubSNSService.class, "CreatePlatformEndpoint"));
         registrar.registerXmlFormStub(
-                "DeleteSMSSandboxPhoneNumber", loadTemplate("DeleteSMSSandboxPhoneNumber"));
-        registrar.registerXmlFormStub("DeleteTopic", loadTemplate("DeleteTopic"));
+                "CreateSMSSandboxPhoneNumber",
+                StubTemplates.load(CloudStubSNSService.class, "CreateSMSSandboxPhoneNumber"));
         registrar.registerXmlFormStub(
-                "GetDataProtectionPolicy", loadTemplate("GetDataProtectionPolicy"));
+                "CreateTopic", StubTemplates.load(CloudStubSNSService.class, "CreateTopic"));
         registrar.registerXmlFormStub(
-                "GetEndpointAttributes", loadTemplate("GetEndpointAttributes"));
+                "DeleteEndpoint", StubTemplates.load(CloudStubSNSService.class, "DeleteEndpoint"));
+        registrar.registerXmlFormStub(
+                "DeletePlatformApplication",
+                StubTemplates.load(CloudStubSNSService.class, "DeletePlatformApplication"));
+        registrar.registerXmlFormStub(
+                "DeleteSMSSandboxPhoneNumber",
+                StubTemplates.load(CloudStubSNSService.class, "DeleteSMSSandboxPhoneNumber"));
+        registrar.registerXmlFormStub(
+                "DeleteTopic", StubTemplates.load(CloudStubSNSService.class, "DeleteTopic"));
+        registrar.registerXmlFormStub(
+                "GetDataProtectionPolicy",
+                StubTemplates.load(CloudStubSNSService.class, "GetDataProtectionPolicy"));
+        registrar.registerXmlFormStub(
+                "GetEndpointAttributes",
+                StubTemplates.load(CloudStubSNSService.class, "GetEndpointAttributes"));
         registrar.registerXmlFormStub(
                 "GetPlatformApplicationAttributes",
-                loadTemplate("GetPlatformApplicationAttributes"));
-        registrar.registerXmlFormStub("GetSMSAttributes", loadTemplate("GetSMSAttributes"));
+                StubTemplates.load(CloudStubSNSService.class, "GetPlatformApplicationAttributes"));
         registrar.registerXmlFormStub(
-                "GetSMSSandboxAccountStatus", loadTemplate("GetSMSSandboxAccountStatus"));
+                "GetSMSAttributes",
+                StubTemplates.load(CloudStubSNSService.class, "GetSMSAttributes"));
         registrar.registerXmlFormStub(
-                "GetSubscriptionAttributes", loadTemplate("GetSubscriptionAttributes"));
-        registrar.registerXmlFormStub("GetTopicAttributes", loadTemplate("GetTopicAttributes"));
+                "GetSMSSandboxAccountStatus",
+                StubTemplates.load(CloudStubSNSService.class, "GetSMSSandboxAccountStatus"));
+        registrar.registerXmlFormStub(
+                "GetSubscriptionAttributes",
+                StubTemplates.load(CloudStubSNSService.class, "GetSubscriptionAttributes"));
+        registrar.registerXmlFormStub(
+                "GetTopicAttributes",
+                StubTemplates.load(CloudStubSNSService.class, "GetTopicAttributes"));
         registrar.registerXmlFormStub(
                 "ListEndpointsByPlatformApplication",
-                loadTemplate("ListEndpointsByPlatformApplication"));
+                StubTemplates.load(
+                        CloudStubSNSService.class, "ListEndpointsByPlatformApplication"));
         registrar.registerXmlFormStub(
-                "ListOriginationNumbers", loadTemplate("ListOriginationNumbers"));
+                "ListOriginationNumbers",
+                StubTemplates.load(CloudStubSNSService.class, "ListOriginationNumbers"));
         registrar.registerXmlFormStub(
-                "ListPhoneNumbersOptedOut", loadTemplate("ListPhoneNumbersOptedOut"));
+                "ListPhoneNumbersOptedOut",
+                StubTemplates.load(CloudStubSNSService.class, "ListPhoneNumbersOptedOut"));
         registrar.registerXmlFormStub(
-                "ListPlatformApplications", loadTemplate("ListPlatformApplications"));
+                "ListPlatformApplications",
+                StubTemplates.load(CloudStubSNSService.class, "ListPlatformApplications"));
         registrar.registerXmlFormStub(
-                "ListSMSSandboxPhoneNumbers", loadTemplate("ListSMSSandboxPhoneNumbers"));
-        registrar.registerXmlFormStub("ListSubscriptions", loadTemplate("ListSubscriptions"));
+                "ListSMSSandboxPhoneNumbers",
+                StubTemplates.load(CloudStubSNSService.class, "ListSMSSandboxPhoneNumbers"));
         registrar.registerXmlFormStub(
-                "ListSubscriptionsByTopic", loadTemplate("ListSubscriptionsByTopic"));
-        registrar.registerXmlFormStub("ListTagsForResource", loadTemplate("ListTagsForResource"));
-        registrar.registerXmlFormStub("ListTopics", loadTemplate("ListTopics"));
-        registrar.registerXmlFormStub("OptInPhoneNumber", loadTemplate("OptInPhoneNumber"));
-        registrar.registerXmlFormStub("Publish", loadTemplate("Publish"));
-        registrar.registerXmlFormStub("PublishBatch", loadTemplate("PublishBatch"));
+                "ListSubscriptions",
+                StubTemplates.load(CloudStubSNSService.class, "ListSubscriptions"));
         registrar.registerXmlFormStub(
-                "PutDataProtectionPolicy", loadTemplate("PutDataProtectionPolicy"));
-        registrar.registerXmlFormStub("RemovePermission", loadTemplate("RemovePermission"));
+                "ListSubscriptionsByTopic",
+                StubTemplates.load(CloudStubSNSService.class, "ListSubscriptionsByTopic"));
         registrar.registerXmlFormStub(
-                "SetEndpointAttributes", loadTemplate("SetEndpointAttributes"));
+                "ListTagsForResource",
+                StubTemplates.load(CloudStubSNSService.class, "ListTagsForResource"));
+        registrar.registerXmlFormStub(
+                "ListTopics", StubTemplates.load(CloudStubSNSService.class, "ListTopics"));
+        registrar.registerXmlFormStub(
+                "OptInPhoneNumber",
+                StubTemplates.load(CloudStubSNSService.class, "OptInPhoneNumber"));
+        registrar.registerXmlFormStub(
+                "Publish", StubTemplates.load(CloudStubSNSService.class, "Publish"));
+        registrar.registerXmlFormStub(
+                "PublishBatch", StubTemplates.load(CloudStubSNSService.class, "PublishBatch"));
+        registrar.registerXmlFormStub(
+                "PutDataProtectionPolicy",
+                StubTemplates.load(CloudStubSNSService.class, "PutDataProtectionPolicy"));
+        registrar.registerXmlFormStub(
+                "RemovePermission",
+                StubTemplates.load(CloudStubSNSService.class, "RemovePermission"));
+        registrar.registerXmlFormStub(
+                "SetEndpointAttributes",
+                StubTemplates.load(CloudStubSNSService.class, "SetEndpointAttributes"));
         registrar.registerXmlFormStub(
                 "SetPlatformApplicationAttributes",
-                loadTemplate("SetPlatformApplicationAttributes"));
-        registrar.registerXmlFormStub("SetSMSAttributes", loadTemplate("SetSMSAttributes"));
+                StubTemplates.load(CloudStubSNSService.class, "SetPlatformApplicationAttributes"));
         registrar.registerXmlFormStub(
-                "SetSubscriptionAttributes", loadTemplate("SetSubscriptionAttributes"));
-        registrar.registerXmlFormStub("SetTopicAttributes", loadTemplate("SetTopicAttributes"));
-        registrar.registerXmlFormStub("Subscribe", loadTemplate("Subscribe"));
-        registrar.registerXmlFormStub("TagResource", loadTemplate("TagResource"));
-        registrar.registerXmlFormStub("Unsubscribe", loadTemplate("Unsubscribe"));
-        registrar.registerXmlFormStub("UntagResource", loadTemplate("UntagResource"));
+                "SetSMSAttributes",
+                StubTemplates.load(CloudStubSNSService.class, "SetSMSAttributes"));
         registrar.registerXmlFormStub(
-                "VerifySMSSandboxPhoneNumber", loadTemplate("VerifySMSSandboxPhoneNumber"));
-    }
-
-    private static String loadTemplate(String name) {
-        String path = "/templates/" + name + ".hbs";
-        try (InputStream in = CloudStubSNSService.class.getResourceAsStream(path)) {
-            if (in == null) throw new IllegalStateException("Template not found: " + path);
-            return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).trim();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+                "SetSubscriptionAttributes",
+                StubTemplates.load(CloudStubSNSService.class, "SetSubscriptionAttributes"));
+        registrar.registerXmlFormStub(
+                "SetTopicAttributes",
+                StubTemplates.load(CloudStubSNSService.class, "SetTopicAttributes"));
+        registrar.registerXmlFormStub(
+                "Subscribe", StubTemplates.load(CloudStubSNSService.class, "Subscribe"));
+        registrar.registerXmlFormStub(
+                "TagResource", StubTemplates.load(CloudStubSNSService.class, "TagResource"));
+        registrar.registerXmlFormStub(
+                "Unsubscribe", StubTemplates.load(CloudStubSNSService.class, "Unsubscribe"));
+        registrar.registerXmlFormStub(
+                "UntagResource", StubTemplates.load(CloudStubSNSService.class, "UntagResource"));
+        registrar.registerXmlFormStub(
+                "VerifySMSSandboxPhoneNumber",
+                StubTemplates.load(CloudStubSNSService.class, "VerifySMSSandboxPhoneNumber"));
     }
 }
