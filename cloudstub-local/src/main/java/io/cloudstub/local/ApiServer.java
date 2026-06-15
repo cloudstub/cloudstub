@@ -31,8 +31,9 @@ import java.util.concurrent.Executors;
 /**
  * Lightweight REST API server for local mode.
  *
- * <p>Serves on a secondary port (default {@value ApiPortResolver#DEFAULT_API_PORT}) so API traffic
- * is always separate from the AWS mock port. Routes:
+ * <p>Serves on a secondary port (default {@value
+ * io.cloudstub.local.config.resolver.ApiPortResolver#DEFAULT_API_PORT}) so API traffic is always
+ * separate from the AWS mock port. Routes:
  *
  * <ul>
  *   <li>{@code GET /api/status} — port, uptime, loaded modules and their stubs, all routes

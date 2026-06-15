@@ -152,6 +152,16 @@ loaded at runtime from a plugin directory. It is the drop-in replacement for Loc
 - **Port override:** `--port=<n>` CLI argument or `CLOUDSTUB_PORT` environment variable
 - **API port:** `4567` (default) — REST API served on a secondary port in the same process; override with
   `--api-port=<n>` or `CLOUDSTUB_API_PORT`
+- **Config file:** an optional `.properties` file (`LocalConfig`) supplies any launcher option, located from
+  `--config=<path>` → `CLOUDSTUB_CONFIG` → `./cloudstub.properties`. Keys are namespaced under `cloudstub.`
+  (`cloudstub.port`, `cloudstub.api-port`, `cloudstub.services`, `cloudstub.store-dir`, `cloudstub.max-history`,
+  `cloudstub.modules-dir`, `cloudstub.module-version`, `cloudstub.maven-base-url`, `cloudstub.auto-download`), with room
+  to grow (e.g. future `cloudstub.faults.*`). Per-option precedence is **CLI flag → env var → config file → default**:
+  the file slots in just above the defaults, so every resolver consults it after its env var. A missing default file is
+  not an error (defaults apply); only an explicit `--config`/`CLOUDSTUB_CONFIG` path that is absent fails fast. A file
+  that cannot be parsed, names an unknown key, or holds a non-numeric value for a numeric key throws
+  `LocalConfigException`, which the launcher turns into a fast exit naming the file and offending key — no stack trace.
+  No new dependency: `java.util.Properties` only, confined to `cloudstub-local`.
 - **Request history cap:** `--max-history=<n>` CLI argument or `CLOUDSTUB_MAX_HISTORY` env var bounds the in-memory
   request journal exposed by `GET /api/history` (default `1000`; `unlimited`/`none`/`0` to disable). Backed by
   `CloudStub.withMaxRequestHistory(int)`, which sets WireMock's `maxRequestJournalEntries`. A full `POST /api/reset`

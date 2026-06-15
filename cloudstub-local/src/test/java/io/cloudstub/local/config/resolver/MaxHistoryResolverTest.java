@@ -1,4 +1,4 @@
-package io.cloudstub.local;
+package io.cloudstub.local.config.resolver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,5 +31,12 @@ class MaxHistoryResolverTest {
     @Test
     void noneKeywordResolvesToZero() {
         assertEquals(0, MaxHistoryResolver.resolve(new String[] {"--max-history=none"}));
+    }
+
+    @Test
+    void nonNumericFlagFallsThroughToDefault() {
+        assertEquals(
+                CloudStub.DEFAULT_MAX_REQUEST_HISTORY,
+                MaxHistoryResolver.resolve(new String[] {"--max-history=abc"}));
     }
 }

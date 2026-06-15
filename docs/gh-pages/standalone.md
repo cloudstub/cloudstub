@@ -203,6 +203,65 @@ The REST API is available at `http://localhost:4567` — see [REST API](rest-api
 the instance from the terminal with the [CLI](cli.md) (`clm` / `cloudstub`), or inspect it visually in the browser
 with the [Console](console.md).
 
+## Configuration file
+
+Every option above can also be set in an optional `.properties` file, so a developer's local CloudStub setup is
+reproducible and can be checked into version control instead of being spread across shell flags. The file is loaded
+from `--config=<path>`, then the `CLOUDSTUB_CONFIG` environment variable, then `cloudstub.properties` in the working
+directory.
+
+```properties
+# cloudstub.properties
+cloudstub.port=4566
+cloudstub.api-port=4567
+cloudstub.services=sqs,s3
+cloudstub.store-dir=.cloudstub
+cloudstub.max-history=1000
+cloudstub.modules-dir=modules
+cloudstub.module-version=0.1.0-beta.1
+cloudstub.maven-base-url=https://repo1.maven.org/maven2
+cloudstub.auto-download=true
+```
+
+```
+java -jar cloudstub-local/build/libs/cloudstub-local.jar --config=cloudstub.properties
+```
+
+| Key                        | Equivalent flag    | Value                                                              |
+| -------------------------- | ------------------ | ----------------------------------------------------------------- |
+| `cloudstub.port`           | `--port`           | mock server port (integer)                                        |
+| `cloudstub.api-port`       | `--api-port`       | REST API port (integer)                                           |
+| `cloudstub.services`       | `--services`       | comma-separated service IDs (`sqs,s3`)                            |
+| `cloudstub.store-dir`      | `--store-dir`      | persistent state directory; `none` / `off` for in-memory          |
+| `cloudstub.max-history`    | `--max-history`    | request-history cap (integer); `unlimited` / `none` for unbounded |
+| `cloudstub.modules-dir`    | `--modules-dir`    | plugin directory to load module jars from                         |
+| `cloudstub.module-version` | `--module-version` | version to auto-download                                          |
+| `cloudstub.maven-base-url` | `--maven-base-url` | Maven repository base URL for auto-download                       |
+| `cloudstub.auto-download`  | `--no-download`    | `false` / `0` / `no` / `off` disables auto-download               |
+
+### Resolution precedence
+
+Each option is resolved independently in this order, the first source that supplies a value winning:
+
+```
+CLI flag → environment variable → config file → built-in default
+```
+
+A CLI flag therefore always overrides the file, and the file overrides nothing but the defaults — the same
+flag-over-environment ordering CloudStub already uses, with the file slotted in just above the defaults. The keys are
+namespaced under `cloudstub.` with room to grow.
+
+### Absent or malformed files
+
+- A **missing** default `cloudstub.properties` is not an error — the server starts on defaults exactly as it does
+  with no file. Only a `--config` (or `CLOUDSTUB_CONFIG`) path that does not exist fails fast.
+- A file that **cannot be parsed**, that contains an **unknown key**, or that holds a **non-numeric value** for a
+  numeric key fails fast with a message naming the file and the offending key, not a stack trace:
+
+```
+[CloudStub] ERROR: unknown key(s) in config file 'cloudstub.properties': cloudstub.prot. Known keys: ...
+```
+
 ## Point an application at CloudStub
 
 In **embedded mode** no endpoint configuration is needed: `CloudStubExtension` sets the

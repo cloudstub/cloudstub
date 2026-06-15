@@ -4,6 +4,17 @@ import io.cloudstub.core.CloudStub;
 import io.cloudstub.core.download.ModuleDownloadException;
 import io.cloudstub.core.download.ModuleDownloader;
 import io.cloudstub.core.spi.CloudStubApiService;
+import io.cloudstub.local.config.LocalConfig;
+import io.cloudstub.local.config.exception.LocalConfigException;
+import io.cloudstub.local.config.resolver.ApiPortResolver;
+import io.cloudstub.local.config.resolver.AutoDownloadResolver;
+import io.cloudstub.local.config.resolver.MavenBaseUrlResolver;
+import io.cloudstub.local.config.resolver.MaxHistoryResolver;
+import io.cloudstub.local.config.resolver.ModuleVersionResolver;
+import io.cloudstub.local.config.resolver.ModulesDirResolver;
+import io.cloudstub.local.config.resolver.PortResolver;
+import io.cloudstub.local.config.resolver.ServiceSelector;
+import io.cloudstub.local.config.resolver.StoreDirectoryResolver;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,28 +37,35 @@ public final class LocalMain {
     private static final Logger log = LoggerFactory.getLogger(LocalMain.class);
 
     public static void main(String[] args) throws Exception {
-        int port = PortResolver.resolve(args);
-        int apiPort = ApiPortResolver.resolve(args);
-        int maxHistory = MaxHistoryResolver.resolve(args);
-        Path storeDir = StoreDirectoryResolver.resolve(args);
+        Config resolved;
+        try {
+            resolved = Config.resolve(args);
+        } catch (LocalConfigException e) {
+            System.err.println("[CloudStub] ERROR: " + e.getMessage());
+            System.exit(1);
+            return;
+        }
 
-        Path modulesDir = ModulesDirResolver.resolve(args);
-        Set<String> requested = ServiceSelector.resolve(args);
-        boolean autoDownload = AutoDownloadResolver.isEnabled(args);
+        int port = resolved.port;
+        int apiPort = resolved.apiPort;
+        int maxHistory = resolved.maxHistory;
+        Path storeDir = resolved.storeDir;
+        Path modulesDir = resolved.modulesDir;
+        Set<String> requested = resolved.requested;
 
-        if (requested != null && autoDownload) {
+        if (requested != null && resolved.autoDownload) {
             modulesDir =
                     provisionMissing(
                             requested,
                             modulesDir,
-                            ModuleVersionResolver.resolve(args),
-                            MavenBaseUrlResolver.resolve(args));
+                            ModuleVersionResolver.resolve(args, resolved.file),
+                            MavenBaseUrlResolver.resolve(args, resolved.file));
         }
 
         ClassLoader pluginLoader = PluginLoader.load(modulesDir);
 
         List<String> available = ServiceDiscovery.discoverServiceIds(pluginLoader);
-        List<String> enabled = resolveEnabled(available, requested, autoDownload);
+        List<String> enabled = resolveEnabled(available, requested, resolved.autoDownload);
 
         System.out.println(
                 "[CloudStub] Plugin directory: "
@@ -110,6 +128,33 @@ public final class LocalMain {
                                     }));
 
             Thread.currentThread().join();
+        }
+    }
+
+    /** The resolved launcher configuration; download coordinates are resolved on demand in main. */
+    private static final class Config {
+        final LocalConfig file;
+        final int port;
+        final int apiPort;
+        final int maxHistory;
+        final Path storeDir;
+        final Path modulesDir;
+        final Set<String> requested;
+        final boolean autoDownload;
+
+        private Config(String[] args) {
+            this.file = LocalConfig.load(args);
+            this.port = PortResolver.resolve(args, file);
+            this.apiPort = ApiPortResolver.resolve(args, file);
+            this.maxHistory = MaxHistoryResolver.resolve(args, file);
+            this.storeDir = StoreDirectoryResolver.resolve(args, file);
+            this.modulesDir = ModulesDirResolver.resolve(args, file);
+            this.requested = ServiceSelector.resolve(args, file);
+            this.autoDownload = AutoDownloadResolver.isEnabled(args, file);
+        }
+
+        static Config resolve(String[] args) {
+            return new Config(args);
         }
     }
 

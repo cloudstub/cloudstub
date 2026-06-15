@@ -1,4 +1,4 @@
-package io.cloudstub.local;
+package io.cloudstub.local.config.resolver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -19,5 +19,10 @@ class ApiPortResolverTest {
     @Test
     void parsesLongFlagWithSpace() {
         assertEquals(9001, ApiPortResolver.resolve(new String[] {"--api-port", "9001"}));
+    }
+
+    @Test
+    void nonNumericFlagFallsThroughToDefault() {
+        assertEquals(4567, ApiPortResolver.resolve(new String[] {"--api-port=abc"}));
     }
 }
