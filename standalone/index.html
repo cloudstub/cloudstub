@@ -784,24 +784,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#point-your-application-at-it" class="md-nav__link">
+  <a href="#point-an-application-at-cloudstub" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Point your application at it
+        Point an application at CloudStub
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Point an application at CloudStub">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variable-no-code-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variable (no code change)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-a-service-end-to-end" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#manual-override-on-the-client-builder" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verify a service end to end
+        Manual override on the client builder
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1251,24 +1268,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#point-your-application-at-it" class="md-nav__link">
+  <a href="#point-an-application-at-cloudstub" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Point your application at it
+        Point an application at CloudStub
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Point an application at CloudStub">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variable-no-code-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variable (no code change)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-a-service-end-to-end" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#manual-override-on-the-client-builder" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verify a service end to end
+        Manual override on the client builder
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1502,12 +1536,39 @@ naming the coordinate, version, and destination, so downloaded jars are distingu
 <p>The REST API is available at <code>http://localhost:4567</code> — see <a href="../rest-api/">REST API</a> for the full reference, drive
 the instance from the terminal with the <a href="../cli/">CLI</a> (<code>clm</code> / <code>cloudstub</code>), or inspect it visually in the browser
 with the <a href="../console/">Console</a>.</p>
-<h2 id="point-your-application-at-it">Point your application at it</h2>
-<p>Set <code>AWS_ENDPOINT_URL</code> (AWS SDK v2 reads this automatically) before starting your application:</p>
+<h2 id="point-an-application-at-cloudstub">Point an application at CloudStub</h2>
+<p>In <strong>embedded mode</strong> no endpoint configuration is needed: <code>CloudStubExtension</code> sets the
+<code>aws.endpoint-url</code> system property to its embedded port before any AWS client is built, so SDK v2 clients in the
+test JVM are redirected automatically. In <strong>standalone mode</strong> CloudStub is a separate process, so the application
+must be told where it is. Three forms supply the endpoint — pick by how the client is built:</p>
+<table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Applies when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AWS_ENDPOINT_URL</code> environment variable</td>
+<td>Any AWS SDK v2 client — the SDK reads it automatically, no code change.</td>
+</tr>
+<tr>
+<td><code>aws.endpoint-url</code> Spring property</td>
+<td>A Spring Boot app whose client beans read the property (see <a href="../spring-boot/">Spring Boot</a>).</td>
+</tr>
+<tr>
+<td><code>endpointOverride(...)</code> on the builder</td>
+<td>A hand-built client, or anywhere you need explicit per-client control.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="environment-variable-no-code-change">Environment variable (no code change)</h3>
+<p>AWS SDK v2 reads <code>AWS_ENDPOINT_URL</code> on its own, so this works without touching the client code:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>export AWS_ENDPOINT_URL=http://localhost:4566
 </span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>./gradlew bootRun
 </span></code></pre></div>
-<p>Or configure it directly in your application's AWS client builder:</p>
+<h3 id="manual-override-on-the-client-builder">Manual override on the client builder</h3>
 <div class="highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">SqsClient</span><span class="w"> </span><span class="n">sqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SqsClient</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
 </span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">    </span><span class="p">.</span><span class="na">endpointOverride</span><span class="p">(</span><span class="n">URI</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;http://localhost:4566&quot;</span><span class="p">))</span>
 </span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">    </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">US_EAST_1</span><span class="p">)</span>
@@ -1515,15 +1576,12 @@ with the <a href="../console/">Console</a>.</p>
 </span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">        </span><span class="n">AwsBasicCredentials</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;test&quot;</span><span class="p">)))</span>
 </span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 </span></code></pre></div>
-<h2 id="verify-a-service-end-to-end">Verify a service end to end</h2>
-<p>The <code>cloudstub-example</code> app ships profile-gated demo runners for manual end-to-end checks against a running server. With the server started above (<code>--services=sqs</code>), run the SQS demo:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>./gradlew :cloudstub-example:junit6:runExample -Pdemo=sqs
-</span></code></pre></div>
-<p>It publishes messages, peeks them with <code>ReceiveMessage</code>, then consumes them with <code>ReceiveMessage</code> + <code>DeleteMessage</code>, and logs the round-trip. See <a href="../spring-boot/#run-the-app-against-a-standalone-server">Spring Boot Integration</a> for details.</p>
+<p>For the Spring property form, the <code>local</code> / <code>prod</code> profiles, an IDE run setup, and the resolution precedence
+between these forms, see <a href="../spring-boot/#pointing-an-application-at-cloudstub">Pointing an application at CloudStub</a>.</p>
 <h2 id="stop-the-server">Stop the server</h2>
 <p>Press <code>Ctrl-C</code> or send <code>SIGTERM</code>. CloudStub prints a shutdown message and exits cleanly — no stack trace:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>^C
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>[CloudStub] Shutting down...
+<div class="highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>^C
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>[CloudStub] Shutting down...
 </span></code></pre></div>
 <h2 id="logging">Logging</h2>
 <p>By default, CloudStub writes INFO-level output to stdout via <code>slf4j-simple</code>. To enable DEBUG output (stub
