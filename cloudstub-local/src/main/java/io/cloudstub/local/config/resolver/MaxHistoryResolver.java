@@ -39,8 +39,6 @@ public final class MaxHistoryResolver {
             if ("unlimited".equalsIgnoreCase(trimmed) || "none".equalsIgnoreCase(trimmed)) {
                 return 0;
             }
-            // Delegate the numeric parse to LocalConfig so a non-numeric value fails fast with a
-            // message naming the file and key rather than an unguarded NumberFormatException.
             return config.getInt(LocalConfig.KEY_MAX_HISTORY).getAsInt();
         }
         return CloudStub.DEFAULT_MAX_REQUEST_HISTORY;

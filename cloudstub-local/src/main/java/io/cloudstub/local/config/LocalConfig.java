@@ -12,27 +12,9 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Optional {@code .properties} configuration file for standalone mode.
- *
- * <p>The file sits between environment variables and built-in defaults in the resolution
- * precedence: a CLI flag overrides an environment variable, which overrides a config-file value,
- * which overrides the built-in default. Each resolver consults {@link #get(String)} after its
- * environment variable and before its default, so the file changes nothing about how flags and
- * environment variables already behave.
- *
- * <p>The file is located from {@code --config=<path>}, then the {@code CLOUDSTUB_CONFIG}
- * environment variable, then {@code ./cloudstub.properties} in the working directory. An explicit
- * {@code --config} (or {@code CLOUDSTUB_CONFIG}) path that does not exist is rejected; a missing
- * default file is not an error and yields an empty configuration, so the server starts on defaults
- * exactly as it does with no file. A file that cannot be parsed, that contains a key outside {@link
- * #KNOWN_KEYS the documented set}, or that holds a non-numeric value for a numeric key, throws
- * {@link LocalConfigException} with a message naming the file and the offending key — the launcher
- * turns that into a fast exit, not a stack trace.
- *
- * <p>Keys are namespaced under {@code cloudstub.} with room to grow (e.g. future {@code
- * cloudstub.faults.*}). Values mirror the CLI flags: {@link #KEY_SERVICES} is the same
- * comma-separated list as {@code --services}, {@link #KEY_AUTO_DOWNLOAD} the same boolean as {@code
- * --no-download} inverts, and so on.
+ * Optional {@code .properties} configuration file for standalone mode, located from {@code
+ * --config=<path>}, then {@code CLOUDSTUB_CONFIG}, then {@code ./cloudstub.properties}. Consulted
+ * by each resolver after its environment variable and before its default.
  */
 public final class LocalConfig {
 
@@ -68,15 +50,12 @@ public final class LocalConfig {
         this.source = source;
     }
 
-    /** An empty configuration backed by no file — every {@link #get(String)} returns absent. */
+    /** An empty configuration backed by no file. */
     public static LocalConfig empty() {
         return new LocalConfig(new Properties(), "(none)");
     }
 
     /**
-     * Loads the config file resolved from {@code --config}, the {@code CLOUDSTUB_CONFIG}
-     * environment variable, or the default {@code ./cloudstub.properties}.
-     *
      * @throws LocalConfigException on an explicit path that does not exist, an unparseable file, or
      *     an unknown key
      */
@@ -129,7 +108,7 @@ public final class LocalConfig {
     }
 
     /**
-     * @return the trimmed value for {@code key}, or absent when the key is missing or blank.
+     * @return the trimmed value for {@code key}, or absent when missing or blank.
      */
     public Optional<String> get(String key) {
         String value = properties.getProperty(key);
@@ -141,8 +120,7 @@ public final class LocalConfig {
     }
 
     /**
-     * @return the value for {@code key} parsed as an integer, or absent when the key is missing or
-     *     blank. Fails fast naming the file and key when the value is not a valid integer.
+     * @return the value for {@code key} as an int, or absent when missing or blank.
      */
     public OptionalInt getInt(String key) {
         Optional<String> value = get(key);

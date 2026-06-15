@@ -43,7 +43,7 @@ public final class LocalMain {
         } catch (LocalConfigException e) {
             System.err.println("[CloudStub] ERROR: " + e.getMessage());
             System.exit(1);
-            return; // unreachable; satisfies the compiler that resolved is assigned
+            return;
         }
 
         int port = resolved.port;
@@ -56,7 +56,10 @@ public final class LocalMain {
         if (requested != null && resolved.autoDownload) {
             modulesDir =
                     provisionMissing(
-                            requested, modulesDir, resolved.moduleVersion, resolved.mavenBaseUrl);
+                            requested,
+                            modulesDir,
+                            ModuleVersionResolver.resolve(args, resolved.file),
+                            MavenBaseUrlResolver.resolve(args, resolved.file));
         }
 
         ClassLoader pluginLoader = PluginLoader.load(modulesDir);
@@ -128,13 +131,9 @@ public final class LocalMain {
         }
     }
 
-    /**
-     * The fully resolved launcher configuration, with each value already merged across CLI flag,
-     * environment variable, config file, and default by its resolver. Resolution is collected here
-     * so the single {@link LocalConfigException} a malformed config file may raise is caught in one
-     * place.
-     */
+    /** The resolved launcher configuration; download coordinates are resolved on demand in main. */
     private static final class Config {
+        final LocalConfig file;
         final int port;
         final int apiPort;
         final int maxHistory;
@@ -142,11 +141,9 @@ public final class LocalMain {
         final Path modulesDir;
         final Set<String> requested;
         final boolean autoDownload;
-        final String moduleVersion;
-        final String mavenBaseUrl;
 
         private Config(String[] args) {
-            LocalConfig file = LocalConfig.load(args);
+            this.file = LocalConfig.load(args);
             this.port = PortResolver.resolve(args, file);
             this.apiPort = ApiPortResolver.resolve(args, file);
             this.maxHistory = MaxHistoryResolver.resolve(args, file);
@@ -154,8 +151,6 @@ public final class LocalMain {
             this.modulesDir = ModulesDirResolver.resolve(args, file);
             this.requested = ServiceSelector.resolve(args, file);
             this.autoDownload = AutoDownloadResolver.isEnabled(args, file);
-            this.moduleVersion = ModuleVersionResolver.resolve(args, file);
-            this.mavenBaseUrl = MavenBaseUrlResolver.resolve(args, file);
         }
 
         static Config resolve(String[] args) {
