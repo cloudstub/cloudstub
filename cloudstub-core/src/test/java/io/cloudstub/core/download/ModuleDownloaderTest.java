@@ -111,7 +111,6 @@ class ModuleDownloaderTest {
     void rejectsChecksumMismatch(@TempDir Path dir) {
         byte[] jar = "good".getBytes(StandardCharsets.UTF_8);
         files.put(basePath("0.1.0", "jar"), jar);
-        // Publish a checksum for different bytes so verification fails.
         files.put(
                 basePath("0.1.0", "jar.sha512"),
                 checksum("tampered".getBytes(StandardCharsets.UTF_8), "sha512")
@@ -141,7 +140,6 @@ class ModuleDownloaderTest {
 
     @Test
     void failsFastWithCoordinateWhenArtifactMissing(@TempDir Path dir) {
-        // Nothing published — the jar GET returns 404.
         ModuleDownloader downloader = new ModuleDownloader(baseUrl);
         ModuleDownloadException ex =
                 assertThrows(
@@ -149,41 +147,43 @@ class ModuleDownloaderTest {
                         () -> downloader.download("sqs", "9.9.9", dir));
         assertTrue(ex.getMessage().contains("io.github.cloudstub:cloudstub-sqs:9.9.9"));
         assertTrue(ex.getMessage().contains("sqs"));
-        // The message tells the developer how to recover.
         assertTrue(ex.getMessage().contains("Place the jar manually"));
         assertTrue(ex.getMessage().contains("--no-download"));
     }
 
     @Test
-    void isCachedMatchesRequestedVersionAndUnversionedJar(@TempDir Path dir) throws IOException {
-        assertFalse(ModuleDownloader.isCached(dir, "sqs", "0.1.0"));
+    void rejectsPathTraversalInServiceOrVersion(@TempDir Path dir) {
+        ModuleDownloader downloader = new ModuleDownloader(baseUrl);
 
-        Files.createFile(dir.resolve("cloudstub-sqs-0.1.0.jar"));
-        assertTrue(ModuleDownloader.isCached(dir, "sqs", "0.1.0"));
-        // A different version is not a cache hit, so a core upgrade re-fetches the matching jar.
-        assertFalse(ModuleDownloader.isCached(dir, "sqs", "0.2.0"));
-        // A different service is unaffected.
-        assertFalse(ModuleDownloader.isCached(dir, "sns", "0.1.0"));
+        assertThrows(
+                ModuleDownloadException.class, () -> downloader.download("../evil", "0.1.0", dir));
+        assertThrows(
+                ModuleDownloadException.class,
+                () -> downloader.download("sqs", "../../etc/passwd", dir));
+        assertThrows(
+                ModuleDownloadException.class,
+                () -> downloader.download("sqs/nested", "0.1.0", dir));
 
-        // A user-placed unversioned jar satisfies any requested version (an explicit manual
-        // choice).
-        Files.createFile(dir.resolve("cloudstub-sns.jar"));
-        assertTrue(ModuleDownloader.isCached(dir, "sns", "0.1.0"));
-        assertTrue(ModuleDownloader.isCached(dir, "sns", "9.9.9"));
+        assertEquals(0, dir.toFile().list().length);
     }
 
     @Test
-    void removeOtherVersionsPrunesStaleVersionedJarsButKeepsUnversioned(@TempDir Path dir)
-            throws IOException {
+    void isCachedDelegatesToTheModuleCache(@TempDir Path dir) throws IOException {
+        assertFalse(ModuleDownloader.isCached(dir, "sqs", "0.1.0"));
         Files.createFile(dir.resolve("cloudstub-sqs-0.1.0.jar"));
-        Files.createFile(dir.resolve("cloudstub-sqs-0.2.0.jar"));
-        Files.createFile(dir.resolve("cloudstub-sns.jar"));
+        assertTrue(ModuleDownloader.isCached(dir, "sqs", "0.1.0"));
+        assertFalse(ModuleDownloader.isCached(dir, "sqs", "0.2.0"));
+    }
 
-        ModuleDownloader.removeOtherVersions(dir, "sqs", "cloudstub-sqs-0.2.0.jar");
+    @Test
+    void downloadPrunesStaleCachedVersions(@TempDir Path dir) throws IOException {
+        Files.createFile(dir.resolve("cloudstub-sqs-0.0.9.jar"));
+        byte[] jar = "fresh".getBytes(StandardCharsets.UTF_8);
+        publish("0.1.0", jar, "sha512");
 
-        assertFalse(Files.exists(dir.resolve("cloudstub-sqs-0.1.0.jar")));
-        assertTrue(Files.exists(dir.resolve("cloudstub-sqs-0.2.0.jar")));
-        // A user-placed unversioned jar of another service is untouched.
-        assertTrue(Files.exists(dir.resolve("cloudstub-sns.jar")));
+        new ModuleDownloader(baseUrl).download("sqs", "0.1.0", dir);
+
+        assertTrue(Files.exists(dir.resolve("cloudstub-sqs-0.1.0.jar")));
+        assertFalse(Files.exists(dir.resolve("cloudstub-sqs-0.0.9.jar")));
     }
 }

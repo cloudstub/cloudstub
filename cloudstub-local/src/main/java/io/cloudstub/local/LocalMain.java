@@ -35,9 +35,6 @@ public final class LocalMain {
         Set<String> requested = ServiceSelector.resolve(args);
         boolean autoDownload = AutoDownloadResolver.isEnabled(args);
 
-        // Provision absent module jars before the plugin classloader is built, so a freshly
-        // downloaded jar is visible to discovery. Auto-download makes --services the single source
-        // of truth: a declared service whose jar is missing is fetched into the plugin directory.
         if (requested != null && autoDownload) {
             modulesDir =
                     provisionMissing(
@@ -128,14 +125,10 @@ public final class LocalMain {
         List<String> downloaded = new ArrayList<>();
         for (String service : requested) {
             if (ModuleDownloader.isCached(targetDir, service, version)) {
-                continue; // this exact version (or a user-placed jar) is present — never re-fetched
+                continue;
             }
             try {
                 Path jar = downloader.download(service, version, targetDir);
-                // Drop any stale versioned jar of this service so the plugin classloader does not
-                // see two copies of the module (which would register the service twice).
-                ModuleDownloader.removeOtherVersions(
-                        targetDir, service, jar.getFileName().toString());
                 System.out.println(
                         "[CloudStub] Downloaded "
                                 + ModuleDownloader.coordinate(service, version)
@@ -147,8 +140,6 @@ public final class LocalMain {
                 System.exit(1);
             }
         }
-        // Only adopt the default directory when it now exists (a download created it); otherwise
-        // leave modulesDir null so PluginLoader keeps its "no plugin directory" behaviour.
         if (modulesDir == null && !downloaded.isEmpty()) {
             return targetDir;
         }
