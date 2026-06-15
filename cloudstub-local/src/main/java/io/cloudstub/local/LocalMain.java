@@ -127,11 +127,15 @@ public final class LocalMain {
         ModuleDownloader downloader = new ModuleDownloader(mavenBaseUrl);
         List<String> downloaded = new ArrayList<>();
         for (String service : requested) {
-            if (ModuleDownloader.isPresent(targetDir, service)) {
-                continue; // cached — never re-downloaded
+            if (ModuleDownloader.isCached(targetDir, service, version)) {
+                continue; // this exact version (or a user-placed jar) is present — never re-fetched
             }
             try {
                 Path jar = downloader.download(service, version, targetDir);
+                // Drop any stale versioned jar of this service so the plugin classloader does not
+                // see two copies of the module (which would register the service twice).
+                ModuleDownloader.removeOtherVersions(
+                        targetDir, service, jar.getFileName().toString());
                 System.out.println(
                         "[CloudStub] Downloaded "
                                 + ModuleDownloader.coordinate(service, version)

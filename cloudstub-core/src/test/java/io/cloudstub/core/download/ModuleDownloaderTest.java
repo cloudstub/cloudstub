@@ -155,10 +155,35 @@ class ModuleDownloaderTest {
     }
 
     @Test
-    void isPresentDetectsVersionedAndCachesIt(@TempDir Path dir) throws IOException {
-        assertFalse(ModuleDownloader.isPresent(dir, "sqs"));
+    void isCachedMatchesRequestedVersionAndUnversionedJar(@TempDir Path dir) throws IOException {
+        assertFalse(ModuleDownloader.isCached(dir, "sqs", "0.1.0"));
+
         Files.createFile(dir.resolve("cloudstub-sqs-0.1.0.jar"));
-        assertTrue(ModuleDownloader.isPresent(dir, "sqs"));
-        assertFalse(ModuleDownloader.isPresent(dir, "sns"));
+        assertTrue(ModuleDownloader.isCached(dir, "sqs", "0.1.0"));
+        // A different version is not a cache hit, so a core upgrade re-fetches the matching jar.
+        assertFalse(ModuleDownloader.isCached(dir, "sqs", "0.2.0"));
+        // A different service is unaffected.
+        assertFalse(ModuleDownloader.isCached(dir, "sns", "0.1.0"));
+
+        // A user-placed unversioned jar satisfies any requested version (an explicit manual
+        // choice).
+        Files.createFile(dir.resolve("cloudstub-sns.jar"));
+        assertTrue(ModuleDownloader.isCached(dir, "sns", "0.1.0"));
+        assertTrue(ModuleDownloader.isCached(dir, "sns", "9.9.9"));
+    }
+
+    @Test
+    void removeOtherVersionsPrunesStaleVersionedJarsButKeepsUnversioned(@TempDir Path dir)
+            throws IOException {
+        Files.createFile(dir.resolve("cloudstub-sqs-0.1.0.jar"));
+        Files.createFile(dir.resolve("cloudstub-sqs-0.2.0.jar"));
+        Files.createFile(dir.resolve("cloudstub-sns.jar"));
+
+        ModuleDownloader.removeOtherVersions(dir, "sqs", "cloudstub-sqs-0.2.0.jar");
+
+        assertFalse(Files.exists(dir.resolve("cloudstub-sqs-0.1.0.jar")));
+        assertTrue(Files.exists(dir.resolve("cloudstub-sqs-0.2.0.jar")));
+        // A user-placed unversioned jar of another service is untouched.
+        assertTrue(Files.exists(dir.resolve("cloudstub-sns.jar")));
     }
 }

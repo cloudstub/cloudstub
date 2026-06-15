@@ -81,27 +81,63 @@ public final class ModuleDownloader {
     }
 
     /**
-     * Returns whether a jar for {@code service} (any version) already exists in {@code dir}, so the
-     * plugin directory acts as a cache and a present jar is never re-downloaded.
+     * Returns whether the jar for {@code service} at {@code version} is already present in {@code
+     * dir} — either the exact versioned jar ({@code cloudstub-<service>-<version>.jar}) or a
+     * user-placed unversioned jar ({@code cloudstub-<service>.jar}). The match is version-specific
+     * so that a different cached version does not satisfy a request for {@code version}: after a
+     * core upgrade the requested version is fetched rather than the stale one being reused.
      *
      * @param dir plugin directory to inspect; may be {@code null}
      * @param service service id (e.g. {@code sqs})
-     * @return {@code true} if a matching jar is present
+     * @param version requested module version
+     * @return {@code true} if the requested version (or a user-placed unversioned jar) is present
      */
-    public static boolean isPresent(Path dir, String service) {
+    public static boolean isCached(Path dir, String service, String version) {
         if (dir == null || !Files.isDirectory(dir)) {
             return false;
         }
-        String exact = "cloudstub-" + service + ".jar";
-        String versionedPrefix = "cloudstub-" + service + "-";
+        String exactVersioned = jarFileName(service, version);
+        String unversioned = "cloudstub-" + service + ".jar";
         try (Stream<Path> entries = Files.list(dir)) {
             return entries.map(p -> p.getFileName().toString())
-                    .anyMatch(
-                            n ->
-                                    n.endsWith(".jar")
-                                            && (n.equals(exact) || n.startsWith(versionedPrefix)));
+                    .anyMatch(n -> n.equals(exactVersioned) || n.equals(unversioned));
         } catch (IOException e) {
             return false;
+        }
+    }
+
+    /**
+     * Removes any versioned jar for {@code service} in {@code dir} other than {@code keepFileName},
+     * so a freshly downloaded version does not coexist with a stale one — two versioned jars of the
+     * same module on the plugin classloader would register the service twice. A user-placed
+     * unversioned {@code cloudstub-<service>.jar} is left untouched (it is an explicit manual
+     * choice, not a cache entry). A removal that fails is ignored: a leftover stale jar is a lesser
+     * problem than failing a successful download.
+     *
+     * @param dir plugin directory to prune; may be {@code null}
+     * @param service service id (e.g. {@code sqs})
+     * @param keepFileName the just-written jar filename to retain
+     */
+    public static void removeOtherVersions(Path dir, String service, String keepFileName) {
+        if (dir == null || !Files.isDirectory(dir)) {
+            return;
+        }
+        String versionedPrefix = "cloudstub-" + service + "-";
+        try (Stream<Path> entries = Files.list(dir)) {
+            for (Path p : entries.toList()) {
+                String n = p.getFileName().toString();
+                if (n.endsWith(".jar")
+                        && n.startsWith(versionedPrefix)
+                        && !n.equals(keepFileName)) {
+                    try {
+                        Files.deleteIfExists(p);
+                    } catch (IOException ignored) {
+                        // leave the stale jar in place rather than failing
+                    }
+                }
+            }
+        } catch (IOException ignored) {
+            // directory not listable — nothing to prune
         }
     }
 
@@ -127,9 +163,19 @@ public final class ModuleDownloader {
             // Write to a temp file then move so a crashed download never leaves a partial
             // jar that a later run would treat as a valid cache hit.
             Path tmp = Files.createTempFile(dir, jarName, ".part");
-            Files.write(tmp, jarBytes);
-            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);
-            return target;
+            try {
+                Files.write(tmp, jarBytes);
+                Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);
+                return target;
+            } finally {
+                // A failed move leaves the temp file behind; remove it so .part files do not
+                // accumulate. After a successful move the temp path is gone and this is a no-op.
+                try {
+                    Files.deleteIfExists(tmp);
+                } catch (IOException ignored) {
+                    // best-effort cleanup; never turn a successful download into a failure
+                }
+            }
         } catch (IOException e) {
             throw new ModuleDownloadException(
                     fail(service, coordinate, dir, "the jar could not be written (" + e + ")"));
@@ -179,7 +225,21 @@ public final class ModuleDownloader {
                 throw new ModuleDownloadException(
                         fail(service, coordinate, dir, "checksum retrieval was interrupted"));
             } catch (IOException e) {
-                continue; // transient checksum-fetch error; fall through to a weaker algorithm
+                // A transport error (not a 404) must not silently downgrade to a weaker checksum:
+                // an interposed proxy that fails the SHA-512/SHA-256 fetches could otherwise force
+                // verification down to SHA-1. A 404 — "this algorithm is not published" — is the
+                // NotFoundException above and does fall through.
+                throw new ModuleDownloadException(
+                        fail(
+                                service,
+                                coordinate,
+                                dir,
+                                "the "
+                                        + ext.toUpperCase(Locale.ROOT)
+                                        + " checksum could not be retrieved ("
+                                        + e.getMessage()
+                                        + ") — refusing to fall back to a weaker checksum on a"
+                                        + " transport error"));
             }
             String expected = parseChecksum(checksumBytes);
             String actual = digest(jarBytes, jdkAlgorithm(ext));
