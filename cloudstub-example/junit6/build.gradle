@@ -15,8 +15,9 @@ dependencies {
     testImplementation libs.aws.v1.sns
 }
 
-// Runs the example app against a standalone CloudStub server. One task for every service: pick the
-// demo with -Pdemo=<serviceId> (selects the matching @Profile runner) and optionally -Pendpoint=<url>.
+// Runs the example app against a standalone CloudStub server. The `local` profile supplies the
+// endpoint (application-local.properties -> http://localhost:4566); -Pdemo=<serviceId> activates the
+// matching @Profile demo runner alongside it; -Pendpoint=<url> overrides the endpoint for a custom port.
 //   ./gradlew :cloudstub-local:run --args="--services=sqs"
 //   ./gradlew :cloudstub-example:junit6:runExample -Pdemo=sqs
 tasks.register('runExample', JavaExec) {
@@ -24,8 +25,9 @@ tasks.register('runExample', JavaExec) {
     description = 'Run the example app against a CloudStub server. Pick a demo with -Pdemo=<serviceId>'
     mainClass = 'io.cloudstub.example.ExampleApplication'
     classpath = sourceSets.main.runtimeClasspath
-    def endpoint = project.findProperty('endpoint') ?: 'http://localhost:4566'
-    def runArgs = ['--aws.endpoint-url=' + endpoint]
-    if (project.hasProperty('demo')) runArgs += '--spring.profiles.active=' + project.property('demo')
+    def profiles = ['local']
+    if (project.hasProperty('demo')) profiles += project.property('demo')
+    def runArgs = ['--spring.profiles.active=' + profiles.join(',')]
+    if (project.hasProperty('endpoint')) runArgs += '--aws.endpoint-url=' + project.property('endpoint')
     args = runArgs
 }

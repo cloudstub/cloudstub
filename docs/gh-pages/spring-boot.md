@@ -59,28 +59,37 @@ See the full working tests in `cloudstub-example`:
 - [`EventPublisherIntegrationTest`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/test/java/io/cloudstub/example/EventPublisherIntegrationTest.java)
 - [`SecretLoaderIntegrationTest`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/test/java/io/cloudstub/example/SecretLoaderIntegrationTest.java)
 
-## Run the app against a standalone server
+## Pointing an application at CloudStub
 
-Besides the integration tests, the example app can run against a [standalone CloudStub server](standalone.md) for manual end-to-end verification of a service through the real AWS SDK client path. A `@Profile`-gated [`CommandLineRunner`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/runner/SqsDemoRunner.java) exercises a service and logs the result; it is inactive during the test suite.
+In **embedded mode** (the integration tests above) no endpoint configuration is needed: `CloudStubExtension` sets the `aws.endpoint-url` system property to its embedded port before Spring builds any client bean, so the `@Value("${aws.endpoint-url:}")` injection picks it up automatically. In **standalone mode** CloudStub runs as a separate process, so the application must be told where it is. Any of these supply the endpoint:
 
-Start the server with the SQS module, then run the app under the `sqs` profile:
+- **`AWS_ENDPOINT_URL` environment variable** — AWS SDK v2 reads it directly, so it works even without the `@Value` wiring. `export AWS_ENDPOINT_URL=http://localhost:4566` before `bootRun`.
+- **`aws.endpoint-url` property** — on the command line (`--aws.endpoint-url=...`), as a system property (`-Daws.endpoint-url=...`), or from an `application.properties` file. Read by the example [`AwsConfig`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/config/AwsConfig.java).
+- **Manual `endpointOverride(...)`** — call it directly on the client builder for explicit per-client control.
 
-```
-# terminal 1 — standalone server
-./gradlew :cloudstub-local:run --args="--services=sqs"
+### Environment profiles
 
-# terminal 2 — example app, pointed at the server
-./gradlew :cloudstub-example:junit6:runExample -Pdemo=sqs
-```
+The example app carries the endpoint on a Spring profile:
 
-`runExample` is one generic task: `-Pdemo=<serviceId>` selects the matching `@Profile` runner and `-Pendpoint=<url>` overrides the default `http://localhost:4566`. A demo for another service is a new `@Profile("<serviceId>")` runner — no build change.
+- **`local`** — [`application-local.properties`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/resources/application-local.properties) sets `aws.endpoint-url=http://localhost:4566`, so the clients hit a standalone CloudStub server.
+- **`prod`** — [`application-prod.properties`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/resources/application-prod.properties) sets no endpoint override, so the SDK uses the real regional endpoints.
 
-The SQS runner publishes messages, then shows the two distinct read operations:
+The base [`application.properties`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/resources/application.properties) sets no endpoint, so with no profile active the SDK uses real AWS. Run against a standalone server with `--spring.profiles.active=local`.
 
-- `EventPublisher.poll()` — a `ReceiveMessage` peek; the messages stay in the queue.
-- `EventPublisher.consume()` — `ReceiveMessage` followed by `DeleteMessage` for each; the full consume cycle, so the messages do not come back.
+### Resolution precedence
 
-This mirrors real SQS: receive is non-destructive, and an explicit delete is required to remove a message.
+When client beans read `aws.endpoint-url` through Spring, Spring's property precedence decides which value wins. From highest to lowest:
+
+1. **Command-line argument** — `--aws.endpoint-url=http://...`.
+2. **System property** — `-Daws.endpoint-url=http://...` (the form `CloudStubExtension` sets in tests).
+3. **Active profile properties** — `application-local.properties` (`aws.endpoint-url=http://localhost:4566`) when `local` is active.
+4. **Base `application.properties`** — no endpoint, so the SDK uses real AWS.
+
+So a test's injected system property outranks the profile, and an explicit `--aws.endpoint-url` outranks both.
+
+### From the IDE
+
+Running the application from an IDE against a standalone server needs two things: a [standalone CloudStub server](standalone.md) running on the endpoint, and the `local` profile active. Set **Active profiles: `local`** in the run configuration (or add `-Dspring.profiles.active=local` to the VM options); `application-local.properties` then points the clients at `http://localhost:4566`.
 
 ## Dependencies
 
