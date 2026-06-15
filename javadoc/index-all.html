@@ -148,6 +148,10 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:C">C</h2>
 <dl class="index">
+<dt><a href="io/cloudstub/core/download/ModuleDownloader.html#CENTRAL_BASE_URL" class="member-name-link">CENTRAL_BASE_URL</a> - Static variable in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
+<dd>
+<div class="block">Canonical Maven Central artifact base.</div>
+</dd>
 <dt><a href="io/cloudstub/core/internal/AwsEndpointOverride.html#clear()" class="member-name-link">clear()</a> - Static method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/AwsEndpointOverride.html" title="class in io.cloudstub.core.internal">AwsEndpointOverride</a></dt>
 <dd>
 <div class="block">Removes the override so the AWS SDK reverts to its normal endpoint resolution.</div>
@@ -320,12 +324,20 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/core/spi/StubResponse.html#contentType()" class="member-name-link">contentType()</a> - Method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/core/download/ModuleDownloader.html#coordinate(java.lang.String,java.lang.String)" class="member-name-link">coordinate(String, String)</a> - Static method in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/core/download/CoreVersion.html" class="type-name-link" title="class in io.cloudstub.core.download">CoreVersion</a> - Class in <a href="io/cloudstub/core/download/package-summary.html">io.cloudstub.core.download</a></dt>
+<dd>
+<div class="block">Reports the running <code>cloudstub-core</code> version from a build-stamped classpath resource.</div>
+</dd>
 <dt><a href="io/cloudstub/core/internal/store/StateStoreFactory.html#create(java.nio.file.Path,io.cloudstub.core.StatePersistence)" class="member-name-link">create(Path, StatePersistence)</a> - Static method in class io.cloudstub.core.internal.store.<a href="io/cloudstub/core/internal/store/StateStoreFactory.html" title="class in io.cloudstub.core.internal.store">StateStoreFactory</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/WireMockServerFactory.html#createStarted(io.cloudstub.core.internal.CloudStubSettings,io.cloudstub.core.internal.CloudStubResponseTransformer)" class="member-name-link">createStarted(CloudStubSettings, CloudStubResponseTransformer)</a> - Static method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/WireMockServerFactory.html" title="class in io.cloudstub.core.internal">WireMockServerFactory</a></dt>
 <dd>
 <div class="block">Builds a WireMock server from <code>settings</code>, starts it, and returns it.</div>
 </dd>
+<dt><a href="io/cloudstub/core/download/CoreVersion.html#current()" class="member-name-link">current()</a> - Static method in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/CoreVersion.html" title="class in io.cloudstub.core.download">CoreVersion</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:D">D</h2>
 <dl class="index">
@@ -348,6 +360,11 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/cloudstub/core/spi/restapi/ApiParam.html#description()" class="member-name-link">description()</a> - Method in record class io.cloudstub.core.spi.restapi.<a href="io/cloudstub/core/spi/restapi/ApiParam.html" title="class in io.cloudstub.core.spi.restapi">ApiParam</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./io/cloudstub/core/spi/restapi/ApiParam.html#param-description"><code>description</code></a> record component.</div>
+</dd>
+<dt><a href="io/cloudstub/core/download/ModuleDownloader.html#download(java.lang.String,java.lang.String,java.nio.file.Path)" class="member-name-link">download(String, String, Path)</a> - Method in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
+<dd>
+<div class="block">Downloads the module jar for <code>service</code> at <code>version</code> into <code>dir</code>, verifying
+ its checksum before the file is made visible and pruning any other cached version.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:E">E</h2>
@@ -453,6 +470,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/Md5HandlebarsHelper.html#getName()" class="member-name-link">getName()</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/Md5HandlebarsHelper.html" title="class in io.cloudstub.core.internal">Md5HandlebarsHelper</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/core/download/ModuleDownloader.html#GROUP" class="member-name-link">GROUP</a> - Static variable in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
+<dd>
+<div class="block">Published Maven group shared by every CloudStub module.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:H">H</h2>
 <dl class="index">
@@ -535,6 +556,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/package-summary.html">io.cloudstub.core</a> - package io.cloudstub.core</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/core/download/package-summary.html">io.cloudstub.core.download</a> - package io.cloudstub.core.download</dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/exception/package-summary.html">io.cloudstub.core.exception</a> - package io.cloudstub.core.exception</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/package-summary.html">io.cloudstub.core.internal</a> - package io.cloudstub.core.internal</dt>
@@ -561,6 +584,11 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/sqs/package-summary.html">io.cloudstub.sqs</a> - package io.cloudstub.sqs</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/core/download/ModuleDownloader.html#isCached(java.nio.file.Path,java.lang.String,java.lang.String)" class="member-name-link">isCached(Path, String, String)</a> - Static method in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
+<dd>
+<div class="block">Returns whether the jar for <code>service</code> at <code>version</code> is present in <code>dir</code> —
+ either the exact versioned jar or an unversioned <code>cloudstub-&lt;service&gt;.jar</code>.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:J">J</h2>
 <dl class="index">
@@ -642,6 +670,25 @@ loadScripts(document, 'script');</script>
 <div class="block">The HTTP method of the request.</div>
 </dd>
 <dt><a href="io/cloudstub/codegen/ModelResolver.html" class="type-name-link" title="interface in io.cloudstub.codegen">ModelResolver</a> - Interface in <a href="io/cloudstub/codegen/package-summary.html">io.cloudstub.codegen</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/core/download/ModuleDownloader.html" class="type-name-link" title="class in io.cloudstub.core.download">ModuleDownloader</a> - Class in <a href="io/cloudstub/core/download/package-summary.html">io.cloudstub.core.download</a></dt>
+<dd>
+<div class="block">Provisions a CloudStub service module jar from Maven Central into a plugin directory: fetch,
+ checksum-verify, then store.</div>
+</dd>
+<dt><a href="io/cloudstub/core/download/ModuleDownloader.html#%3Cinit%3E()" class="member-name-link">ModuleDownloader()</a> - Constructor for class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
+<dd>
+<div class="block">Creates a downloader that resolves from <a href="io/cloudstub/core/download/ModuleDownloader.html#CENTRAL_BASE_URL"><code>Maven Central</code></a>.</div>
+</dd>
+<dt><a href="io/cloudstub/core/download/ModuleDownloader.html#%3Cinit%3E(java.lang.String)" class="member-name-link">ModuleDownloader(String)</a> - Constructor for class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
+<dd>
+<div class="block">Creates a downloader resolving from <code>baseUrl</code> (a Maven repository layout root).</div>
+</dd>
+<dt><a href="io/cloudstub/core/download/ModuleDownloadException.html" class="type-name-link" title="class in io.cloudstub.core.download">ModuleDownloadException</a> - Exception in <a href="io/cloudstub/core/download/package-summary.html">io.cloudstub.core.download</a></dt>
+<dd>
+<div class="block">Thrown when a service module jar cannot be provisioned from Maven Central.</div>
+</dd>
+<dt><a href="io/cloudstub/core/download/ModuleDownloadException.html#%3Cinit%3E(java.lang.String)" class="member-name-link">ModuleDownloadException(String)</a> - Constructor for exception io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloadException.html" title="class in io.cloudstub.core.download">ModuleDownloadException</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/codegen/ModuleGenerator.html" class="type-name-link" title="class in io.cloudstub.codegen">ModuleGenerator</a> - Class in <a href="io/cloudstub/codegen/package-summary.html">io.cloudstub.codegen</a></dt>
 <dd>

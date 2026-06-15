@@ -1,5 +1,6 @@
 io.cloudstub.codegen
 io.cloudstub.core
+io.cloudstub.core.download
 io.cloudstub.core.exception
 io.cloudstub.core.internal
 io.cloudstub.core.internal.store
