@@ -6,26 +6,34 @@ import io.cloudstub.core.spi.StateStore;
 import io.cloudstub.core.spi.StubRegistrar;
 import io.cloudstub.core.spi.StubRequest;
 import io.cloudstub.core.spi.StubResponse;
+import io.cloudstub.core.spi.StubTemplates;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * CloudStub service module for Amazon SQS.
  *
- * <p>AWS SDK v2 (≥2.20) uses the JSON/X-Amz-Target protocol for SQS: requests carry an {@code
- * X-Amz-Target} header (e.g. {@code AmazonSQS.SendMessage}) and a JSON body. Each operation is
- * registered as a {@link io.cloudstub.core.spi.StubHandler} that reads and writes the shared {@link
- * StateStore}, so a message sent in one call is returned by a later {@code ReceiveMessage}.
+ * <p>The operation set is generated from the AWS SQS Smithy model; AWS SDK v2 (≥2.20) drives it
+ * with the JSON/X-Amz-Target protocol, so requests carry an {@code X-Amz-Target} header (e.g.
+ * {@code AmazonSQS.SendMessage}) and a JSON body, matched by {@link
+ * StubRegistrar#registerJsonTargetStub}.
  *
- * <p>State is keyed under the {@code sqs/} prefix:
+ * <p>The eight queue/message operations below are <strong>state-backed</strong>: each is a {@link
+ * io.cloudstub.core.spi.StubHandler} that reads and writes the shared {@link StateStore}, so a
+ * message sent in one call is returned by a later {@code ReceiveMessage}. State is keyed under the
+ * {@code sqs/} prefix:
  *
  * <ul>
  *   <li>{@code sqs/queues/{name}} → the queue URL (marks the queue's existence)
  *   <li>{@code sqs/queues/{name}/messages/{id}} → the message body
  * </ul>
  *
- * <p>Not simulated: visibility timeout, FIFO deduplication/ordering. A received message stays
- * visible until explicitly deleted.
+ * <p>The remaining operations are served from static Handlebars templates in {@code
+ * src/main/resources/templates/}: they return well-formed but stateless placeholder responses (e.g.
+ * {@code SendMessageBatch}, {@code ChangeMessageVisibility}, {@code TagQueue}).
+ *
+ * <p>Not simulated: visibility timeout, FIFO deduplication/ordering, batch operations, message-move
+ * tasks, permissions, and tagging. A received message stays visible until explicitly deleted.
  *
  * <p>Discovered via {@code ServiceLoader} from {@code
  * META-INF/services/io.cloudstub.core.spi.CloudStubService}.
@@ -44,6 +52,8 @@ public class CloudStubSqsService implements CloudStubService {
     @Override
     public void register(CloudStubContext context) {
         StubRegistrar r = context.registrar();
+
+        // State-backed operations — handlers that read and write the shared StateStore.
         r.registerJsonTargetStub(PREFIX + "CreateQueue", this::createQueue);
         r.registerJsonTargetStub(PREFIX + "GetQueueUrl", this::getQueueUrl);
         r.registerJsonTargetStub(PREFIX + "SendMessage", this::sendMessage);
@@ -52,6 +62,28 @@ public class CloudStubSqsService implements CloudStubService {
         r.registerJsonTargetStub(PREFIX + "DeleteQueue", this::deleteQueue);
         r.registerJsonTargetStub(PREFIX + "ListQueues", this::listQueues);
         r.registerJsonTargetStub(PREFIX + "GetQueueAttributes", this::getQueueAttributes);
+
+        // Template-backed operations — stateless placeholder responses generated from the model.
+        registerTemplate(r, "AddPermission");
+        registerTemplate(r, "CancelMessageMoveTask");
+        registerTemplate(r, "ChangeMessageVisibility");
+        registerTemplate(r, "ChangeMessageVisibilityBatch");
+        registerTemplate(r, "DeleteMessageBatch");
+        registerTemplate(r, "ListDeadLetterSourceQueues");
+        registerTemplate(r, "ListMessageMoveTasks");
+        registerTemplate(r, "ListQueueTags");
+        registerTemplate(r, "PurgeQueue");
+        registerTemplate(r, "RemovePermission");
+        registerTemplate(r, "SendMessageBatch");
+        registerTemplate(r, "SetQueueAttributes");
+        registerTemplate(r, "StartMessageMoveTask");
+        registerTemplate(r, "TagQueue");
+        registerTemplate(r, "UntagQueue");
+    }
+
+    private static void registerTemplate(StubRegistrar r, String operation) {
+        r.registerJsonTargetStub(
+                PREFIX + operation, StubTemplates.load(CloudStubSqsService.class, operation));
     }
 
     private StubResponse createQueue(StubRequest req, StateStore store) {
