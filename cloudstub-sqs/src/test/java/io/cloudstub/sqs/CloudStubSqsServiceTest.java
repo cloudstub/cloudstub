@@ -8,6 +8,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,6 +20,7 @@ import software.amazon.awssdk.services.sqs.model.GetQueueAttributesResponse;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry;
 
 class CloudStubSqsServiceTest {
 
@@ -187,5 +189,39 @@ class CloudStubSqsServiceTest {
                         b -> b.queueUrl(queueUrl).attributeNames(QueueAttributeName.ALL));
         assertEquals(
                 "2", response.attributes().get(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES));
+    }
+
+    /**
+     * The operations generated from the Smithy model but not state-backed serve stateless template
+     * placeholders. This verifies a representative set is registered and returns responses the AWS
+     * SDK can deserialize without error (no assertion on content — these are placeholders).
+     */
+    @Test
+    void templateBackedOperationsRespondWithoutSdkError() {
+        String queueUrl = newQueue();
+        assertDoesNotThrow(
+                () -> {
+                    sqsClient.sendMessageBatch(
+                            b ->
+                                    b.queueUrl(queueUrl)
+                                            .entries(
+                                                    SendMessageBatchRequestEntry.builder()
+                                                            .id("1")
+                                                            .messageBody("batched")
+                                                            .build()));
+                    sqsClient.changeMessageVisibility(
+                            b -> b.queueUrl(queueUrl).receiptHandle("rh").visibilityTimeout(30));
+                    sqsClient.setQueueAttributes(
+                            b ->
+                                    b.queueUrl(queueUrl)
+                                            .attributes(
+                                                    Map.of(
+                                                            QueueAttributeName.VISIBILITY_TIMEOUT,
+                                                            "60")));
+                    sqsClient.tagQueue(b -> b.queueUrl(queueUrl).tags(Map.of("env", "test")));
+                    sqsClient.listQueueTags(b -> b.queueUrl(queueUrl));
+                    sqsClient.untagQueue(b -> b.queueUrl(queueUrl).tagKeys("env"));
+                    sqsClient.purgeQueue(b -> b.queueUrl(queueUrl));
+                });
     }
 }

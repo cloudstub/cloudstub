@@ -42,6 +42,8 @@ nav:
       - Console: console.md
       - Logging: logging.md
       - SDK v1 Support: sdk-v1.md
+  - Services:
+      - Amazon SQS: sqs.md
   - Module Authoring: module-authoring.md
   - CloudStub Codegen: codegen.md
   - Changelog: changelog.md
