@@ -16,7 +16,8 @@ and point your application at `http://localhost:4566`.
 
 The standalone server is a thin runtime: the launcher plus `cloudstub-core`. **No service modules are bundled.**
 Service modules ship as separate jars that the launcher loads at runtime from a **plugin directory**. The model is:
-download the server jar once, then download the module jars you want and drop them in the plugin directory.
+download the server jar once, then let the launcher fetch the modules you declare with `--services` (auto-download,
+on by default), or drop the jars into the plugin directory yourself.
 
 - `--modules-dir` controls what is **available** — which module jars are on the classpath.
 - `--services` (below) narrows what is **enabled** among those.
@@ -31,9 +32,39 @@ This produces `cloudstub-local/build/libs/cloudstub-local.jar` — the CloudStub
 WireMock/Jetty) and the launcher, and nothing else. Each service module (`cloudstub-sqs`, `cloudstub-sns`,
 `cloudstub-secretsmanager`, `cloudstub-s3`) is a separate jar built by its own module.
 
-## Add the modules you want
+## Add the services you need
 
-The launcher loads every `.jar` in the plugin directory (default `./modules`):
+Declare the services you want with `--services=sqs,s3` (or `CLOUDSTUB_SERVICES`). Before it starts, the launcher makes sure
+each declared module's jar is in the plugin directory — and by default it **downloads any that are missing**, so for
+published modules you never manage jars by hand.
+
+### Auto-download (default)
+
+Auto-download is **on by default**: when you declare a service whose jar is not already in the plugin directory, the
+launcher fetches `io.github.cloudstub:cloudstub-<service>:<version>` from Maven Central, verifies it, writes it into
+the plugin directory, and loads it. `--services` is the single source of truth — declare what you want and it
+appears:
+
+```
+java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
+```
+
+- **Version:** defaults to the running `cloudstub-core` version, so a downloaded module matches the SPI the core
+  provides. Override with `--module-version=<v>` or `CLOUDSTUB_MODULE_VERSION`. (Development builds are `-SNAPSHOT`,
+  which is not published to Central — point `--module-version` at a released version such as `0.1.0-beta.1`.)
+- **Cache:** the plugin directory is the cache. A jar that is already present is **never** re-downloaded, so the
+  next start is offline-fast. When no `--modules-dir` is set and a download is needed, the default `./modules`
+  directory is created to hold it.
+- **Integrity:** every download is checksum-verified (the strongest published of SHA-512 / SHA-256 / SHA-1) before
+  the jar is trusted and loaded. A mismatch fails the start.
+- **Source:** the canonical Maven Central host. Point at an internal mirror with `--maven-base-url=<url>` or
+  `CLOUDSTUB_MAVEN_BASE_URL` (a single Maven-layout repository root — not a general multi-repository resolver).
+
+### Place module jars manually
+
+You can also manage the jars yourself — useful for locally built modules (the [fat JAR build](#build-the-fat-jar)
+produces each service jar) or a curated offline set. The launcher loads every `.jar` in the plugin directory
+(default `./modules`), so drop them in and start:
 
 ```
 mkdir -p modules
@@ -54,31 +85,9 @@ java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
     ```
 
 Plugin directory precedence: `--modules-dir` flag → `CLOUDSTUB_MODULES_DIR` env var → default `./modules`. An
-explicitly provided `--modules-dir` that does not exist fails fast with a clear error; a missing or empty default
-`./modules` is **not** fatal — the server starts and serves nothing.
-
-## Auto-download modules
-
-You usually do **not** need to copy module jars by hand. Auto-download is **on by default**: when you declare a
-service with `--services` (or `CLOUDSTUB_SERVICES`) and its jar is not already in the plugin directory, the launcher
-fetches `io.github.cloudstub:cloudstub-<service>:<version>` from Maven Central, verifies it, writes it into the
-plugin directory, and loads it. `--services` becomes the single source of truth — declare what you want and it
-appears:
-
-```
-java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs
-```
-
-- **Version:** defaults to the running `cloudstub-core` version, so a downloaded module matches the SPI the core
-  provides. Override with `--module-version=<v>` or `CLOUDSTUB_MODULE_VERSION`. (Development builds are `-SNAPSHOT`,
-  which is not published to Central — point `--module-version` at a released version such as `0.1.0-beta.1`.)
-- **Cache:** the plugin directory is the cache. A jar that is already present is **never** re-downloaded, so the
-  next start is offline-fast. When no `--modules-dir` is set and a download is needed, the default `./modules`
-  directory is created to hold it.
-- **Integrity:** every download is checksum-verified (the strongest published of SHA-512 / SHA-256 / SHA-1) before
-  the jar is trusted and loaded. A mismatch fails the start.
-- **Source:** the canonical Maven Central host. Point at an internal mirror with `--maven-base-url=<url>` or
-  `CLOUDSTUB_MAVEN_BASE_URL` (a single Maven-layout repository root — not a general multi-repository resolver).
+explicitly provided `--modules-dir` that does not exist fails fast; a missing or empty default
+`./modules` is **not** fatal — the server starts and serves nothing. A jar already present is used as-is and never
+re-downloaded.
 
 ### Disable auto-download (offline / air-gapped)
 
@@ -148,7 +157,13 @@ If you start with no `--services`, the server warns you and tells you how to ena
 [CloudStub]          Available services: sqs, sns, secretsmanager, s3
 ```
 
-### Limit retained request history
+Naming a service that is not available also fails fast:
+
+```
+[CloudStub] Unknown service(s): dynamo. Available: sqs, sns, secretsmanager, s3
+```
+
+## Limit retained request history
 
 The REST API records served requests for `GET /api/history`. In a long-lived process this journal is
 capped at the last 1000 entries by default. Override the cap, or remove it entirely:
@@ -168,14 +183,7 @@ capped at the last 1000 entries by default. Override the cap, or remove it entir
 History cap precedence: `--max-history` flag → `CLOUDSTUB_MAX_HISTORY` env var → default `1000`.
 Pass `unlimited` (or `none`) to retain every request.
 
-If you name a service that is not on the classpath, the server fails fast with a clear error instead of starting up with a
-silently missing service:
-
-```
-[CloudStub] Unknown service(s): dynamo. Available: sqs, sns, secretsmanager, s3
-```
-
-### Expected startup output
+## Expected startup output
 
 ```
 [CloudStub] Plugin directory: /path/to/modules
@@ -192,7 +200,7 @@ discovered in that directory; the **Enabled** line lists the ones actually servi
 served, check that its module jar is in the plugin directory (Available) and that its service appears on the Enabled
 line.
 
-On a first run, any module fetched by [auto-download](#auto-download-modules) prints a line before the summary,
+On a first run, any module fetched by [auto-download](#auto-download-default) prints a line before the summary,
 naming the coordinate, version, and destination, so downloaded jars are distinguished from pre-present ones:
 
 ```
