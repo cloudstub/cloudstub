@@ -1585,7 +1585,7 @@ appears:</p>
 <ul>
 <li><strong>Version:</strong> defaults to the running <code>cloudstub-core</code> version, so a downloaded module matches the SPI the core
   provides. Override with <code>--module-version=&lt;v&gt;</code> or <code>CLOUDSTUB_MODULE_VERSION</code>. (Development builds are <code>-SNAPSHOT</code>,
-  which is not published to Central — point <code>--module-version</code> at a released version such as <code>0.1.0-beta.1</code>.)</li>
+  which is not published to Central — point <code>--module-version</code> at a released version such as <code>0.1.0-beta.3</code>.)</li>
 <li><strong>Cache:</strong> the plugin directory is the cache. A jar that is already present is <strong>never</strong> re-downloaded, so the
   next start is offline-fast. When no <code>--modules-dir</code> is set and a download is needed, the default <code>./modules</code>
   directory is created to hold it.</li>
@@ -1704,7 +1704,7 @@ served, check that its module jar is in the plugin directory (Available) and tha
 line.</p>
 <p>On a first run, any module fetched by <a href="#auto-download-default">auto-download</a> prints a line before the summary,
 naming the coordinate, version, and destination, so downloaded jars are distinguished from pre-present ones:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>[CloudStub] Downloaded io.github.cloudstub:cloudstub-sqs:0.1.0-beta.1 -&gt; /path/to/modules/cloudstub-sqs-0.1.0-beta.1.jar
+<div class="highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>[CloudStub] Downloaded io.github.cloudstub:cloudstub-sqs:0.1.0-beta.3 -&gt; /path/to/modules/cloudstub-sqs-0.1.0-beta.3.jar
 </span></code></pre></div>
 <p>The REST API is available at <code>http://localhost:4567</code> — see <a href="../rest-api/">REST API</a> for the full reference, or
 inspect it visually in the browser with the <a href="../console/">Console</a>. A command-line client is coming soon.</p>
@@ -1720,7 +1720,7 @@ directory.</p>
 </span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="na">cloudstub.store-dir</span><span class="o">=</span><span class="s">.cloudstub</span>
 </span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="na">cloudstub.max-history</span><span class="o">=</span><span class="s">1000</span>
 </span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="na">cloudstub.modules-dir</span><span class="o">=</span><span class="s">modules</span>
-</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="na">cloudstub.module-version</span><span class="o">=</span><span class="s">0.1.0-beta.1</span>
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="na">cloudstub.module-version</span><span class="o">=</span><span class="s">0.1.0-beta.3</span>
 </span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="na">cloudstub.maven-base-url</span><span class="o">=</span><span class="s">https://repo1.maven.org/maven2</span>
 </span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="na">cloudstub.auto-download</span><span class="o">=</span><span class="s">true</span>
 </span></code></pre></div>
