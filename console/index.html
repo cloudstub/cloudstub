@@ -738,21 +738,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
+  <a href="#open-it" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#connecting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Connecting
+        Open it
       
     </span>
   </a>
@@ -1075,21 +1064,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
+  <a href="#open-it" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#connecting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Connecting
+        Open it
       
     </span>
   </a>
@@ -1140,50 +1118,28 @@
 
 <h1 id="console">Console</h1>
 <p>The CloudStub Console is a web interface for a running <a href="../standalone/">standalone</a> CloudStub
-instance. It gives you visual access to mock state — loaded modules, request history, and per-service
-operations — without touching the terminal or writing code. Open it in a browser, point it at your
-instance, and you see what the mock is doing.</p>
-<p>The console is a <strong>thin client over the <a href="../rest-api/">REST API</a></strong>. It has no
-dependency on CloudStub internals, WireMock, or any service module — it only speaks HTTP to
-<code>/api/status</code> and <code>/api/&lt;service&gt;/…</code>. It builds its navigation at runtime from <code>GET /api/status</code>, so
+instance — visual access to mock state (loaded modules, request history, per-service operations)
+without the terminal or writing code.</p>
+<p>It is <strong>served by the standalone server itself</strong>: start <code>cloudstub-local</code> and open
+<strong><code>http://localhost:4567/console</code></strong> in a browser (the API port — opening <code>http://localhost:4567/</code>
+redirects there). There is no separate app to install or host.</p>
+<p>The console is a <strong>thin client over the <a href="../rest-api/">REST API</a></strong> — it only speaks HTTP to
+<code>/api/status</code> and <code>/api/&lt;service&gt;/…</code>, building its navigation at runtime from <code>GET /api/status</code>, so
 an instance with more modules loaded simply shows more services; the console itself never changes.</p>
-<h2 id="install">Install</h2>
-<p>The console ships in its own repository,
-<a href="https://github.com/cloudstub/cloudstub-console">cloudstub/cloudstub-console</a> — it is released
-independently and is an optional install, not part of the core distribution. It is an Angular
-application; building it requires Node.js 20+.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git clone https://github.com/cloudstub/cloudstub-console
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>cd cloudstub-console
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>npm install
+<h2 id="open-it">Open it</h2>
+<p>Start the server (see <a href="../standalone/">Standalone Mode</a>) and browse to the console:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>java -jar cloudstub-local.jar --services=sqs
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a># then open http://localhost:4567/console
 </span></code></pre></div>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Development server</label><label for="__tabbed_1_2">Production build</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>npm start
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a># serves on http://localhost:4200 with live reload
-</span></code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>npm run build
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a># static bundle in dist/ — serve it with any static file server
-</span></code></pre></div>
-</div>
-</div>
-</div>
-<p>The console is a static single-page app: once built it works in any modern browser with no install
-and no backend of its own.</p>
-<h2 id="connecting">Connecting</h2>
-<p>The console talks only to the REST API port. The default target is <code>http://localhost:4567</code>, which
-matches standalone mode, so with a server on the default port no configuration is needed. Use the
-<strong>Connect</strong> page to point it at a different host or port; the value is stored in the browser's
-local storage.</p>
+<p>The console is bundled in the <code>cloudstub-local</code> distributable, so there is nothing else to download.
+Because it is served from the same origin as the API it calls, no connection setup is needed — it
+talks to the instance that served it.</p>
 <div class="admonition note">
-<p class="admonition-title">CORS</p>
-<p>Because the console runs in the browser and calls the API from a different origin, the standalone
-REST API sends permissive CORS headers (<code>Access-Control-Allow-Origin: *</code>). No proxy is required.</p>
+<p class="admonition-title">Developing the console</p>
+<p>The console source lives in this monorepo under <code>cloudstub-console</code> (an Angular app). You only
+need to build it to work on the console itself; the standalone REST API also sends permissive CORS
+headers, so a <code>npm start</code> dev server on another port can call a running instance directly.</p>
 </div>
-<p>If the instance is not reachable, the console shows a clear "Disconnected" state and a prompt to
-configure the connection.</p>
 <h2 id="features">Features</h2>
 <p>The console polls <code>GET /api/status</code> every few seconds, so the dashboard and navigation stay current
 as modules load or state changes.</p>
@@ -1202,7 +1158,7 @@ as modules load or state changes.</p>
 <h2 id="how-new-modules-appear-automatically">How new modules appear automatically</h2>
 <p>Because everything is driven by <code>/api/status</code>, the console needs no change when a module is added:</p>
 <ul>
-<li>A module that implements <a href="../module-authoring/#8-exposing-cli-commands-via-the-rest-api"><code>CloudStubApiService</code></a>
+<li>A module that implements <a href="../module-authoring/#8-exposing-rest-api-routes"><code>CloudStubApiService</code></a>
   contributes routes under <code>/api/&lt;service&gt;/…</code>, each advertising a command name and parameters.</li>
 <li>Start CloudStub with that module on the classpath and a panel for it appears in the service
   browser, with a form per route.</li>

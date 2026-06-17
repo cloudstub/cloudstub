@@ -104,12 +104,6 @@ loadScripts(document, 'script');</script>
 <div class="block">Passed to <a href="io/cloudstub/core/spi/CloudStubApiService.html#registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)"><code>CloudStubApiService.registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)</code></a> so modules can declare API routes without
  depending on any HTTP transport type.</div>
 </dd>
-<dt><a href="io/cloudstub/local/ApiServer.html" class="type-name-link" title="class in io.cloudstub.local">ApiServer</a> - Class in <a href="io/cloudstub/local/package-summary.html">io.cloudstub.local</a></dt>
-<dd>
-<div class="block">Lightweight REST API server for local mode.</div>
-</dd>
-<dt><a href="io/cloudstub/local/ApiServer.html#%3Cinit%3E(io.cloudstub.core.CloudStub,int,java.util.List)" class="member-name-link">ApiServer(CloudStub, int, List&lt;CloudStubApiService&gt;)</a> - Constructor for class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/StatePersistence.html#APPEND_LOG" class="member-name-link">APPEND_LOG</a> - Enum constant in enum class io.cloudstub.core.<a href="io/cloudstub/core/StatePersistence.html" title="enum class in io.cloudstub.core">StatePersistence</a></dt>
 <dd>
 <div class="block">Append-only log with periodic compaction (the default).</div>
@@ -206,7 +200,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/core/CloudStub.html#close()" class="member-name-link">close()</a> - Method in class io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/cloudstub/local/ApiServer.html#close()" class="member-name-link">close()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
+<dt><a href="io/cloudstub/local/LocalServer.html#close()" class="member-name-link">close()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/LocalServer.html" title="class in io.cloudstub.local">LocalServer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/CloudStub.html" class="type-name-link" title="class in io.cloudstub.core">CloudStub</a> - Class in <a href="io/cloudstub/core/package-summary.html">io.cloudstub.core</a></dt>
 <dd>
@@ -697,6 +691,12 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/local/LocalMain.html#%3Cinit%3E()" class="member-name-link">LocalMain()</a> - Constructor for class io.cloudstub.local.<a href="io/cloudstub/local/LocalMain.html" title="class in io.cloudstub.local">LocalMain</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/LocalServer.html" class="type-name-link" title="class in io.cloudstub.local">LocalServer</a> - Class in <a href="io/cloudstub/local/package-summary.html">io.cloudstub.local</a></dt>
+<dd>
+<div class="block">The cloudstub-local HTTP server for the secondary management port (REST API + web console).</div>
+</dd>
+<dt><a href="io/cloudstub/local/LocalServer.html#%3Cinit%3E(io.cloudstub.core.CloudStub,int,java.util.List)" class="member-name-link">LocalServer(CloudStub, int, List&lt;CloudStubApiService&gt;)</a> - Constructor for class io.cloudstub.local.<a href="io/cloudstub/local/LocalServer.html" title="class in io.cloudstub.local">LocalServer</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:M">M</h2>
 <dl class="index">
@@ -854,7 +854,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the port the embedded server is listening on.</div>
 </dd>
-<dt><a href="io/cloudstub/local/ApiServer.html#port()" class="member-name-link">port()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
+<dt><a href="io/cloudstub/local/LocalServer.html#port()" class="member-name-link">port()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/LocalServer.html" title="class in io.cloudstub.local">LocalServer</a></dt>
 <dd>
 <div class="block">The port the API is listening on.</div>
 </dd>
@@ -1141,7 +1141,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Starts the embedded server, registers all discovered service stubs, and injects <code>
  aws.endpoint-url</code> so the AWS SDK v2 routes traffic locally.</div>
 </dd>
-<dt><a href="io/cloudstub/local/ApiServer.html#start()" class="member-name-link">start()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
+<dt><a href="io/cloudstub/local/LocalServer.html#start()" class="member-name-link">start()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/LocalServer.html" title="class in io.cloudstub.local">LocalServer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/CloudStub.html#startedAt()" class="member-name-link">startedAt()</a> - Method in class io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></dt>
 <dd>
@@ -1190,7 +1190,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Stops the embedded server and removes the <code>aws.endpoint-url</code> system property.</div>
 </dd>
-<dt><a href="io/cloudstub/local/ApiServer.html#stop()" class="member-name-link">stop()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
+<dt><a href="io/cloudstub/local/LocalServer.html#stop()" class="member-name-link">stop()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/LocalServer.html" title="class in io.cloudstub.local">LocalServer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/CloudStubSettings.html#storeDirectory()" class="member-name-link">storeDirectory()</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubSettings.html" title="class in io.cloudstub.core.internal">CloudStubSettings</a></dt>
 <dd>&nbsp;</dd>
