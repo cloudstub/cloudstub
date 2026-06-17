@@ -72,6 +72,7 @@ public final class ApiServer implements Closeable {
 
         registerCoreRoutes();
         registerModuleRoutes();
+        registerConsole();
 
         server.setExecutor(
                 Executors.newSingleThreadExecutor(
@@ -137,6 +138,30 @@ public final class ApiServer implements Closeable {
                 "OpenAPI 3.0 spec auto-generated from registered routes",
                 List.of(),
                 req -> new ApiResponse(200, buildOpenApiSpec()));
+    }
+
+    /**
+     * Serves the web console (if its assets are bundled) at {@code /console}, and redirects {@code
+     * /} to {@code /console/}. When the UI is not bundled — a headless build — nothing is
+     * registered and the server runs API-only.
+     */
+    private void registerConsole() {
+        ConsoleHandler console = new ConsoleHandler("/console", "console");
+        if (!console.isAvailable()) {
+            return;
+        }
+        server.createContext("/console", console);
+        server.createContext("/", this::handleRoot);
+    }
+
+    private void handleRoot(HttpExchange exchange) throws IOException {
+        if ("/".equals(exchange.getRequestURI().getPath())) {
+            exchange.getResponseHeaders().set("Location", "/console/");
+            exchange.sendResponseHeaders(302, -1);
+            exchange.close();
+            return;
+        }
+        sendError(exchange, 404, "Not Found");
     }
 
     private void registerModuleRoutes() {
