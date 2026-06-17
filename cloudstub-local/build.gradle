@@ -66,6 +66,33 @@ tasks.register('copyModuleJars', Copy) {
     into "${buildDir}/modules"
 }
 
+// The web console (built by :cloudstub-console) is embedded into the fat JAR and the `run` task only
+// when -Pconsole is set — release builds and `:cloudstub-local:run -Pconsole`. Default builds, tests,
+// and integrationTest stay Java-only and Node-free. See #152.
+if (project.hasProperty('console')) {
+    // Captured in a local: inside the shadowJar closure, `configurations` resolves to the task's own
+    // configs-to-bundle property, not the project's configuration container.
+    def consoleAssetsCfg =
+            configurations.create('consoleAssets') {
+                canBeConsumed = false
+                canBeResolved = true
+            }
+    dependencies {
+        consoleAssets project(path: ':cloudstub-console', configuration: 'consoleAssets')
+    }
+    shadowJar {
+        from(consoleAssetsCfg) { into 'console' }
+    }
+    def stageConsole = tasks.register('stageConsole', Sync) {
+        from consoleAssetsCfg
+        into layout.buildDirectory.dir('console-run/console')
+    }
+    run {
+        dependsOn stageConsole
+        classpath += files(layout.buildDirectory.dir('console-run'))
+    }
+}
+
 // integrationTest launches the fat JAR as a subprocess: build it and pass its path + plugin dir.
 tasks.named('integrationTest') {
     dependsOn shadowJar, copyModuleJars
