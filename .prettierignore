@@ -3,6 +3,9 @@
 **/generated/**
 node_modules/
 
+# The Angular console module has its own frontend tooling (eslint/prettier via npm).
+cloudstub-console/
+
 # MkDocs Material source: uses Python-Markdown extensions (admonitions `!!! note`,
 # content tabs) whose required indentation a CommonMark formatter strips, breaking the
 # rendered site. Left to MkDocs, not Prettier.

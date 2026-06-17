@@ -1,0 +1,130 @@
+.page {
+  padding: 2rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: var(--text-primary);
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+::ng-deep .service-select {
+  min-width: 160px;
+}
+
+.table-wrapper {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ts-cell {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.method-badge {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+
+  &.method-get {
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563eb;
+  }
+  &.method-post {
+    background: rgba(34, 197, 94, 0.12);
+    color: #16a34a;
+  }
+  &.method-put {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+  &.method-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+  }
+  &.method-patch {
+    background: rgba(139, 92, 246, 0.12);
+    color: #7c3aed;
+  }
+}
+
+.url-cell {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.service-chip {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--surface-section);
+  color: var(--text-muted);
+}
+
+.op-cell {
+  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+}
+
+.matched-yes {
+  color: #22c55e;
+  font-size: 1rem;
+}
+.matched-no {
+  color: #ef4444;
+  font-size: 1rem;
+}
+
+.empty-msg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+
+  i {
+    font-size: 1.25rem;
+    opacity: 0.4;
+  }
+}

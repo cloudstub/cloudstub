@@ -1,0 +1,86 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Request History</h1>
+      <p class="page-subtitle">All requests captured by the mock server</p>
+    </div>
+    <div class="header-actions">
+      <p-select
+        [options]="serviceOptions()"
+        [ngModel]="selectedService()"
+        (ngModelChange)="onServiceChange($event)"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="All services"
+        styleClass="service-select"
+      >
+      </p-select>
+      <button
+        pButton
+        severity="secondary"
+        [outlined]="true"
+        size="small"
+        icon="pi pi-refresh"
+        label="Refresh"
+        (click)="load()"
+      ></button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <p-table
+      [value]="records()"
+      [loading]="loading()"
+      [paginator]="true"
+      [rows]="50"
+      [rowsPerPageOptions]="[25, 50, 100]"
+      dataKey="timestamp"
+      styleClass="p-datatable-sm history-table"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 180px">Time</th>
+          <th style="width: 72px">Method</th>
+          <th>URL</th>
+          <th style="width: 120px">Service</th>
+          <th style="width: 160px">Operation</th>
+          <th style="width: 80px">Status</th>
+          <th style="width: 80px">Matched</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-r>
+        <tr>
+          <td class="ts-cell">{{ r.timestamp | date: 'HH:mm:ss.SSS' }}</td>
+          <td>
+            <span class="method-badge" [ngClass]="methodClass(r.method)">{{ r.method }}</span>
+          </td>
+          <td class="url-cell">{{ r.url }}</td>
+          <td>
+            <span class="service-chip">{{ r.serviceId }}</span>
+          </td>
+          <td class="op-cell">{{ r.operation }}</td>
+          <td>
+            <p-tag [value]="r.statusCode.toString()" [severity]="statusSeverity(r.statusCode)" />
+          </td>
+          <td>
+            @if (r.matched) {
+              <i class="pi pi-check-circle matched-yes"></i>
+            } @else {
+              <i class="pi pi-times-circle matched-no"></i>
+            }
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="empty-msg">
+              <i class="pi pi-list"></i>
+              <span>No requests captured yet</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

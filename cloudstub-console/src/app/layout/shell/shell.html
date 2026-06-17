@@ -1,0 +1,69 @@
+<p-toast />
+
+<div class="shell">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <img
+          class="brand-logo"
+          [src]="theme.dark() ? '/logo-dark.png' : '/logo.png'"
+          alt="CloudStub"
+        />
+        <span class="brand-name">CloudStub</span>
+      </div>
+    </div>
+
+    <div
+      class="connection-pill"
+      [class.connected]="api.connected()"
+      [class.disconnected]="!api.connected()"
+    >
+      <span class="connection-dot"></span>
+      <span class="connection-label">{{ api.connected() ? 'Connected' : 'Disconnected' }}</span>
+      @if (api.connected()) {
+        <span class="connection-port">:{{ api.status()?.apiPort }}</span>
+      }
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Overview</div>
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-home"></i>
+        <span>Dashboard</span>
+      </a>
+      <a routerLink="/history" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-list"></i>
+        <span>Request History</span>
+      </a>
+    </div>
+
+    @if (modules().length > 0) {
+      <div class="nav-section">
+        <div class="nav-label">Services</div>
+        @for (mod of modules(); track mod.id) {
+          <a [routerLink]="['/services', mod.id]" routerLinkActive="active" class="nav-item">
+            <i class="pi pi-server"></i>
+            <span>{{ mod.id | uppercase }}</span>
+          </a>
+        }
+      </div>
+    }
+
+    <div class="nav-section sidebar-bottom">
+      <a routerLink="/connect" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-cog"></i>
+        <span>Connect</span>
+      </a>
+      <button class="nav-item theme-toggle" (click)="toggleTheme()">
+        <i [class]="'pi ' + (theme.dark() ? 'pi-sun' : 'pi-moon')"></i>
+        <span>{{ theme.dark() ? 'Light mode' : 'Dark mode' }}</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <router-outlet />
+  </main>
+</div>

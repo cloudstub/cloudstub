@@ -1,0 +1,65 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Connect</h1>
+      <p class="page-subtitle">Configure the CloudStub instance to connect to</p>
+    </div>
+  </div>
+
+  <div class="connect-card">
+    <div class="field">
+      <label class="field-label">API host</label>
+      <p class="field-hint">The base URL of the CloudStub API port (default: 4567)</p>
+      <div class="input-row">
+        <input
+          pInputText
+          [ngModel]="hostInput()"
+          (ngModelChange)="hostInput.set($event)"
+          placeholder="http://localhost:4567"
+          class="host-input"
+        />
+      </div>
+    </div>
+
+    <div class="field-actions">
+      <button pButton label="Save" (click)="save()" icon="pi pi-check"></button>
+      <button
+        pButton
+        severity="secondary"
+        [outlined]="true"
+        label="Test connection"
+        [loading]="testing()"
+        (click)="test()"
+        icon="pi pi-wifi"
+      ></button>
+      <button
+        pButton
+        severity="secondary"
+        [outlined]="true"
+        label="Reset to default"
+        (click)="resetToDefault()"
+        icon="pi pi-refresh"
+      ></button>
+    </div>
+
+    <div class="status-row">
+      <div class="status-chip" [class.ok]="api.connected()" [class.err]="!api.connected()">
+        <span class="dot"></span>
+        @if (api.connected()) {
+          Connected to {{ api.host() }}
+        } @else {
+          Not connected
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <h3>How to start CloudStub</h3>
+    <pre class="code-block">java -jar cloudstub-standalone.jar</pre>
+    <p>By default, the mock port is <code>4566</code> and the API port is <code>4567</code>.</p>
+    <p>
+      Override with <code>--api-port=&lt;n&gt;</code> or <code>CLOUDSTUB_API_PORT</code> env var.
+    </p>
+  </div>
+</div>
