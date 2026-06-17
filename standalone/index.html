@@ -704,10 +704,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#build-the-fat-jar" class="md-nav__link">
+  <a href="#get-the-server-jar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Build the fat JAR
+        Get the server JAR
       
     </span>
   </a>
@@ -1291,10 +1291,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#build-the-fat-jar" class="md-nav__link">
+  <a href="#get-the-server-jar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Build the fat JAR
+        Get the server JAR
       
     </span>
   </a>
@@ -1565,12 +1565,18 @@ on by default), or drop the jars into the plugin directory yourself.</p>
 <li><code>--modules-dir</code> controls what is <strong>available</strong> — which module jars are on the classpath.</li>
 <li><code>--services</code> (below) narrows what is <strong>enabled</strong> among those.</li>
 </ul>
-<h2 id="build-the-fat-jar">Build the fat JAR</h2>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>./gradlew :cloudstub-local:shadowJar
+<h2 id="get-the-server-jar">Get the server JAR</h2>
+<p>The runnable server is distributed on the <a href="https://github.com/cloudstub/cloudstub/releases">GitHub Releases</a>
+page — it is <strong>not</strong> on Maven Central (Central carries the libraries). Download the latest:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl -L -o cloudstub-local.jar \
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  https://github.com/cloudstub/cloudstub/releases/latest/download/cloudstub-local.jar
 </span></code></pre></div>
-<p>This produces <code>cloudstub-local/build/libs/cloudstub-local.jar</code> — the CloudStub engine (with shaded
-WireMock/Jetty) and the launcher, and nothing else. Each service module (<code>cloudstub-sqs</code>, <code>cloudstub-sns</code>,
-<code>cloudstub-secretsmanager</code>, <code>cloudstub-s3</code>) is a separate jar built by its own module.</p>
+<p>Or build it from source:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>./gradlew :cloudstub-local:shadowJar
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a># → cloudstub-local/build/libs/cloudstub-local.jar
+</span></code></pre></div>
+<p>The examples below use the build path <code>cloudstub-local/build/libs/cloudstub-local.jar</code>; substitute
+<code>cloudstub-local.jar</code> if you downloaded it.</p>
 <h2 id="add-the-services-you-need">Add the services you need</h2>
 <p>Declare the services you want with <code>--services=sqs,s3</code> (or <code>CLOUDSTUB_SERVICES</code>). Before it starts, the launcher makes sure
 each declared module's jar is in the plugin directory — and by default it <strong>downloads any that are missing</strong>, so for
@@ -1580,7 +1586,7 @@ published modules you never manage jars by hand.</p>
 launcher fetches <code>io.github.cloudstub:cloudstub-&lt;service&gt;:&lt;version&gt;</code> from Maven Central, verifies it, writes it into
 the plugin directory, and loads it. <code>--services</code> is the single source of truth — declare what you want and it
 appears:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
 </span></code></pre></div>
 <ul>
 <li><strong>Version:</strong> defaults to the running <code>cloudstub-core</code> version, so a downloaded module matches the SPI the core
@@ -1595,21 +1601,21 @@ appears:</p>
   <code>CLOUDSTUB_MAVEN_BASE_URL</code> (a single Maven-layout repository root — not a general multi-repository resolver).</li>
 </ul>
 <h3 id="place-module-jars-manually">Place module jars manually</h3>
-<p>You can also manage the jars yourself — useful for locally built modules (the <a href="#build-the-fat-jar">fat JAR build</a>
+<p>You can also manage the jars yourself — useful for locally built modules (the <a href="#get-the-server-jar">server JAR build</a>
 produces each service jar) or a curated offline set. The launcher loads every <code>.jar</code> in the plugin directory
 (default <code>./modules</code>), so drop them in and start:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mkdir -p modules
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>cp path/to/cloudstub-sqs.jar path/to/cloudstub-s3.jar modules/
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mkdir -p modules
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>cp path/to/cloudstub-sqs.jar path/to/cloudstub-s3.jar modules/
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
 </span></code></pre></div>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Custom plugin directory (CLI flag)</label><label for="__tabbed_1_2">Custom plugin directory (environment variable)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --modules-dir=/opt/cloudstub/modules --services=sqs
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --modules-dir=/opt/cloudstub/modules --services=sqs
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>CLOUDSTUB_MODULES_DIR=/opt/cloudstub/modules java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>CLOUDSTUB_MODULES_DIR=/opt/cloudstub/modules java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs
 </span></code></pre></div>
 </div>
 </div>
@@ -1621,11 +1627,11 @@ re-downloaded.</p>
 <h3 id="disable-auto-download-offline-air-gapped">Disable auto-download (offline / air-gapped)</h3>
 <p>Turn auto-download off with <code>--no-download</code> or <code>CLOUDSTUB_AUTO_DOWNLOAD=false</code>. A declared service whose jar is then
 missing fails fast rather than reaching the network:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs --no-download
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs --no-download
 </span></code></pre></div>
-<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>[CloudStub] Unknown service(s): sqs. Available: (none)
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>[CloudStub]          Auto-download is disabled. Drop the module jar into the plugin directory, or enable
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>[CloudStub]          auto-download (omit --no-download / set CLOUDSTUB_AUTO_DOWNLOAD=true).
+<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>[CloudStub] Unknown service(s): sqs. Available: (none)
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>[CloudStub]          Auto-download is disabled. Drop the module jar into the plugin directory, or enable
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>[CloudStub]          auto-download (omit --no-download / set CLOUDSTUB_AUTO_DOWNLOAD=true).
 </span></code></pre></div>
 <p>A failed download (offline, unknown service, HTTP error) likewise fails fast, naming the service and the coordinate
 attempted and telling you how to supply the jar manually.</p>
@@ -1633,15 +1639,15 @@ attempted and telling you how to supply the jar manually.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Default port (4566)</label><label for="__tabbed_2_2">Custom port (CLI flag)</label><label for="__tabbed_2_3">Custom port (environment variable)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar
+<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --port=9000
+<div class="highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --port=9000
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>CLOUDSTUB_PORT=9000 java -jar cloudstub-local/build/libs/cloudstub-local.jar
+<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>CLOUDSTUB_PORT=9000 java -jar cloudstub-local/build/libs/cloudstub-local.jar
 </span></code></pre></div>
 </div>
 </div>
@@ -1654,23 +1660,23 @@ request.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI flag</label><label for="__tabbed_3_2">Environment variable</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,secretsmanager
+<div class="highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,secretsmanager
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>CLOUDSTUB_SERVICES=sqs,secretsmanager java -jar cloudstub-local/build/libs/cloudstub-local.jar
+<div class="highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>CLOUDSTUB_SERVICES=sqs,secretsmanager java -jar cloudstub-local/build/libs/cloudstub-local.jar
 </span></code></pre></div>
 </div>
 </div>
 </div>
 <p>Service selection precedence: <code>--services</code> flag → <code>CLOUDSTUB_SERVICES</code> env var → nothing enabled.</p>
 <p>If you start with no <code>--services</code>, the server warns you and tells you how to enable services:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>[CloudStub] WARNING: no services enabled — the mock will serve nothing.
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>[CloudStub]          Enable services with --services=&lt;id&gt;[,&lt;id&gt;...] or CLOUDSTUB_SERVICES=&lt;id&gt;[,&lt;id&gt;...].
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>[CloudStub]          Available services: sqs, sns, secretsmanager, s3
+<div class="highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>[CloudStub] WARNING: no services enabled — the mock will serve nothing.
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>[CloudStub]          Enable services with --services=&lt;id&gt;[,&lt;id&gt;...] or CLOUDSTUB_SERVICES=&lt;id&gt;[,&lt;id&gt;...].
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>[CloudStub]          Available services: sqs, sns, secretsmanager, s3
 </span></code></pre></div>
 <p>Naming a service that is not available also fails fast:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>[CloudStub] Unknown service(s): dynamo. Available: sqs, sns, secretsmanager, s3
+<div class="highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>[CloudStub] Unknown service(s): dynamo. Available: sqs, sns, secretsmanager, s3
 </span></code></pre></div>
 <h2 id="limit-retained-request-history">Limit retained request history</h2>
 <p>The REST API records served requests for <code>GET /api/history</code>. In a long-lived process this journal is
@@ -1678,11 +1684,11 @@ capped at the last 1000 entries by default. Override the cap, or remove it entir
 <div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">CLI flag</label><label for="__tabbed_4_2">Environment variable</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --max-history=5000
+<div class="highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --max-history=5000
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>CLOUDSTUB_MAX_HISTORY=5000 java -jar cloudstub-local/build/libs/cloudstub-local.jar
+<div class="highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>CLOUDSTUB_MAX_HISTORY=5000 java -jar cloudstub-local/build/libs/cloudstub-local.jar
 </span></code></pre></div>
 </div>
 </div>
@@ -1690,13 +1696,13 @@ capped at the last 1000 entries by default. Override the cap, or remove it entir
 <p>History cap precedence: <code>--max-history</code> flag → <code>CLOUDSTUB_MAX_HISTORY</code> env var → default <code>1000</code>.
 Pass <code>unlimited</code> (or <code>none</code>) to retain every request.</p>
 <h2 id="expected-startup-output">Expected startup output</h2>
-<div class="highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>[CloudStub] Plugin directory: /path/to/modules
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>[CloudStub] Available services: sqs, sns, secretsmanager, s3
-</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>[CloudStub] Enabled services: sqs, secretsmanager
-</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>[CloudStub] State storage: persistent (.cloudstub)
-</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>[CloudStub] Request history: last 1000 entries
-</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>CloudStub started on port 4566
-</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>CloudStub API on port 4567
+<div class="highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>[CloudStub] Plugin directory: /path/to/modules
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>[CloudStub] Available services: sqs, sns, secretsmanager, s3
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>[CloudStub] Enabled services: sqs, secretsmanager
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>[CloudStub] State storage: persistent (.cloudstub)
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>[CloudStub] Request history: last 1000 entries
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>CloudStub started on port 4566
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>CloudStub API on port 4567
 </span></code></pre></div>
 <p>The <strong>Plugin directory</strong> line shows where module jars are loaded from; the <strong>Available</strong> line lists every service
 discovered in that directory; the <strong>Enabled</strong> line lists the ones actually serving requests. If a stub is not being
@@ -1704,7 +1710,7 @@ served, check that its module jar is in the plugin directory (Available) and tha
 line.</p>
 <p>On a first run, any module fetched by <a href="#auto-download-default">auto-download</a> prints a line before the summary,
 naming the coordinate, version, and destination, so downloaded jars are distinguished from pre-present ones:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>[CloudStub] Downloaded io.github.cloudstub:cloudstub-sqs:0.1.0-beta.3 -&gt; /path/to/modules/cloudstub-sqs-0.1.0-beta.3.jar
+<div class="highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>[CloudStub] Downloaded io.github.cloudstub:cloudstub-sqs:0.1.0-beta.3 -&gt; /path/to/modules/cloudstub-sqs-0.1.0-beta.3.jar
 </span></code></pre></div>
 <p>The REST API is available at <code>http://localhost:4567</code> — see <a href="../rest-api/">REST API</a> for the full reference, or
 inspect it visually in the browser with the <a href="../console/">Console</a>. A command-line client is coming soon.</p>
@@ -1713,18 +1719,18 @@ inspect it visually in the browser with the <a href="../console/">Console</a>. A
 reproducible and can be checked into version control instead of being spread across shell flags. The file is loaded
 from <code>--config=&lt;path&gt;</code>, then the <code>CLOUDSTUB_CONFIG</code> environment variable, then <code>cloudstub.properties</code> in the working
 directory.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># cloudstub.properties</span>
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="na">cloudstub.port</span><span class="o">=</span><span class="s">4566</span>
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="na">cloudstub.api-port</span><span class="o">=</span><span class="s">4567</span>
-</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="na">cloudstub.services</span><span class="o">=</span><span class="s">sqs,s3</span>
-</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="na">cloudstub.store-dir</span><span class="o">=</span><span class="s">.cloudstub</span>
-</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="na">cloudstub.max-history</span><span class="o">=</span><span class="s">1000</span>
-</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="na">cloudstub.modules-dir</span><span class="o">=</span><span class="s">modules</span>
-</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="na">cloudstub.module-version</span><span class="o">=</span><span class="s">0.1.0-beta.3</span>
-</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="na">cloudstub.maven-base-url</span><span class="o">=</span><span class="s">https://repo1.maven.org/maven2</span>
-</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="na">cloudstub.auto-download</span><span class="o">=</span><span class="s">true</span>
+<div class="highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># cloudstub.properties</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="na">cloudstub.port</span><span class="o">=</span><span class="s">4566</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="na">cloudstub.api-port</span><span class="o">=</span><span class="s">4567</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="na">cloudstub.services</span><span class="o">=</span><span class="s">sqs,s3</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="na">cloudstub.store-dir</span><span class="o">=</span><span class="s">.cloudstub</span>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="na">cloudstub.max-history</span><span class="o">=</span><span class="s">1000</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="na">cloudstub.modules-dir</span><span class="o">=</span><span class="s">modules</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="na">cloudstub.module-version</span><span class="o">=</span><span class="s">0.1.0-beta.3</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="na">cloudstub.maven-base-url</span><span class="o">=</span><span class="s">https://repo1.maven.org/maven2</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="na">cloudstub.auto-download</span><span class="o">=</span><span class="s">true</span>
 </span></code></pre></div>
-<div class="highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --config=cloudstub.properties
+<div class="highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --config=cloudstub.properties
 </span></code></pre></div>
 <table>
 <thead>
@@ -1784,7 +1790,7 @@ directory.</p>
 </table>
 <h3 id="resolution-precedence">Resolution precedence</h3>
 <p>Each option is resolved independently in this order, the first source that supplies a value winning:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>CLI flag → environment variable → config file → built-in default
+<div class="highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>CLI flag → environment variable → config file → built-in default
 </span></code></pre></div>
 <p>A CLI flag therefore always overrides the file, and the file overrides nothing but the defaults — the same
 flag-over-environment ordering CloudStub already uses, with the file slotted in just above the defaults. The keys are
@@ -1796,7 +1802,7 @@ namespaced under <code>cloudstub.</code> with room to grow.</p>
 <li>A file that <strong>cannot be parsed</strong>, that contains an <strong>unknown key</strong>, or that holds a <strong>non-numeric value</strong> for a
   numeric key fails fast with a message naming the file and the offending key, not a stack trace:</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>[CloudStub] ERROR: unknown key(s) in config file &#39;cloudstub.properties&#39;: cloudstub.prot. Known keys: ...
+<div class="highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>[CloudStub] ERROR: unknown key(s) in config file &#39;cloudstub.properties&#39;: cloudstub.prot. Known keys: ...
 </span></code></pre></div>
 <h2 id="point-an-application-at-cloudstub">Point an application at CloudStub</h2>
 <p>In <strong>embedded mode</strong> no endpoint configuration is needed: <code>CloudStubExtension</code> sets the
@@ -1827,23 +1833,23 @@ must be told where it is. Three forms supply the endpoint — pick by how the cl
 </table>
 <h3 id="environment-variable-no-code-change">Environment variable (no code change)</h3>
 <p>AWS SDK v2 reads <code>AWS_ENDPOINT_URL</code> on its own, so this works without touching the client code:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>export AWS_ENDPOINT_URL=http://localhost:4566
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>./gradlew bootRun
+<div class="highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>export AWS_ENDPOINT_URL=http://localhost:4566
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>./gradlew bootRun
 </span></code></pre></div>
 <h3 id="manual-override-on-the-client-builder">Manual override on the client builder</h3>
-<div class="highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">SqsClient</span><span class="w"> </span><span class="n">sqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SqsClient</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">    </span><span class="p">.</span><span class="na">endpointOverride</span><span class="p">(</span><span class="n">URI</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;http://localhost:4566&quot;</span><span class="p">))</span>
-</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">    </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">US_EAST_1</span><span class="p">)</span>
-</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">    </span><span class="p">.</span><span class="na">credentialsProvider</span><span class="p">(</span><span class="n">StaticCredentialsProvider</span><span class="p">.</span><span class="na">create</span><span class="p">(</span>
-</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">        </span><span class="n">AwsBasicCredentials</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;test&quot;</span><span class="p">)))</span>
-</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<div class="highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="n">SqsClient</span><span class="w"> </span><span class="n">sqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SqsClient</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">    </span><span class="p">.</span><span class="na">endpointOverride</span><span class="p">(</span><span class="n">URI</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;http://localhost:4566&quot;</span><span class="p">))</span>
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">    </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">US_EAST_1</span><span class="p">)</span>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">    </span><span class="p">.</span><span class="na">credentialsProvider</span><span class="p">(</span><span class="n">StaticCredentialsProvider</span><span class="p">.</span><span class="na">create</span><span class="p">(</span>
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="w">        </span><span class="n">AwsBasicCredentials</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;test&quot;</span><span class="p">)))</span>
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 </span></code></pre></div>
 <p>For the Spring property form, the <code>local</code> / <code>prod</code> profiles, an IDE run setup, and the resolution precedence
 between these forms, see <a href="../spring-boot/#pointing-an-application-at-cloudstub">Pointing an application at CloudStub</a>.</p>
 <h2 id="stop-the-server">Stop the server</h2>
 <p>Press <code>Ctrl-C</code> or send <code>SIGTERM</code>. CloudStub prints a shutdown message and exits cleanly — no stack trace:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>^C
-</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>[CloudStub] Shutting down...
+<div class="highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>^C
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>[CloudStub] Shutting down...
 </span></code></pre></div>
 <h2 id="logging">Logging</h2>
 <p>By default, CloudStub writes INFO-level output to stdout via <code>slf4j-simple</code>. To enable DEBUG output (stub

@@ -1208,15 +1208,20 @@ protocol, and operations, then exits without writing files:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>./gradlew :cloudstub-codegen:validate --args=&quot;--model &lt;path&gt;&quot;
 </span></code></pre></div>
 <h3 id="standalone-distribution-java-jar">Standalone / distribution (<code>java -jar</code>)</h3>
-<p>Outside the monorepo — and in CI — the codegen ships as an executable fat JAR. Build it once, then run it against a
-model:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>./gradlew :cloudstub-codegen:shadowJar
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>java -jar cloudstub-codegen/build/libs/cloudstub-codegen.jar \
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    --model &lt;path-or-url&gt; \
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    [--output &lt;dir&gt;] \
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    [--core-version &lt;version&gt;] \
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    [--validate]
+<p>Outside the monorepo — and in CI — the codegen ships as an executable fat JAR on the
+<a href="https://github.com/cloudstub/cloudstub/releases">GitHub Releases</a> page (it is not on Maven Central).
+Download it:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl -L -o cloudstub-codegen.jar \
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  https://github.com/cloudstub/cloudstub/releases/latest/download/cloudstub-codegen.jar
+</span></code></pre></div>
+<p>Or build it from source, then run it against a model:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>./gradlew :cloudstub-codegen:shadowJar
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>java -jar cloudstub-codegen/build/libs/cloudstub-codegen.jar \
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    --model &lt;path-or-url&gt; \
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    [--output &lt;dir&gt;] \
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    [--core-version &lt;version&gt;] \
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    [--validate]
 </span></code></pre></div>
 <p>Both invocation paths share the same entry point and produce identical output for the same inputs.</p>
 <table>
@@ -1256,9 +1261,9 @@ model:</p>
 </tbody>
 </table>
 <p><strong>Example:</strong></p>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>java -jar cloudstub-codegen/build/libs/cloudstub-codegen.jar \
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    --model models/kinesis.smithy \
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    --output cloudstub-kinesis
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>java -jar cloudstub-codegen/build/libs/cloudstub-codegen.jar \
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    --model models/kinesis.smithy \
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    --output cloudstub-kinesis
 </span></code></pre></div>
 <p>The <code>--model</code> argument accepts:</p>
 <ul>
@@ -1287,16 +1292,16 @@ model:</p>
 <p>Response templates are <strong>minimal placeholders</strong>, not finished responses. Each <code>.hbs</code> file opens with a
 <code>{{! REVIEW REQUIRED ... }}</code> comment listing the operation's output shape and its members, so you know what to fill in.</p>
 <p><strong>Example <code>register()</code> for a two-operation JSON service:</strong></p>
-<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@Override</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="n">StubRegistrar</span><span class="w"> </span><span class="n">registrar</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="n">registrar</span><span class="p">.</span><span class="na">registerJsonTargetStub</span><span class="p">(</span><span class="n">TARGET_PREFIX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;CreateStream&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loadTemplate</span><span class="p">(</span><span class="s">&quot;CreateStream&quot;</span><span class="p">));</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="n">registrar</span><span class="p">.</span><span class="na">registerJsonTargetStub</span><span class="p">(</span><span class="n">TARGET_PREFIX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;DescribeStream&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loadTemplate</span><span class="p">(</span><span class="s">&quot;DescribeStream&quot;</span><span class="p">));</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nd">@Override</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="n">StubRegistrar</span><span class="w"> </span><span class="n">registrar</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="n">registrar</span><span class="p">.</span><span class="na">registerJsonTargetStub</span><span class="p">(</span><span class="n">TARGET_PREFIX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;CreateStream&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loadTemplate</span><span class="p">(</span><span class="s">&quot;CreateStream&quot;</span><span class="p">));</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="n">registrar</span><span class="p">.</span><span class="na">registerJsonTargetStub</span><span class="p">(</span><span class="n">TARGET_PREFIX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;DescribeStream&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loadTemplate</span><span class="p">(</span><span class="s">&quot;DescribeStream&quot;</span><span class="p">));</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Each operation's response body lives in its own file. For example <code>src/main/resources/templates/DescribeStream.hbs</code> (
 illustrative — the generated placeholder reflects the model's output shape):</p>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>{{! REVIEW REQUIRED — output: DescribeStreamOutput [StreamDescription: structure] }}
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>{&quot;StreamDescription&quot;:{}}
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>{{! REVIEW REQUIRED — output: DescribeStreamOutput [StreamDescription: structure] }}
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>{&quot;StreamDescription&quot;:{}}
 </span></code></pre></div>
 <p><code>TARGET_PREFIX</code> itself is a generated guess derived from the service name and carries a <code>TODO</code> comment — confirm the
 real <code>X-Amz-Target</code> prefix during review (see step 1 below).</p>
