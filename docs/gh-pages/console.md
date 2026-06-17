@@ -1,58 +1,34 @@
 # Console
 
 The CloudStub Console is a web interface for a running [standalone](standalone.md) CloudStub
-instance. It gives you visual access to mock state — loaded modules, request history, and per-service
-operations — without touching the terminal or writing code. Open it in a browser, point it at your
-instance, and you see what the mock is doing.
+instance — visual access to mock state (loaded modules, request history, per-service operations)
+without the terminal or writing code.
 
-The console is a **thin client over the [REST API](rest-api.md)**. It has no
-dependency on CloudStub internals, WireMock, or any service module — it only speaks HTTP to
-`/api/status` and `/api/<service>/…`. It builds its navigation at runtime from `GET /api/status`, so
+It is **served by the standalone server itself**: start `cloudstub-local` and open
+**`http://localhost:4567/console`** in a browser (the API port — opening `http://localhost:4567/`
+redirects there). There is no separate app to install or host.
+
+The console is a **thin client over the [REST API](rest-api.md)** — it only speaks HTTP to
+`/api/status` and `/api/<service>/…`, building its navigation at runtime from `GET /api/status`, so
 an instance with more modules loaded simply shows more services; the console itself never changes.
 
-## Install
+## Open it
 
-The console ships in its own repository,
-[cloudstub/cloudstub-console](https://github.com/cloudstub/cloudstub-console) — it is released
-independently and is an optional install, not part of the core distribution. It is an Angular
-application; building it requires Node.js 20+.
+Start the server (see [Standalone Mode](standalone.md)) and browse to the console:
 
 ```
-git clone https://github.com/cloudstub/cloudstub-console
-cd cloudstub-console
-npm install
+java -jar cloudstub-local.jar --services=sqs
+# then open http://localhost:4567/console
 ```
 
-=== "Development server"
+The console is bundled in the `cloudstub-local` distributable, so there is nothing else to download.
+Because it is served from the same origin as the API it calls, no connection setup is needed — it
+talks to the instance that served it.
 
-    ```
-    npm start
-    # serves on http://localhost:4200 with live reload
-    ```
-
-=== "Production build"
-
-    ```
-    npm run build
-    # static bundle in dist/ — serve it with any static file server
-    ```
-
-The console is a static single-page app: once built it works in any modern browser with no install
-and no backend of its own.
-
-## Connecting
-
-The console talks only to the REST API port. The default target is `http://localhost:4567`, which
-matches standalone mode, so with a server on the default port no configuration is needed. Use the
-**Connect** page to point it at a different host or port; the value is stored in the browser's
-local storage.
-
-!!! note "CORS"
-    Because the console runs in the browser and calls the API from a different origin, the standalone
-    REST API sends permissive CORS headers (`Access-Control-Allow-Origin: *`). No proxy is required.
-
-If the instance is not reachable, the console shows a clear "Disconnected" state and a prompt to
-configure the connection.
+!!! note "Developing the console"
+    The console source lives in this monorepo under `cloudstub-console` (an Angular app). You only
+    need to build it to work on the console itself; the standalone REST API also sends permissive CORS
+    headers, so a `npm start` dev server on another port can call a running instance directly.
 
 ## Features
 
@@ -74,7 +50,7 @@ as modules load or state changes.
 
 Because everything is driven by `/api/status`, the console needs no change when a module is added:
 
-- A module that implements [`CloudStubApiService`](module-authoring.md#8-exposing-cli-commands-via-the-rest-api)
+- A module that implements [`CloudStubApiService`](module-authoring.md#8-exposing-rest-api-routes)
   contributes routes under `/api/<service>/…`, each advertising a command name and parameters.
 - Start CloudStub with that module on the classpath and a panel for it appears in the service
   browser, with a form per route.
