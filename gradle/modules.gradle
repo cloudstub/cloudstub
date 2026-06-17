@@ -9,4 +9,4 @@ ext.serviceModules = ['cloudstub-sqs', 'cloudstub-sns', 'cloudstub-secretsmanage
 ext.shadowModules = ['cloudstub-core', 'cloudstub-local', 'cloudstub-codegen']
 
 // Services rolled out so far; add the next one here (and its pomInfo) when its publishing is validated.
-ext.publishedServices = []
+ext.publishedServices = ['cloudstub-sqs']
