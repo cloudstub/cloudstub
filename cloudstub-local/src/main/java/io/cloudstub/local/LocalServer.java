@@ -29,11 +29,11 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 /**
- * Lightweight REST API server for local mode.
+ * The cloudstub-local HTTP server for the secondary management port (REST API + web console).
  *
  * <p>Serves on a secondary port (default {@value
- * io.cloudstub.local.config.resolver.ApiPortResolver#DEFAULT_API_PORT}) so API traffic is always
- * separate from the AWS mock port. Routes:
+ * io.cloudstub.local.config.resolver.ApiPortResolver#DEFAULT_API_PORT}), separate from the AWS mock
+ * port. REST API routes:
  *
  * <ul>
  *   <li>{@code GET /api/status} — port, uptime, loaded modules and their stubs, all routes
@@ -44,9 +44,12 @@ import java.util.concurrent.Executors;
  *   <li>{@code GET /api/openapi.json} — OpenAPI 3.0 spec auto-generated from registered routes
  * </ul>
  *
- * <p>Modules register additional routes by implementing {@link CloudStubApiService}.
+ * <p>It also serves the web console at {@code /console} when its assets are bundled (redirecting
+ * {@code /} to {@code /console/}); a headless build runs API-only.
+ *
+ * <p>Modules register additional API routes by implementing {@link CloudStubApiService}.
  */
-public final class ApiServer implements Closeable {
+public final class LocalServer implements Closeable {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String APPLICATION_JSON = "application/json";
@@ -61,7 +64,7 @@ public final class ApiServer implements Closeable {
 
     private HttpServer server;
 
-    public ApiServer(CloudStub cloudMock, int port, List<CloudStubApiService> moduleServices) {
+    public LocalServer(CloudStub cloudMock, int port, List<CloudStubApiService> moduleServices) {
         this.cloudMock = cloudMock;
         this.port = port;
         this.moduleServices = moduleServices;
