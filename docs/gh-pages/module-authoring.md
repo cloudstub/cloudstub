@@ -213,13 +213,13 @@ dependencies {
 
 ---
 
-## 8. Exposing CLI commands via the REST API
+## 8. Exposing REST API routes
 
 `CloudStubService` registers the AWS wire-protocol stubs your module serves on the mock port. A
 module may *also* expose a small REST surface under `/api/<serviceId>/…` by implementing the
-optional `CloudStubApiService` SPI. This is what the [CLI](cli.md) drives: each route you register
-advertises a command name and parameters in `/api/status`, and the CLI turns it into
-`clm <serviceId> <command>` automatically — no change to the CLI is needed.
+optional `CloudStubApiService` SPI. Each route you register advertises a command name and parameters
+in `/api/status`. A command-line client that turns each route into a `<serviceId> <command>`
+subcommand automatically is coming soon.
 
 `CloudStubApiService` depends only on core SPI types (no WireMock, no AWS SDK, no picocli). Handlers
 return an `ApiResponse(statusCode, body)` whose `body` map is serialised to JSON. Parameters arrive
@@ -251,9 +251,9 @@ public class CloudStubMyServiceApiService implements CloudStubApiService {
         r.register(
             HttpMethod.POST,                                  // HTTP method
             "/describe-widget",                               // path under /api/myservice
-            "describe-widget",                                // CLI command name
+            "describe-widget",                                // command name
             "Describe a widget",                              // help text
-            List.of(new ApiParam("id", true, "Widget id")),  // params → CLI options
+            List.of(new ApiParam("id", true, "Widget id")),  // params
             req -> new io.cloudstub.core.spi.restapi.ApiResponse(200, Map.of(
                 "id", req.queryParams().getOrDefault("id", ""),
                 "status", "ACTIVE")));
@@ -268,9 +268,9 @@ Register it alongside the stub service with a second `ServiceLoader` file,
 io.cloudstub.myservice.CloudStubMyServiceApiService
 ```
 
-Now `clm myservice describe-widget --id w-123` works against any standalone instance that has the
-module loaded. Routes (and therefore CLI commands) for a service that is not enabled with `--services`
-are not registered, keeping the stub view and the API view consistent.
+Now `POST /api/myservice/describe-widget?id=w-123` works against any standalone instance that has the
+module loaded; a command-line client to drive it is coming soon. Routes for a service that is not
+enabled with `--services` are not registered, keeping the stub view and the API view consistent.
 
 !!! note "State-backed or synthetic — your call"
     Handlers receive the shared `StateStore` via `context.stateStore()`, so they can read and write the

@@ -82,7 +82,7 @@ Modules
 -------
   s3               107 stub(s)
   secretsmanager   5 stub(s)
-  sqs              8 stub(s)
+  sqs              23 stub(s)
 ```
 
 ### `clm reset`
@@ -135,8 +135,8 @@ Responses are printed as JSON:
 ```
 $ clm sqs send-message --queue orders --body "hello"
 {
-  "messageId" : "f8eafb78-edcd-46f7-b78a-43b9e160cbef",
-  "md5OfBody" : "5d41402abc4b2a76b9719d911017c592"
+  "md5OfBody" : "5d41402abc4b2a76b9719d911017c592",
+  "messageId" : "f8eafb78-edcd-46f7-b78a-43b9e160cbef"
 }
 ```
 
