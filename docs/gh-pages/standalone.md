@@ -22,15 +22,25 @@ on by default), or drop the jars into the plugin directory yourself.
 - `--modules-dir` controls what is **available** — which module jars are on the classpath.
 - `--services` (below) narrows what is **enabled** among those.
 
-## Build the fat JAR
+## Get the server JAR
+
+The runnable server is distributed on the [GitHub Releases](https://github.com/cloudstub/cloudstub/releases)
+page — it is **not** on Maven Central (Central carries the libraries). Download the latest:
+
+```
+curl -L -o cloudstub-local.jar \
+  https://github.com/cloudstub/cloudstub/releases/latest/download/cloudstub-local.jar
+```
+
+Or build it from source:
 
 ```
 ./gradlew :cloudstub-local:shadowJar
+# → cloudstub-local/build/libs/cloudstub-local.jar
 ```
 
-This produces `cloudstub-local/build/libs/cloudstub-local.jar` — the CloudStub engine (with shaded
-WireMock/Jetty) and the launcher, and nothing else. Each service module (`cloudstub-sqs`, `cloudstub-sns`,
-`cloudstub-secretsmanager`, `cloudstub-s3`) is a separate jar built by its own module.
+The examples below use the build path `cloudstub-local/build/libs/cloudstub-local.jar`; substitute
+`cloudstub-local.jar` if you downloaded it.
 
 ## Add the services you need
 
@@ -62,7 +72,7 @@ java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
 
 ### Place module jars manually
 
-You can also manage the jars yourself — useful for locally built modules (the [fat JAR build](#build-the-fat-jar)
+You can also manage the jars yourself — useful for locally built modules (the [server JAR build](#get-the-server-jar)
 produces each service jar) or a curated offline set. The launcher loads every `.jar` in the plugin directory
 (default `./modules`), so drop them in and start:
 

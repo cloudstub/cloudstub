@@ -8,5 +8,8 @@ ext.serviceModules = ['cloudstub-sqs', 'cloudstub-sns', 'cloudstub-secretsmanage
 // Modules whose primary published artifact is the shadow (fat) JAR.
 ext.shadowModules = ['cloudstub-core', 'cloudstub-local', 'cloudstub-codegen']
 
+// Runnable application JARs distributed via GitHub Releases, not Maven Central.
+ext.toolModules = ['cloudstub-local', 'cloudstub-codegen']
+
 // Services rolled out so far; add the next one here (and its pomInfo) when its publishing is validated.
 ext.publishedServices = ['cloudstub-sqs']

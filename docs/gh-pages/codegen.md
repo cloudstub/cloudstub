@@ -31,8 +31,16 @@ protocol, and operations, then exits without writing files:
 
 ### Standalone / distribution (`java -jar`)
 
-Outside the monorepo — and in CI — the codegen ships as an executable fat JAR. Build it once, then run it against a
-model:
+Outside the monorepo — and in CI — the codegen ships as an executable fat JAR on the
+[GitHub Releases](https://github.com/cloudstub/cloudstub/releases) page (it is not on Maven Central).
+Download it:
+
+```
+curl -L -o cloudstub-codegen.jar \
+  https://github.com/cloudstub/cloudstub/releases/latest/download/cloudstub-codegen.jar
+```
+
+Or build it from source, then run it against a model:
 
 ```
 ./gradlew :cloudstub-codegen:shadowJar
