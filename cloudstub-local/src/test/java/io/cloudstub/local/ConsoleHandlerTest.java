@@ -97,4 +97,11 @@ class ConsoleHandlerTest {
         HttpResponse<String> r = get("/console/../secret");
         assertEquals(404, r.statusCode());
     }
+
+    @Test
+    void returns404ForSiblingPathOutsideMount() throws Exception {
+        // HttpServer prefix-matches "/consoleX" to the /console context; it must not serve the app.
+        HttpResponse<String> r = get("/consoleX");
+        assertEquals(404, r.statusCode());
+    }
 }

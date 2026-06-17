@@ -62,6 +62,14 @@ final class ConsoleHandler implements HttpHandler {
             return;
         }
 
+        // HttpServer dispatches by string prefix, so a sibling path like "/consoleX" lands here
+        // too;
+        // only paths actually under the mount ("/console/…") are ours.
+        if (!path.startsWith(mountPath + "/")) {
+            send(exchange, 404, "text/plain", "Not Found".getBytes(StandardCharsets.UTF_8));
+            return;
+        }
+
         String rel = path.substring(mountPath.length()); // begins with "/"
         if (rel.equals("/")) {
             rel = "/index.html";
