@@ -1,0 +1,69 @@
+name: Release Tools
+
+# The runnable tool JARs (cloudstub-local, cloudstub-codegen) are not published to Maven Central — they
+# are distributed via GitHub Releases. They change only when core/local/codegen change, so they are
+# released on demand here rather than on every Maven Central release. Run this against an existing
+# release tag to build the fat JARs (stamped with that version, so the embedded core version is
+# correct) and attach them to that tag's GitHub Release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version matching an existing v<version> tag (e.g. 0.1.0-beta.3)."
+        required: true
+
+permissions:
+  contents: write # create/update the GitHub Release and upload assets
+
+jobs:
+  publish-tools:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate version
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || [[ "$VERSION" == *SNAPSHOT* ]]; then
+            echo "::error::'$VERSION' is not a release version (expected MAJOR.MINOR.PATCH[-prerelease], no -SNAPSHOT)."
+            exit 1
+          fi
+          echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v6.0.2
+        with:
+          ref: v${{ inputs.version }} # build from the exact release tag
+
+      - uses: actions/setup-java@v5.2.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v5.0.2
+        with:
+          gradle-version: "8.8"
+
+      - name: Build runnable tool JARs
+        run: gradle :cloudstub-local:shadowJar :cloudstub-codegen:shadowJar -Pversion="$RELEASE_VERSION"
+
+      - name: Attach tool JARs to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Versioned copies (archival) plus the unversioned build outputs, whose basenames become the
+          # stable .../releases/latest/download/cloudstub-local.jar asset names.
+          cp cloudstub-local/build/libs/cloudstub-local.jar "cloudstub-local-${RELEASE_VERSION}.jar"
+          cp cloudstub-codegen/build/libs/cloudstub-codegen.jar "cloudstub-codegen-${RELEASE_VERSION}.jar"
+          ASSETS=(
+            cloudstub-local/build/libs/cloudstub-local.jar
+            cloudstub-codegen/build/libs/cloudstub-codegen.jar
+            "cloudstub-local-${RELEASE_VERSION}.jar"
+            "cloudstub-codegen-${RELEASE_VERSION}.jar"
+          )
+          TAG="v${RELEASE_VERSION}"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber "${ASSETS[@]}"
+          else
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
+              --title "$TAG" --generate-notes "${ASSETS[@]}"
+          fi
