@@ -4,9 +4,12 @@
 def isExample = project.path == ':cloudstub-example' || project.path.startsWith(':cloudstub-example:')
 def isShadowModule = project.name in rootProject.shadowModules
 def isService = project.name in rootProject.serviceModules
-// Services publish only once rolled out; non-services (core, junit, testing, local, codegen,
-// sdk-v1) publish as soon as they exist.
-def publishable = !isExample && (isService ? project.name in rootProject.publishedServices : true)
+// Runnable tools (cloudstub-local, cloudstub-codegen) ship via GitHub Releases, not Central.
+def isTool = project.name in rootProject.toolModules
+// Services publish only once rolled out; non-services (core, junit, testing, sdk-v1) publish as soon
+// as they exist. Tool modules are never published to Central.
+def publishable =
+    !isExample && !isTool && (isService ? project.name in rootProject.publishedServices : true)
 
 // POM name/description per published module. Shared by both publication paths below.
 def pomInfo = [
