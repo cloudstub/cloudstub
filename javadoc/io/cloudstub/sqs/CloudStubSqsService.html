@@ -85,19 +85,25 @@ loadScripts(document, 'script');</script>
 implements <a href="../core/spi/CloudStubService.html" title="interface in io.cloudstub.core.spi">CloudStubService</a></span></div>
 <div class="block">CloudStub service module for Amazon SQS.
 
- <p>AWS SDK v2 (≥2.20) uses the JSON/X-Amz-Target protocol for SQS: requests carry an <code>
- X-Amz-Target</code> header (e.g. <code>AmazonSQS.SendMessage</code>) and a JSON body. Each operation is
- registered as a <a href="../core/spi/StubHandler.html" title="interface in io.cloudstub.core.spi"><code>StubHandler</code></a> that reads and writes the shared <a href="../core/spi/StateStore.html" title="interface in io.cloudstub.core.spi"><code>StateStore</code></a>, so a message sent in one call is returned by a later <code>ReceiveMessage</code>.
+ <p>The operation set is generated from the AWS SQS Smithy model; AWS SDK v2 (≥2.20) drives it
+ with the JSON/X-Amz-Target protocol, so requests carry an <code>X-Amz-Target</code> header (e.g.
+ <code>AmazonSQS.SendMessage</code>) and a JSON body, matched by <a href="../core/spi/StubRegistrar.html#registerJsonTargetStub(java.lang.String,java.lang.String)"><code>StubRegistrar.registerJsonTargetStub(java.lang.String, java.lang.String)</code></a>.
 
- <p>State is keyed under the <code>sqs/</code> prefix:
+ <p>The eight queue/message operations below are <strong>state-backed</strong>: each is a <a href="../core/spi/StubHandler.html" title="interface in io.cloudstub.core.spi"><code>StubHandler</code></a> that reads and writes the shared <a href="../core/spi/StateStore.html" title="interface in io.cloudstub.core.spi"><code>StateStore</code></a>, so a
+ message sent in one call is returned by a later <code>ReceiveMessage</code>. State is keyed under the
+ <code>sqs/</code> prefix:
 
  <ul>
    <li><code>sqs/queues/{name}</code> → the queue URL (marks the queue's existence)
    <li><code>sqs/queues/{name}/messages/{id}</code> → the message body
  </ul>
 
- <p>Not simulated: visibility timeout, FIFO deduplication/ordering. A received message stays
- visible until explicitly deleted.
+ <p>The remaining operations are served from static Handlebars templates in <code>
+ src/main/resources/templates/</code>: they return well-formed but stateless placeholder responses (e.g.
+ <code>SendMessageBatch</code>, <code>ChangeMessageVisibility</code>, <code>TagQueue</code>).
+
+ <p>Not simulated: visibility timeout, FIFO deduplication/ordering, batch operations, message-move
+ tasks, permissions, and tagging. A received message stays visible until explicitly deleted.
 
  <p>Discovered via <code>ServiceLoader</code> from <code>
  META-INF/services/io.cloudstub.core.spi.CloudStubService</code>.</div>

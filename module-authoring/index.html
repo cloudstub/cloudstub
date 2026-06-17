@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://cloudstub.github.io/cloudstub/module-authoring/">
       
       
-        <link rel="prev" href="../sdk-v1/">
+        <link rel="prev" href="../sqs/">
       
       
         <link rel="next" href="../codegen/">
@@ -270,6 +270,26 @@
   
   
   Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../sqs/" class="md-tabs__link">
+          
+  
+  
+  Services
 
         </a>
       </li>
@@ -653,34 +673,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../cli/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    CLI
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../console/" class="md-nav__link">
         
   
@@ -745,6 +737,93 @@
     
   
     SDK v1 Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Services
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Services
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sqs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Amazon SQS
   
 
     
@@ -959,10 +1038,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#8-exposing-cli-commands-via-the-rest-api" class="md-nav__link">
+  <a href="#8-exposing-rest-api-routes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        8. Exposing CLI commands via the REST API
+        8. Exposing REST API routes
       
     </span>
   </a>
@@ -1223,10 +1302,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#8-exposing-cli-commands-via-the-rest-api" class="md-nav__link">
+  <a href="#8-exposing-rest-api-routes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        8. Exposing CLI commands via the REST API
+        8. Exposing REST API routes
       
     </span>
   </a>
@@ -1452,12 +1531,12 @@ This is enforced by Gradle:</p>
 </span></code></pre></div>
 <p><code>testImplementation</code> is exempt — integration tests may combine multiple modules.</p>
 <hr />
-<h2 id="8-exposing-cli-commands-via-the-rest-api">8. Exposing CLI commands via the REST API</h2>
+<h2 id="8-exposing-rest-api-routes">8. Exposing REST API routes</h2>
 <p><code>CloudStubService</code> registers the AWS wire-protocol stubs your module serves on the mock port. A
 module may <em>also</em> expose a small REST surface under <code>/api/&lt;serviceId&gt;/…</code> by implementing the
-optional <code>CloudStubApiService</code> SPI. This is what the <a href="../cli/">CLI</a> drives: each route you register
-advertises a command name and parameters in <code>/api/status</code>, and the CLI turns it into
-<code>clm &lt;serviceId&gt; &lt;command&gt;</code> automatically — no change to the CLI is needed.</p>
+optional <code>CloudStubApiService</code> SPI. Each route you register advertises a command name and parameters
+in <code>/api/status</code>. A command-line client that turns each route into a <code>&lt;serviceId&gt; &lt;command&gt;</code>
+subcommand automatically is coming soon.</p>
 <p><code>CloudStubApiService</code> depends only on core SPI types (no WireMock, no AWS SDK, no picocli). Handlers
 return an <code>ApiResponse(statusCode, body)</code> whose <code>body</code> map is serialised to JSON. Parameters arrive
 as query-string values via <code>ApiRequest.queryParams()</code>; the request body is not read.</p>
@@ -1486,9 +1565,9 @@ as query-string values via <code>ApiRequest.queryParams()</code>; the request bo
 </span><span id="__span-11-23"><a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a><span class="w">        </span><span class="n">r</span><span class="p">.</span><span class="na">register</span><span class="p">(</span>
 </span><span id="__span-11-24"><a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a><span class="w">            </span><span class="n">HttpMethod</span><span class="p">.</span><span class="na">POST</span><span class="p">,</span><span class="w">                                  </span><span class="c1">// HTTP method</span>
 </span><span id="__span-11-25"><a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a><span class="w">            </span><span class="s">&quot;/describe-widget&quot;</span><span class="p">,</span><span class="w">                               </span><span class="c1">// path under /api/myservice</span>
-</span><span id="__span-11-26"><a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a><span class="w">            </span><span class="s">&quot;describe-widget&quot;</span><span class="p">,</span><span class="w">                                </span><span class="c1">// CLI command name</span>
+</span><span id="__span-11-26"><a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a><span class="w">            </span><span class="s">&quot;describe-widget&quot;</span><span class="p">,</span><span class="w">                                </span><span class="c1">// command name</span>
 </span><span id="__span-11-27"><a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a><span class="w">            </span><span class="s">&quot;Describe a widget&quot;</span><span class="p">,</span><span class="w">                              </span><span class="c1">// help text</span>
-</span><span id="__span-11-28"><a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a><span class="w">            </span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ApiParam</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Widget id&quot;</span><span class="p">)),</span><span class="w">  </span><span class="c1">// params → CLI options</span>
+</span><span id="__span-11-28"><a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a><span class="w">            </span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ApiParam</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Widget id&quot;</span><span class="p">)),</span><span class="w">  </span><span class="c1">// params</span>
 </span><span id="__span-11-29"><a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a><span class="w">            </span><span class="n">req</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">io</span><span class="p">.</span><span class="na">cloudstub</span><span class="p">.</span><span class="na">core</span><span class="p">.</span><span class="na">spi</span><span class="p">.</span><span class="na">restapi</span><span class="p">.</span><span class="na">ApiResponse</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="p">.</span><span class="na">of</span><span class="p">(</span>
 </span><span id="__span-11-30"><a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a><span class="w">                </span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">req</span><span class="p">.</span><span class="na">queryParams</span><span class="p">().</span><span class="na">getOrDefault</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">),</span>
 </span><span id="__span-11-31"><a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a><span class="w">                </span><span class="s">&quot;status&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;ACTIVE&quot;</span><span class="p">)));</span>
@@ -1499,9 +1578,9 @@ as query-string values via <code>ApiRequest.queryParams()</code>; the request bo
 <code>src/main/resources/META-INF/services/io.cloudstub.core.spi.CloudStubApiService</code>:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>io.cloudstub.myservice.CloudStubMyServiceApiService
 </span></code></pre></div>
-<p>Now <code>clm myservice describe-widget --id w-123</code> works against any standalone instance that has the
-module loaded. Routes (and therefore CLI commands) for a service that is not enabled with <code>--services</code>
-are not registered, keeping the stub view and the API view consistent.</p>
+<p>Now <code>POST /api/myservice/describe-widget?id=w-123</code> works against any standalone instance that has the
+module loaded; a command-line client to drive it is coming soon. Routes for a service that is not
+enabled with <code>--services</code> are not registered, keeping the stub view and the API view consistent.</p>
 <div class="admonition note">
 <p class="admonition-title">State-backed or synthetic — your call</p>
 <p>Handlers receive the shared <code>StateStore</code> via <code>context.stateStore()</code>, so they can read and write the

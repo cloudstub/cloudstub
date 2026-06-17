@@ -16,7 +16,7 @@
         <link rel="prev" href="../standalone/">
       
       
-        <link rel="next" href="../cli/">
+        <link rel="next" href="../console/">
       
       
         
@@ -272,6 +272,26 @@
   
   
   Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../sqs/" class="md-tabs__link">
+          
+  
+  
+  Services
 
         </a>
       </li>
@@ -799,34 +819,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../cli/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    CLI
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../console/" class="md-nav__link">
         
   
@@ -891,6 +883,93 @@
     
   
     SDK v1 Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Services
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Services
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sqs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Amazon SQS
   
 
     
@@ -1207,8 +1286,9 @@ The API and the AWS mock port (<code>4566</code>) run in the same process — no
 same port would cause those stubs to match <code>/api/*</code> paths before the API routes could. A dedicated
 port keeps the two traffic streams cleanly separated.</p>
 <p>The two ports are <strong>two views of the same state</strong>, not two separate mocks. The mock port speaks the
-AWS wire protocol (for SDKs); the API port is a friendly JSON view for the console and CLI. For
-state-backed modules they read and write one shared store, so a message sent through the AWS SDK is
+AWS wire protocol (for SDKs); the API port is a friendly JSON view for the console (a command-line
+client is coming soon). For state-backed modules they read and write one shared store, so a message
+sent through the AWS SDK is
 returned by <code>GET /api/sqs/receive-message</code>, and vice versa.</p>
 <h2 id="endpoints">Endpoints</h2>
 <p>All responses are JSON. The base URL used in the examples below is <code>http://localhost:4567</code>.</p>
@@ -1265,8 +1345,8 @@ stubs, and the full list of available API routes.</p>
 <p>Use <code>GET /api/status</code> as the discovery endpoint — the <code>routes</code> array tells you exactly what
 operations are available without consulting documentation. Module routes additionally carry a
 <code>service</code>, a <code>command</code> name, and a <code>params</code> list (each with <code>name</code>, <code>required</code>, and <code>description</code>).
-That metadata is what lets the <a href="../cli/">CLI</a> build <code>clm &lt;service&gt; &lt;command&gt;</code> with typed options at
-runtime, with no hardcoded knowledge of any module.</p>
+That metadata is what will let a command-line client (coming soon) build <code>&lt;service&gt; &lt;command&gt;</code>
+subcommands with typed options at runtime, with no hardcoded knowledge of any module.</p>
 <hr />
 <h3 id="post-apireset"><code>POST /api/reset</code></h3>
 <p>Clears all state in the store. Use this to start each test scenario with a clean slate when
@@ -1349,8 +1429,8 @@ contributed by module-specific <code>CloudStubApiService</code> implementations.
 <p>Modules can expose their own routes under <code>/api/&lt;serviceId&gt;/…</code> by implementing the
 <code>CloudStubApiService</code> SPI interface. If a module JAR is not on the classpath — or the service is
 not enabled with <code>--services</code> — its routes do not exist; loading the module makes them available
-automatically. Each route may advertise a <code>command</code> name and <code>params</code>, which the <a href="../cli/">CLI</a>
-turns into a <code>clm &lt;service&gt; &lt;command&gt;</code> subcommand.</p>
+automatically. Each route may advertise a <code>command</code> name and <code>params</code>, which a command-line client
+(coming soon) turns into a <code>&lt;service&gt; &lt;command&gt;</code> subcommand.</p>
 <p>Parameters are passed as query-string values (<code>POST /api/sqs/send-message?queue=q&amp;body=hello</code>);
 the request body is not read.</p>
 <p>See <a href="../module-authoring/#8-exposing-cli-commands-via-the-rest-api">Module Authoring</a> for details on
