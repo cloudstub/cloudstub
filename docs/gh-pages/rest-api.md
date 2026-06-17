@@ -39,8 +39,9 @@ same port would cause those stubs to match `/api/*` paths before the API routes 
 port keeps the two traffic streams cleanly separated.
 
 The two ports are **two views of the same state**, not two separate mocks. The mock port speaks the
-AWS wire protocol (for SDKs); the API port is a friendly JSON view for the console and CLI. For
-state-backed modules they read and write one shared store, so a message sent through the AWS SDK is
+AWS wire protocol (for SDKs); the API port is a friendly JSON view for the console (a command-line
+client is coming soon). For state-backed modules they read and write one shared store, so a message
+sent through the AWS SDK is
 returned by `GET /api/sqs/receive-message`, and vice versa.
 
 ## Endpoints
@@ -106,8 +107,8 @@ stubs, and the full list of available API routes.
 Use `GET /api/status` as the discovery endpoint — the `routes` array tells you exactly what
 operations are available without consulting documentation. Module routes additionally carry a
 `service`, a `command` name, and a `params` list (each with `name`, `required`, and `description`).
-That metadata is what lets the [CLI](cli.md) build `clm <service> <command>` with typed options at
-runtime, with no hardcoded knowledge of any module.
+That metadata is what will let a command-line client (coming soon) build `<service> <command>`
+subcommands with typed options at runtime, with no hardcoded knowledge of any module.
 
 ---
 
@@ -213,8 +214,8 @@ The spec updates automatically when modules are added or removed — no manual m
 Modules can expose their own routes under `/api/<serviceId>/…` by implementing the
 `CloudStubApiService` SPI interface. If a module JAR is not on the classpath — or the service is
 not enabled with `--services` — its routes do not exist; loading the module makes them available
-automatically. Each route may advertise a `command` name and `params`, which the [CLI](cli.md)
-turns into a `clm <service> <command>` subcommand.
+automatically. Each route may advertise a `command` name and `params`, which a command-line client
+(coming soon) turns into a `<service> <command>` subcommand.
 
 Parameters are passed as query-string values (`POST /api/sqs/send-message?queue=q&body=hello`);
 the request body is not read.

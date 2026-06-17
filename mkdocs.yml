@@ -38,7 +38,6 @@ nav:
       - Fault Injection: fault-injection.md
       - Standalone Mode: standalone.md
       - REST API: rest-api.md
-      - CLI: cli.md
       - Console: console.md
       - Logging: logging.md
       - SDK v1 Support: sdk-v1.md
@@ -48,6 +47,10 @@ nav:
   - CloudStub Codegen: codegen.md
   - Changelog: changelog.md
   - Javadoc: javadoc/index.html
+
+# cli.md is intentionally kept out of the nav until the CLI is published.
+not_in_nav: |
+  /cli.md
 
 plugins:
   - search

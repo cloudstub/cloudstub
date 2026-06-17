@@ -199,9 +199,8 @@ naming the coordinate, version, and destination, so downloaded jars are distingu
 [CloudStub] Downloaded io.github.cloudstub:cloudstub-sqs:0.1.0-beta.1 -> /path/to/modules/cloudstub-sqs-0.1.0-beta.1.jar
 ```
 
-The REST API is available at `http://localhost:4567` — see [REST API](rest-api.md) for the full reference, drive
-the instance from the terminal with the [CLI](cli.md) (`clm` / `cloudstub`), or inspect it visually in the browser
-with the [Console](console.md).
+The REST API is available at `http://localhost:4567` — see [REST API](rest-api.md) for the full reference, or
+inspect it visually in the browser with the [Console](console.md). A command-line client is coming soon.
 
 ## Configuration file
 

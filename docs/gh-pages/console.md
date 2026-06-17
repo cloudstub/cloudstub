@@ -5,7 +5,7 @@ instance. It gives you visual access to mock state — loaded modules, request h
 operations — without touching the terminal or writing code. Open it in a browser, point it at your
 instance, and you see what the mock is doing.
 
-Like the [CLI](cli.md), the console is a **thin client over the [REST API](rest-api.md)**. It has no
+The console is a **thin client over the [REST API](rest-api.md)**. It has no
 dependency on CloudStub internals, WireMock, or any service module — it only speaks HTTP to
 `/api/status` and `/api/<service>/…`. It builds its navigation at runtime from `GET /api/status`, so
 an instance with more modules loaded simply shows more services; the console itself never changes.
