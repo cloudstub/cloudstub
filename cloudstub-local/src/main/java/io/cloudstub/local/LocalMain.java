@@ -110,9 +110,9 @@ public final class LocalMain {
         Thread.currentThread().setContextClassLoader(pluginLoader);
 
         try (cloudMock;
-                ApiServer apiServer = new ApiServer(cloudMock, apiPort, apiServices)) {
+                LocalServer localServer = new LocalServer(cloudMock, apiPort, apiServices)) {
             cloudMock.start();
-            apiServer.start();
+            localServer.start();
 
             System.out.println("CloudStub started on port " + cloudMock.port());
             System.out.println("CloudStub API on port " + apiPort);
@@ -123,7 +123,7 @@ public final class LocalMain {
                             new Thread(
                                     () -> {
                                         System.out.println("[CloudStub] Shutting down...");
-                                        apiServer.stop();
+                                        localServer.stop();
                                         cloudMock.stop();
                                     }));
 

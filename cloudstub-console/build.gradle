@@ -1,0 +1,42 @@
+// The CloudStub web console (Angular). Built by gradle-node-plugin with an auto-downloaded Node, not
+// the Java toolchain (see the root build.gradle subprojects exclusion). The build is NOT wired into
+// `build`/`test`, so a normal `./gradlew build` stays Java-only and Node-free; cloudstub-local pulls
+// the built assets in only for its distributable JAR and `run` task.
+
+apply plugin: 'com.github.node-gradle.node'
+
+node {
+    download = true
+    version = '22.12.0'
+    // `npm ci`, not `npm install`: install exactly the locked tree and fail on lockfile drift, so
+    // release builds are reproducible.
+    npmInstallCommand = 'ci'
+}
+
+// Angular's application builder writes the browser bundle under <output-path>/browser.
+tasks.register('buildConsole', com.github.gradle.node.npm.task.NpmTask) {
+    group = 'build'
+    description = 'Builds the Angular console (base href /console/) for embedding in cloudstub-local.'
+    dependsOn tasks.named('npmInstall')
+    npmCommand = ['run', 'build']
+    args = ['--', '--base-href=/console/', '--output-path=build/console']
+    inputs.dir('src')
+    inputs.dir('public')
+    inputs.files(
+            'package.json', 'package-lock.json', 'angular.json', 'tsconfig.json', 'tsconfig.app.json')
+    outputs.dir(layout.buildDirectory.dir('console'))
+}
+
+// Expose the built browser assets as a consumable artifact so cloudstub-local can embed them.
+configurations {
+    consoleAssets {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+}
+
+artifacts {
+    consoleAssets(layout.buildDirectory.dir('console/browser')) {
+        builtBy tasks.named('buildConsole')
+    }
+}

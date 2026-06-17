@@ -23,10 +23,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class ApiServerIntegrationTest {
+class LocalServerIntegrationTest {
 
     private CloudStub cloudMock;
-    private ApiServer apiServer;
+    private LocalServer localServer;
     private int apiPort;
     private final ObjectMapper mapper = new ObjectMapper();
     private final HttpClient http = HttpClient.newHttpClient();
@@ -35,14 +35,14 @@ class ApiServerIntegrationTest {
     void setUp() throws Exception {
         cloudMock = new CloudStub();
         cloudMock.start();
-        apiServer = new ApiServer(cloudMock, 0, List.of()); // 0 = ephemeral port, no bind race
-        apiServer.start();
-        apiPort = apiServer.port();
+        localServer = new LocalServer(cloudMock, 0, List.of()); // 0 = ephemeral port, no bind race
+        localServer.start();
+        apiPort = localServer.port();
     }
 
     @AfterEach
     void tearDown() {
-        apiServer.stop();
+        localServer.stop();
         cloudMock.stop();
     }
 
@@ -212,10 +212,10 @@ class ApiServerIntegrationTest {
     // -------------------------------------------------------------------------
 
     private void restartApiWith(CloudStubApiService... services) throws IOException {
-        apiServer.stop();
-        apiServer = new ApiServer(cloudMock, 0, List.of(services));
-        apiServer.start();
-        apiPort = apiServer.port();
+        localServer.stop();
+        localServer = new LocalServer(cloudMock, 0, List.of(services));
+        localServer.start();
+        apiPort = localServer.port();
     }
 
     private void sendSqsSendMessage() throws IOException, InterruptedException {

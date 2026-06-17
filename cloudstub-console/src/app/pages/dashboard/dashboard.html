@@ -1,0 +1,136 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Running instance overview</p>
+    </div>
+    @if (status(); as s) {
+      <button
+        pButton
+        severity="danger"
+        [outlined]="true"
+        size="small"
+        [loading]="resetting()"
+        (click)="resetAll()"
+      >
+        <i pButtonIcon class="pi pi-refresh"></i>
+        <span pButtonLabel>Reset all</span>
+      </button>
+    }
+  </div>
+
+  @if (!api.connected()) {
+    <div class="empty-state">
+      <i class="pi pi-wifi empty-icon"></i>
+      <h3>Not connected</h3>
+      <p>
+        CloudStub is not reachable at <code>{{ api.host() }}</code>
+      </p>
+      <a pButton routerLink="/connect" severity="secondary">
+        <span pButtonLabel>Configure connection</span>
+      </a>
+    </div>
+  }
+
+  @if (api.connected() && status(); as s) {
+    <!-- Stat cards -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="pi pi-clock"></i></div>
+        <div class="stat-body">
+          <div class="stat-value">{{ uptime() }}</div>
+          <div class="stat-label">Uptime</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="pi pi-server"></i></div>
+        <div class="stat-body">
+          <div class="stat-value">{{ s.port }}</div>
+          <div class="stat-label">Mock port</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon violet"><i class="pi pi-sitemap"></i></div>
+        <div class="stat-body">
+          <div class="stat-value">{{ s.modules.length }}</div>
+          <div class="stat-label">Modules loaded</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber"><i class="pi pi-bolt"></i></div>
+        <div class="stat-body">
+          <div class="stat-value">{{ totalStubs() }}</div>
+          <div class="stat-label">Stubs registered</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modules -->
+    <div class="section-header">
+      <h2 class="section-title">Loaded modules</h2>
+      <p-iconfield>
+        <p-inputicon class="pi pi-filter-fill" />
+        <input
+          pInputText
+          type="text"
+          placeholder="Filter modules…"
+          pSize="small"
+          [value]="filterQuery()"
+          (input)="filterQuery.set($any($event.target).value)"
+        />
+      </p-iconfield>
+    </div>
+    <div class="module-grid">
+      @for (mod of filteredModules(); track mod.id) {
+        <div class="module-card">
+          <div class="module-top">
+            <div class="module-id">{{ mod.id }}</div>
+            <button
+              pButton
+              severity="secondary"
+              size="small"
+              [outlined]="true"
+              (click)="resetService(mod.id)"
+            >
+              <i pButtonIcon class="pi pi-refresh"></i>
+              <span pButtonLabel>Reset {{ mod.id }}</span>
+            </button>
+          </div>
+          <div class="stub-list">
+            @for (stub of mod.stubs; track stub.matchKey) {
+              <div class="stub-item">
+                <p-tag [value]="stub.protocol" severity="secondary" class="stub-tag" />
+                <span class="stub-key">{{ stub.matchKey }}</span>
+              </div>
+            }
+            @if (mod.stubs.length === 0) {
+              <div class="stub-empty">No stubs registered</div>
+            }
+          </div>
+          <a class="module-link" [routerLink]="['/services', mod.id]">
+            Browse {{ mod.id }} <i class="pi pi-arrow-right"></i>
+          </a>
+        </div>
+      } @empty {
+        @if (filterQuery()) {
+          <div class="filter-empty">
+            <i class="pi pi-filter-slash"></i>
+            No modules match <strong>{{ filterQuery() }}</strong>
+          </div>
+        } @else {
+          <div class="filter-empty">
+            <i class="pi pi-inbox"></i>
+            No modules loaded
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Started at -->
+    @if (startedAt(); as started) {
+      <div class="started-info">
+        Started <time [dateTime]="s.startedAt">{{ started | date: 'medium' }}</time>
+      </div>
+    }
+  }
+</div>

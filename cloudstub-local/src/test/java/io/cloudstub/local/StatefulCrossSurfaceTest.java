@@ -31,7 +31,7 @@ class StatefulCrossSurfaceTest {
     private final HttpClient http = HttpClient.newHttpClient();
 
     private CloudStub cloudMock;
-    private ApiServer apiServer;
+    private LocalServer localServer;
     private int apiPort;
     private SqsClient sqs;
 
@@ -44,9 +44,9 @@ class StatefulCrossSurfaceTest {
                 ServiceLoader.load(CloudStubApiService.class).stream()
                         .map(ServiceLoader.Provider::get)
                         .toList();
-        apiServer = new ApiServer(cloudMock, 0, apiServices);
-        apiServer.start();
-        apiPort = apiServer.port();
+        localServer = new LocalServer(cloudMock, 0, apiServices);
+        localServer.start();
+        apiPort = localServer.port();
 
         sqs =
                 SqsClient.builder()
@@ -59,7 +59,7 @@ class StatefulCrossSurfaceTest {
     @AfterEach
     void tearDown() {
         sqs.close();
-        apiServer.stop();
+        localServer.stop();
         cloudMock.stop();
     }
 

@@ -29,11 +29,11 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 /**
- * Lightweight REST API server for local mode.
+ * The cloudstub-local HTTP server for the secondary management port (REST API + web console).
  *
  * <p>Serves on a secondary port (default {@value
- * io.cloudstub.local.config.resolver.ApiPortResolver#DEFAULT_API_PORT}) so API traffic is always
- * separate from the AWS mock port. Routes:
+ * io.cloudstub.local.config.resolver.ApiPortResolver#DEFAULT_API_PORT}), separate from the AWS mock
+ * port. REST API routes:
  *
  * <ul>
  *   <li>{@code GET /api/status} — port, uptime, loaded modules and their stubs, all routes
@@ -44,9 +44,12 @@ import java.util.concurrent.Executors;
  *   <li>{@code GET /api/openapi.json} — OpenAPI 3.0 spec auto-generated from registered routes
  * </ul>
  *
- * <p>Modules register additional routes by implementing {@link CloudStubApiService}.
+ * <p>It also serves the web console at {@code /console} when its assets are bundled (redirecting
+ * {@code /} to {@code /console/}); a headless build runs API-only.
+ *
+ * <p>Modules register additional API routes by implementing {@link CloudStubApiService}.
  */
-public final class ApiServer implements Closeable {
+public final class LocalServer implements Closeable {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String APPLICATION_JSON = "application/json";
@@ -61,7 +64,7 @@ public final class ApiServer implements Closeable {
 
     private HttpServer server;
 
-    public ApiServer(CloudStub cloudMock, int port, List<CloudStubApiService> moduleServices) {
+    public LocalServer(CloudStub cloudMock, int port, List<CloudStubApiService> moduleServices) {
         this.cloudMock = cloudMock;
         this.port = port;
         this.moduleServices = moduleServices;
@@ -72,6 +75,7 @@ public final class ApiServer implements Closeable {
 
         registerCoreRoutes();
         registerModuleRoutes();
+        registerConsole();
 
         server.setExecutor(
                 Executors.newSingleThreadExecutor(
@@ -137,6 +141,30 @@ public final class ApiServer implements Closeable {
                 "OpenAPI 3.0 spec auto-generated from registered routes",
                 List.of(),
                 req -> new ApiResponse(200, buildOpenApiSpec()));
+    }
+
+    /**
+     * Serves the web console (if its assets are bundled) at {@code /console}, and redirects {@code
+     * /} to {@code /console/}. When the UI is not bundled — a headless build — nothing is
+     * registered and the server runs API-only.
+     */
+    private void registerConsole() {
+        ConsoleHandler console = new ConsoleHandler("/console", "console");
+        if (!console.isAvailable()) {
+            return;
+        }
+        server.createContext("/console", console);
+        server.createContext("/", this::handleRoot);
+    }
+
+    private void handleRoot(HttpExchange exchange) throws IOException {
+        if ("/".equals(exchange.getRequestURI().getPath())) {
+            exchange.getResponseHeaders().set("Location", "/console/");
+            exchange.sendResponseHeaders(302, -1);
+            exchange.close();
+            return;
+        }
+        sendError(exchange, 404, "Not Found");
     }
 
     private void registerModuleRoutes() {

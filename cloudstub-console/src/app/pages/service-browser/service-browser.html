@@ -1,0 +1,95 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ serviceId() | uppercase }}</h1>
+      <p class="page-subtitle">Service API browser</p>
+    </div>
+    @if (moduleInfo(); as mod) {
+      <div class="stub-count">
+        <span class="count-value">{{ mod.stubs.length }}</span>
+        <span class="count-label">stubs</span>
+      </div>
+    }
+  </div>
+
+  @if (!api.connected()) {
+    <div class="empty-state">
+      <i class="pi pi-wifi"></i>
+      <p>CloudStub is not connected.</p>
+    </div>
+  } @else if (!hasRoutes()) {
+    <div class="empty-state">
+      <i class="pi pi-inbox"></i>
+      <p>
+        No API routes registered for <strong>{{ serviceId() }}</strong
+        >.
+      </p>
+      <p class="hint">This service does not implement CloudStubApiService, or it is not loaded.</p>
+    </div>
+  } @else {
+    <div class="route-list">
+      @for (exec of executions(); track exec.route.method + exec.route.path) {
+        <div class="route-card">
+          <div class="route-header">
+            <p-tag
+              [value]="exec.route.method"
+              [severity]="methodSeverity(exec.route.method)"
+              styleClass="method-tag"
+            />
+            <span class="route-path">{{ exec.route.path }}</span>
+            @if (exec.route.command) {
+              <span class="route-command">clm {{ serviceId() }} {{ exec.route.command }}</span>
+            }
+          </div>
+          <p class="route-desc">{{ exec.route.description }}</p>
+
+          @if ((exec.route.params?.length ?? 0) > 0) {
+            <div class="params">
+              @for (param of exec.route.params; track param.name) {
+                <div class="param-row">
+                  <label class="param-label">
+                    {{ param.name }}
+                    @if (param.required) {
+                      <span class="required">*</span>
+                    }
+                  </label>
+                  <input
+                    pInputText
+                    [(ngModel)]="exec.paramValues[param.name]"
+                    [placeholder]="param.description"
+                    size="small"
+                  />
+                </div>
+              }
+            </div>
+          }
+
+          <div class="route-actions">
+            <button
+              pButton
+              [label]="exec.route.method === 'GET' ? 'Fetch' : 'Execute'"
+              [loading]="exec.loading()"
+              [severity]="exec.route.method === 'GET' ? 'secondary' : 'primary'"
+              size="small"
+              (click)="execute(exec)"
+            ></button>
+          </div>
+
+          @if (exec.result() !== null) {
+            <div class="result-block">
+              <div class="result-label">Response</div>
+              <pre class="result-pre" [innerHTML]="exec.result() | jsonHighlight"></pre>
+            </div>
+          }
+
+          @if (exec.error(); as error) {
+            <div class="error-block">
+              <i class="pi pi-exclamation-triangle"></i>
+              {{ error }}
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
