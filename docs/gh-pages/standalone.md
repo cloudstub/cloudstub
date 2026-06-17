@@ -51,7 +51,7 @@ java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
 
 - **Version:** defaults to the running `cloudstub-core` version, so a downloaded module matches the SPI the core
   provides. Override with `--module-version=<v>` or `CLOUDSTUB_MODULE_VERSION`. (Development builds are `-SNAPSHOT`,
-  which is not published to Central — point `--module-version` at a released version such as `0.1.0-beta.1`.)
+  which is not published to Central — point `--module-version` at a released version such as `0.1.0-beta.3`.)
 - **Cache:** the plugin directory is the cache. A jar that is already present is **never** re-downloaded, so the
   next start is offline-fast. When no `--modules-dir` is set and a download is needed, the default `./modules`
   directory is created to hold it.
@@ -204,7 +204,7 @@ On a first run, any module fetched by [auto-download](#auto-download-default) pr
 naming the coordinate, version, and destination, so downloaded jars are distinguished from pre-present ones:
 
 ```
-[CloudStub] Downloaded io.github.cloudstub:cloudstub-sqs:0.1.0-beta.1 -> /path/to/modules/cloudstub-sqs-0.1.0-beta.1.jar
+[CloudStub] Downloaded io.github.cloudstub:cloudstub-sqs:0.1.0-beta.3 -> /path/to/modules/cloudstub-sqs-0.1.0-beta.3.jar
 ```
 
 The REST API is available at `http://localhost:4567` — see [REST API](rest-api.md) for the full reference, or
@@ -225,7 +225,7 @@ cloudstub.services=sqs,s3
 cloudstub.store-dir=.cloudstub
 cloudstub.max-history=1000
 cloudstub.modules-dir=modules
-cloudstub.module-version=0.1.0-beta.1
+cloudstub.module-version=0.1.0-beta.3
 cloudstub.maven-base-url=https://repo1.maven.org/maven2
 cloudstub.auto-download=true
 ```
