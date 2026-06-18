@@ -57,11 +57,19 @@
          <lastmod>2026-06-18</lastmod>
     </url>
     <url>
-         <loc>https://cloudstub.github.io/cloudstub/sqs/</loc>
+         <loc>https://cloudstub.github.io/cloudstub/standalone/</loc>
          <lastmod>2026-06-18</lastmod>
     </url>
     <url>
-         <loc>https://cloudstub.github.io/cloudstub/standalone/</loc>
+         <loc>https://cloudstub.github.io/cloudstub/services/</loc>
+         <lastmod>2026-06-18</lastmod>
+    </url>
+    <url>
+         <loc>https://cloudstub.github.io/cloudstub/services/sns/</loc>
+         <lastmod>2026-06-18</lastmod>
+    </url>
+    <url>
+         <loc>https://cloudstub.github.io/cloudstub/services/sqs/</loc>
          <lastmod>2026-06-18</lastmod>
     </url>
 </urlset>
