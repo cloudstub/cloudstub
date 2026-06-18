@@ -3,11 +3,13 @@ def springBootVersion = '4.0.6'
 dependencies {
     implementation "org.springframework.boot:spring-boot-starter:${springBootVersion}"
     implementation libs.aws.sqs
+    implementation libs.aws.sns
     implementation libs.aws.secretsmanager
 
     testImplementation project(':cloudstub-core')
     testImplementation project(':cloudstub-junit')
     testImplementation project(':cloudstub-sqs')
+    testImplementation project(':cloudstub-sns')
     testImplementation project(':cloudstub-secretsmanager')
     testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
 

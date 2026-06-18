@@ -109,6 +109,12 @@ SNS=$(curl -sf -X POST "http://localhost:$PORT" \
 echo "$SNS" | grep -q "TopicArn" || fail "SNS CreateTopic bad response: $SNS"
 pass "SNS CreateTopic"
 
+# State-backed: the topic created over the AWS protocol is visible through the REST API.
+SNS_TOPICS=$(curl -sf "http://localhost:$API_PORT/api/sns/list-topics")
+echo "$SNS_TOPICS" | python3 -c "import sys,json; d=json.load(sys.stdin); assert any('smoke-topic' in t for t in d['topics'])" \
+  || fail "SNS topic not state-backed across surfaces: $SNS_TOPICS"
+pass "SNS list-topics (state-backed)  → $SNS_TOPICS"
+
 echo ""
 echo "==> GET /api/history (3 requests logged)"
 HIST=$(curl -sf "http://localhost:$API_PORT/api/history")
