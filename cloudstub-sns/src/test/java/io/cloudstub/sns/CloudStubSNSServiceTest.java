@@ -72,6 +72,26 @@ class CloudStubSNSServiceTest {
                 "response should be well-formed SNS XML");
     }
 
+    /**
+     * A malformed subscription ARN must yield a 400 error response, not a server-side exception.
+     */
+    @Test
+    void malformedSubscriptionArnReturnsClientError() throws Exception {
+        HttpResponse<String> response =
+                HTTP.send(
+                        HttpRequest.newBuilder()
+                                .uri(URI.create("http://localhost:" + cloudMock.port() + "/"))
+                                .POST(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                "Action=Unsubscribe&SubscriptionArn=not-an-arn&Version=2010-03-31"))
+                                .header("Content-Type", "application/x-www-form-urlencoded")
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(400, response.statusCode());
+        assertTrue(response.body().contains("InvalidParameter"));
+    }
+
     @Test
     void createTopicReturnsArnContainingTopicName() {
         String topicArn = sns.createTopic(b -> b.name("named-topic")).topicArn();

@@ -144,7 +144,10 @@ public class CloudStubSNSService implements CloudStubService {
     }
 
     private StubResponse createTopic(StubRequest req, StateStore store) {
-        String name = SnsForm.parse(req.body()).get("Name");
+        String name = required(SnsForm.parse(req.body()), "Name");
+        if (name == null) {
+            return missing("Name");
+        }
         String arn = SnsKeys.topicArn(name);
         store.put(SnsKeys.topicKey(name), arn);
         return StubResponse.xml(
@@ -152,7 +155,11 @@ public class CloudStubSNSService implements CloudStubService {
     }
 
     private StubResponse deleteTopic(StubRequest req, StateStore store) {
-        String name = SnsKeys.topicNameFromArn(SnsForm.parse(req.body()).get("TopicArn"));
+        String topicArn = required(SnsForm.parse(req.body()), "TopicArn");
+        if (topicArn == null) {
+            return missing("TopicArn");
+        }
+        String name = SnsKeys.topicNameFromArn(topicArn);
         store.delete(SnsKeys.topicKey(name));
         store.clear(SnsKeys.subscriptionPrefix(name));
         return StubResponse.xml(SnsXml.empty("DeleteTopic"));
@@ -176,7 +183,10 @@ public class CloudStubSNSService implements CloudStubService {
     }
 
     private StubResponse getTopicAttributes(StubRequest req, StateStore store) {
-        String arn = SnsForm.parse(req.body()).get("TopicArn");
+        String arn = required(SnsForm.parse(req.body()), "TopicArn");
+        if (arn == null) {
+            return missing("TopicArn");
+        }
         String name = SnsKeys.topicNameFromArn(arn);
         int subscriptions = store.list(SnsKeys.subscriptionPrefix(name)).size();
         String attributes =
@@ -192,7 +202,10 @@ public class CloudStubSNSService implements CloudStubService {
 
     private StubResponse subscribe(StubRequest req, StateStore store) {
         Map<String, String> form = SnsForm.parse(req.body());
-        String topicArn = form.get("TopicArn");
+        String topicArn = required(form, "TopicArn");
+        if (topicArn == null) {
+            return missing("TopicArn");
+        }
         String name = SnsKeys.topicNameFromArn(topicArn);
         String id = UUID.randomUUID().toString();
         String subscriptionArn = topicArn + ":" + id;
@@ -216,8 +229,14 @@ public class CloudStubSNSService implements CloudStubService {
     }
 
     private StubResponse unsubscribe(StubRequest req, StateStore store) {
-        String subscriptionArn = SnsForm.parse(req.body()).get("SubscriptionArn");
+        String subscriptionArn = required(SnsForm.parse(req.body()), "SubscriptionArn");
+        if (subscriptionArn == null) {
+            return missing("SubscriptionArn");
+        }
         int lastColon = subscriptionArn.lastIndexOf(':');
+        if (lastColon < 0) {
+            return invalid("SubscriptionArn");
+        }
         String id = subscriptionArn.substring(lastColon + 1);
         String name = SnsKeys.topicNameFromArn(subscriptionArn.substring(0, lastColon));
         store.delete(SnsKeys.subscriptionKey(name, id));
@@ -239,7 +258,11 @@ public class CloudStubSNSService implements CloudStubService {
     }
 
     private StubResponse listSubscriptionsByTopic(StubRequest req, StateStore store) {
-        String name = SnsKeys.topicNameFromArn(SnsForm.parse(req.body()).get("TopicArn"));
+        String topicArn = required(SnsForm.parse(req.body()), "TopicArn");
+        if (topicArn == null) {
+            return missing("TopicArn");
+        }
+        String name = SnsKeys.topicNameFromArn(topicArn);
         StringBuilder members = new StringBuilder();
         appendSubscriptions(members, store, name);
         return StubResponse.xml(
@@ -249,8 +272,14 @@ public class CloudStubSNSService implements CloudStubService {
     }
 
     private StubResponse getSubscriptionAttributes(StubRequest req, StateStore store) {
-        String subscriptionArn = SnsForm.parse(req.body()).get("SubscriptionArn");
+        String subscriptionArn = required(SnsForm.parse(req.body()), "SubscriptionArn");
+        if (subscriptionArn == null) {
+            return missing("SubscriptionArn");
+        }
         int lastColon = subscriptionArn.lastIndexOf(':');
+        if (lastColon < 0) {
+            return invalid("SubscriptionArn");
+        }
         String id = subscriptionArn.substring(lastColon + 1);
         String topicArn = subscriptionArn.substring(0, lastColon);
         String name = SnsKeys.topicNameFromArn(topicArn);
@@ -313,5 +342,24 @@ public class CloudStubSNSService implements CloudStubService {
 
     private static String orEmpty(String value) {
         return value == null ? "" : value;
+    }
+
+    /** A required form value, or {@code null} when absent or blank. */
+    private static String required(Map<String, String> form, String key) {
+        String value = form.get(key);
+        return value == null || value.isBlank() ? null : value;
+    }
+
+    private static StubResponse missing(String parameter) {
+        return badRequest("Missing required parameter: " + parameter);
+    }
+
+    private static StubResponse invalid(String parameter) {
+        return badRequest("Invalid parameter: " + parameter);
+    }
+
+    private static StubResponse badRequest(String message) {
+        return StubResponse.of(
+                400, StubResponse.CONTENT_TYPE_XML, SnsXml.error("InvalidParameter", message));
     }
 }

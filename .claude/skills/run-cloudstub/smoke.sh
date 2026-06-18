@@ -7,6 +7,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 JAR="$REPO_ROOT/cloudstub-local/build/libs/cloudstub-local.jar"
+# Load the locally built module jars, not ones downloaded from Maven Central.
+export CLOUDSTUB_MODULES_DIR="$REPO_ROOT/cloudstub-local/build/modules"
 PORT=14566
 API_PORT=14567
 EXTRA_ARGS=()
@@ -18,8 +20,8 @@ for arg in "$@"; do
     --api-port=*)  API_PORT="${arg#--api-port=}" ;;
     --services=*)  EXTRA_ARGS+=("$arg"); SERVICES_SET=true ;;
     --build)
-      echo "==> Building standalone JAR..."
-      cd "$REPO_ROOT" && ./gradlew :cloudstub-local:shadowJar -q
+      echo "==> Building standalone JAR and module jars..."
+      cd "$REPO_ROOT" && ./gradlew :cloudstub-local:shadowJar :cloudstub-local:copyModuleJars -q
       ;;
   esac
 done
