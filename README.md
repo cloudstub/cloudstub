@@ -131,9 +131,19 @@ clm sqs send-message --queue orders --body "hello"
 > for in-memory). See the [Standalone Mode guide](https://cloudstub.github.io/cloudstub/standalone/) and
 > [CLI guide](https://cloudstub.github.io/cloudstub/cli/) for full details.
 
-The `cloudstub-example` app ships profile-gated demo runners for manual end-to-end verification against a running server
-(`./gradlew :cloudstub-example:junit6:runExample -Pdemo=sqs`); see the
-[Spring Boot Integration guide](https://cloudstub.github.io/cloudstub/spring-boot/).
+The `cloudstub-example` app ships profile-gated demo runners for manual end-to-end verification. Start a server with the
+service enabled, then run the matching demo against it in a second terminal:
+
+```
+# terminal 1 — start the standalone server
+./gradlew :cloudstub-local:run --args="--services=sns"
+
+# terminal 2 — run the demo (-Pdemo=<service> selects the runner)
+./gradlew :cloudstub-example:junit6:runExample -Pdemo=sns
+```
+
+The server can load several services at once (`--services=sqs,sns`), but `-Pdemo` runs one runner at a time — pick the
+service to exercise (`-Pdemo=sqs` or `-Pdemo=sns`) and rerun for each.
 
 ## Supported services
 

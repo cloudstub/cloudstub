@@ -20,6 +20,7 @@ dependencies {
 
     testImplementation project(':cloudstub-core')
     testImplementation libs.aws.sqs
+    testImplementation libs.aws.sns
     testImplementation libs.slf4j.simple
     // StatefulCrossSurfaceTest / ApiServerIntegrationTest need SQS discoverable via ServiceLoader.
     testRuntimeOnly project(':cloudstub-sqs')
