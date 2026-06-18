@@ -7,6 +7,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 JAR="$REPO_ROOT/cloudstub-local/build/libs/cloudstub-local.jar"
+# Load the locally built module jars, not ones downloaded from Maven Central.
+export CLOUDSTUB_MODULES_DIR="$REPO_ROOT/cloudstub-local/build/modules"
 PORT=14566
 API_PORT=14567
 EXTRA_ARGS=()
@@ -18,8 +20,8 @@ for arg in "$@"; do
     --api-port=*)  API_PORT="${arg#--api-port=}" ;;
     --services=*)  EXTRA_ARGS+=("$arg"); SERVICES_SET=true ;;
     --build)
-      echo "==> Building standalone JAR..."
-      cd "$REPO_ROOT" && ./gradlew :cloudstub-local:shadowJar -q
+      echo "==> Building standalone JAR and module jars..."
+      cd "$REPO_ROOT" && ./gradlew :cloudstub-local:shadowJar :cloudstub-local:copyModuleJars -q
       ;;
   esac
 done
@@ -108,6 +110,12 @@ SNS=$(curl -sf -X POST "http://localhost:$PORT" \
   -d "Action=CreateTopic&Name=smoke-topic&Version=2010-03-31")
 echo "$SNS" | grep -q "TopicArn" || fail "SNS CreateTopic bad response: $SNS"
 pass "SNS CreateTopic"
+
+# State-backed: the topic created over the AWS protocol is visible through the REST API.
+SNS_TOPICS=$(curl -sf "http://localhost:$API_PORT/api/sns/list-topics")
+echo "$SNS_TOPICS" | python3 -c "import sys,json; d=json.load(sys.stdin); assert any('smoke-topic' in t for t in d['topics'])" \
+  || fail "SNS topic not state-backed across surfaces: $SNS_TOPICS"
+pass "SNS list-topics (state-backed)  → $SNS_TOPICS"
 
 echo ""
 echo "==> GET /api/history (3 requests logged)"
