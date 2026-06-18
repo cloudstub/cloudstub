@@ -28,19 +28,19 @@ public class AwsConfig {
 
 1. The `:` default means the property is optional. In production `aws.endpoint-url` is absent and the SDK uses real AWS endpoints. In tests CloudStub sets it before the context starts.
 
-Your services are plain Spring `@Service` classes with no CloudStub imports — see [`EventPublisher`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/service/EventPublisher.java) and [`SecretLoader`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/service/SecretLoader.java) in `cloudstub-example` for the full code.
+Your services are plain Spring `@Service` classes with no CloudStub imports — see [`QueuePublisher`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/service/QueuePublisher.java) and [`SecretLoader`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/service/SecretLoader.java) in `cloudstub-example` for the full code.
 
 ## Integration tests
 
 ```java
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext // (1)!
-class EventPublisherIntegrationTest {
+class QueuePublisherIntegrationTest {
 
     @RegisterExtension
     static CloudStubExtension cloudMock = new CloudStubExtension(); // (2)!
 
-    @Autowired EventPublisher publisher;
+    @Autowired QueuePublisher publisher;
 
     @Test
     void publishCreatesQueueAndReturnsMessageId() {
@@ -56,7 +56,7 @@ class EventPublisherIntegrationTest {
 
 See the full working tests in `cloudstub-example`:
 
-- [`EventPublisherIntegrationTest`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/test/java/io/cloudstub/example/EventPublisherIntegrationTest.java)
+- [`QueuePublisherIntegrationTest`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/test/java/io/cloudstub/example/QueuePublisherIntegrationTest.java)
 - [`SecretLoaderIntegrationTest`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/test/java/io/cloudstub/example/SecretLoaderIntegrationTest.java)
 
 ## Pointing an application at CloudStub

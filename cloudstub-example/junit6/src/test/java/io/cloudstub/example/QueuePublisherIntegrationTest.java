@@ -2,7 +2,7 @@ package io.cloudstub.example;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.cloudstub.example.service.EventPublisher;
+import io.cloudstub.example.service.QueuePublisher;
 import io.cloudstub.junit.CloudStubExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -12,11 +12,11 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext
-class EventPublisherIntegrationTest {
+class QueuePublisherIntegrationTest {
 
     @RegisterExtension static CloudStubExtension cloudMock = new CloudStubExtension();
 
-    @Autowired EventPublisher publisher;
+    @Autowired QueuePublisher publisher;
 
     @Test
     void publishCreatesQueueOnFirstCallAndReturnsMessageId() {

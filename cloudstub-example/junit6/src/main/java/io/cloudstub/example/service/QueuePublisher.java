@@ -5,15 +5,15 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.Message;
 
-/** Publishes events to an SQS queue, creating it on first use. */
+/** Publishes messages to an SQS queue, creating it on first use. */
 @Service
-public class EventPublisher {
+public class QueuePublisher {
 
     private final SqsClient sqs;
     private final String queueName;
     private String queueUrl;
 
-    public EventPublisher(SqsClient sqs) {
+    public QueuePublisher(SqsClient sqs) {
         this.sqs = sqs;
         this.queueName = "events";
     }
