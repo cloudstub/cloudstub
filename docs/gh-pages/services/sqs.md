@@ -7,7 +7,7 @@ AWS SQS Smithy model; AWS SDK v2 (≥ 2.20) drives it with the JSON / `X-Amz-Tar
 
 The core queue and message operations are **state-backed**: a message sent through `SendMessage` is
 returned by a later `ReceiveMessage`, survives a restart when a persistent store directory is
-configured, and is visible through the [REST API](rest-api.md). The remaining operations are
+configured, and is visible through the [REST API](../rest-api.md). The remaining operations are
 registered from the model and return well-formed but stateless placeholder responses.
 See [Supported operations](#supported-operations) for the full list.
 
@@ -22,9 +22,9 @@ java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs
 
 Applications talk to it through the **AWS SDK** by pointing the client's endpoint at the mock port
 (`http://localhost:4566`) — see the [Test example](#test-example) for an `SqsClient` setup and
-[Standalone Mode](standalone.md) for the full configuration.
+[Standalone Mode](../standalone.md) for the full configuration.
 
-To inspect and drive queue state from the terminal, call the [REST API](rest-api.md) on the API port
+To inspect and drive queue state from the terminal, call the [REST API](../rest-api.md) on the API port
 (`4567`) — for example with `curl`. Parameters are passed as query-string values. Send a message and
 receive it back:
 
@@ -42,7 +42,7 @@ SDK is returned by `GET /api/sqs/receive-message`, and vice versa. See
 
 ## Test example
 
-In embedded mode, add `cloudstub-sqs` (see [Getting Started](getting-started.md)) and exercise the
+In embedded mode, add `cloudstub-sqs` (see [Getting Started](../getting-started.md)) and exercise the
 service end to end with `CloudStubExtension`:
 
 ```java
@@ -83,7 +83,7 @@ class SqsRoundTripTest {
 
 ## REST API access
 
-The module exposes a [REST API](rest-api.md) under `/api/sqs/…`. These routes read and write the same
+The module exposes a [REST API](../rest-api.md) under `/api/sqs/…`. These routes read and write the same
 state as the AWS-protocol stubs — a message sent with the SDK is returned by
 `GET /api/sqs/receive-message`, and vice versa. Parameters are passed as query-string values (e.g.
 `POST /api/sqs/send-message?queue=orders&body=hello`).

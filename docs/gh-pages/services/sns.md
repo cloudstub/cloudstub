@@ -10,7 +10,7 @@ The topic and subscription operations are **state-backed**: a topic created with
 returned by a later `ListTopics`, a subscription created with `Subscribe` is returned by
 `ListSubscriptionsByTopic`, `GetTopicAttributes` reports the live subscription count, and the data
 survives a restart when a persistent store directory is configured. State is visible through the
-[REST API](rest-api.md) and the console. The remaining operations are registered from the model and
+[REST API](../rest-api.md) and the console. The remaining operations are registered from the model and
 return well-formed but stateless responses. See [Supported operations](#supported-operations) for
 the full list.
 
@@ -27,7 +27,7 @@ java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sns
 ```
 
 Point any AWS client at the mock port (`http://localhost:4566`) — see
-[Standalone Mode](standalone.md) for the full configuration. With the AWS CLI, a created topic is
+[Standalone Mode](../standalone.md) for the full configuration. With the AWS CLI, a created topic is
 returned by `list-topics` and a subscription by `list-subscriptions-by-topic`:
 
 ```
@@ -53,12 +53,12 @@ $ aws --endpoint-url=http://localhost:4566 sns list-topics
 }
 ```
 
-To inspect and drive topic state from the terminal, call the [REST API](rest-api.md) on the API port
+To inspect and drive topic state from the terminal, call the [REST API](../rest-api.md) on the API port
 (`4567`) — see [REST/CLI access](#restcli-access).
 
 ## Test example
 
-In embedded mode, add `cloudstub-sns` (see [Getting Started](getting-started.md)) and exercise the
+In embedded mode, add `cloudstub-sns` (see [Getting Started](../getting-started.md)) and exercise the
 service end to end with `CloudStubExtension`:
 
 ```java
@@ -98,7 +98,7 @@ class SnsTopicTest {
 
 ## REST/CLI access
 
-The module exposes a [REST API](rest-api.md) under `/api/sns/…`. These routes read and write the
+The module exposes a [REST API](../rest-api.md) under `/api/sns/…`. These routes read and write the
 same state as the AWS-protocol stubs — a topic created with the SDK is returned by
 `GET /api/sns/list-topics`, and vice versa. Parameters are passed as query-string values.
 

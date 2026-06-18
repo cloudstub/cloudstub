@@ -24,6 +24,7 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
+    - navigation.indexes
     - navigation.top
     - content.code.copy
     - content.code.annotate
@@ -42,8 +43,9 @@ nav:
       - Logging: logging.md
       - SDK v1 Support: sdk-v1.md
   - Services:
-      - Amazon SNS: sns.md
-      - Amazon SQS: sqs.md
+      - services/index.md
+      - Amazon SNS: services/sns.md
+      - Amazon SQS: services/sqs.md
   - Module Authoring: module-authoring.md
   - CloudStub Codegen: codegen.md
   - Changelog: changelog.md
@@ -55,6 +57,9 @@ not_in_nav: |
 
 plugins:
   - search
+
+extra_javascript:
+  - javascripts/service-filter.js
 
 markdown_extensions:
   - pymdownx.highlight:
