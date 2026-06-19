@@ -117,13 +117,14 @@ export AWS_ENDPOINT_URL=http://localhost:4566
 ./gradlew bootRun
 ```
 
-A companion CLI (`clm` / `cloudstub`) drives a running instance from the terminal — inspect status, send test data,
-reset services — without the AWS CLI. It is a thin HTTP client that discovers its commands from the server at runtime,
-and ships in its own repository: [cloudstub/cloudstub-cli](https://github.com/cloudstub/cloudstub-cli).
+The `cloudstub-local` fat JAR is **dual-mode**: with no arguments it starts the server, and with a command token it
+runs a companion CLI (`cloudstub` / `clb`) that drives a running instance from the terminal — inspect status, send test
+data, reset services — without the AWS CLI. It is a thin HTTP client that discovers its commands from the server at
+runtime.
 
 ```
-clm status
-clm sqs send-message --queue orders --body "hello"
+clb status
+clb sqs send-message --queue orders --body "hello"
 ```
 
 > Standalone mode shares the same core engine and state backend as embedded mode: stateful modules return live data
@@ -163,8 +164,7 @@ service to exercise (`-Pdemo=sqs` or `-Pdemo=sns`) and rerun for each.
 | `cloudstub-codegen` | Stub generator — produces a module skeleton from a Smithy model                     |
 | `cloudstub-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1      |
 
-The `clm` / `cloudstub` command-line client ships separately at
-[cloudstub/cloudstub-cli](https://github.com/cloudstub/cloudstub-cli).
+The `cloudstub` / `clb` command-line client ships inside the `cloudstub-local` fat JAR (dual-mode: server or CLI).
 
 ## Scope and limitations
 

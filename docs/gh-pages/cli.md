@@ -1,43 +1,43 @@
 # CLI
 
-`cloudstub-cli` is a small command-line client for a running [standalone](standalone.md) CloudStub
+The CloudStub CLI is a small command-line client for a running [standalone](standalone.md) CloudStub
 instance. It lets you inspect and drive mock state from the terminal — list resources, send test
 data, reset services — without writing code or installing the AWS CLI.
 
-The CLI is a **thin HTTP client over the [REST API](rest-api.md)**. It has no dependency on
-CloudStub internals, WireMock, or any service module, and it does not need the AWS SDK. It
-discovers the available commands at runtime from `GET /api/status`, so a CloudStub instance with
-more modules loaded simply offers more commands — the CLI itself never changes.
+The CLI is a **thin HTTP client over the [REST API](rest-api.md)**. It discovers the available
+commands at runtime from `GET /api/status`, so a CloudStub instance with more modules loaded simply
+offers more commands — the CLI itself never changes.
+
+It ships in the same `cloudstub-local` fat JAR as the server: the jar is **dual-mode**. With no
+arguments (or an explicit `serve`) it starts the server; with a command token (`status`, `reset`,
+`sqs send-message`, …) it runs the CLI against an already-running instance. The CLI path never boots
+the mock, so commands start quickly.
 
 ## Install
 
-The CLI ships in its own repository, [cloudstub/cloudstub-cli](https://github.com/cloudstub/cloudstub-cli)
-— it has no dependency on CloudStub and is released independently. Build the fat JAR from a clone
-(requires Java 17+):
+Build the `cloudstub-local` fat JAR (requires Java 17+):
 
 ```
-git clone https://github.com/cloudstub/cloudstub-cli
-cd cloudstub-cli
-./gradlew shadowJar
-# output: build/libs/cloudstub-cli.jar
+./gradlew :cloudstub-local:shadowJar
+# output: cloudstub-local/build/libs/cloudstub-local.jar
 ```
 
-Run it via the bundled launcher scripts in `bin/` (`cloudstub` is the binary, `clm` is an identical
-alias — both work; put `bin/` on your `PATH`), or directly with `java -jar`:
+Run it via the bundled launcher scripts in `cloudstub-local/bin/` (`cloudstub` is the binary, `clb`
+is an identical short alias — both work; put `bin/` on your `PATH`), or directly with `java -jar`:
 
 === "Launcher script"
 
     ```
-    ./bin/clm status
+    ./bin/clb status
     ```
 
 === "java -jar"
 
     ```
-    java -jar build/libs/cloudstub-cli.jar status
+    java -jar cloudstub-local/build/libs/cloudstub-local.jar status
     ```
 
-The examples below use `clm`.
+The examples below use `clb`.
 
 ## Connecting
 
@@ -51,28 +51,28 @@ default port no configuration is needed.
 | Default              | `localhost`           | `4567`                    |
 
 ```
-clm --api-port=9001 status
-CLOUDSTUB_API_PORT=9001 clm status
+clb --api-port=9001 status
+CLOUDSTUB_API_PORT=9001 clb status
 ```
 
 If the server is not reachable the CLI prints a clear message and exits non-zero:
 
 ```
-$ clm status
+$ clb status
 CloudStub is not running at http://localhost:4567.
-Start it with: java -jar cloudstub-local.jar
+Start it with: cloudstub serve
 ```
 
 ## Global commands
 
 These are always available, regardless of which modules are loaded.
 
-### `clm status`
+### `clb status`
 
 Shows the running instance: ports, uptime, and each loaded module with its stub count.
 
 ```
-$ clm status
+$ clb status
 mock port:     4566
 api port:      4567
 started at:    2026-06-06T10:00:00Z
@@ -85,55 +85,55 @@ Modules
   sqs              23 stub(s)
 ```
 
-### `clm reset`
+### `clb reset`
 
 Clears mock state. With no argument it resets everything (and clears the request history); with
 `--service` it resets a single service.
 
 ```
-clm reset
-clm reset --service sqs
+clb reset
+clb reset --service sqs
 ```
 
 ## Service commands
 
-Service commands follow the pattern `clm <service> <action>`. They are **discovered at runtime**:
+Service commands follow the pattern `clb <service> <action>`. They are **discovered at runtime**:
 every module route advertised by `/api/status` becomes a subcommand, and each route parameter
-becomes an option. Run `clm --help` to see the services the connected instance exposes, and
-`clm <service> --help` for its actions.
+becomes an option. Run `clb --help` to see the services the connected instance exposes, and
+`clb <service> --help` for its actions.
 
 The commands available today, with the reference modules loaded:
 
 === "SQS"
 
     ```
-    clm sqs list-queues
-    clm sqs send-message --queue orders --body "hello"
-    clm sqs receive-message --queue orders
-    clm sqs purge-queue --queue orders
+    clb sqs list-queues
+    clb sqs send-message --queue orders --body "hello"
+    clb sqs receive-message --queue orders
+    clb sqs purge-queue --queue orders
     ```
 
 === "S3"
 
     ```
-    clm s3 list-buckets
-    clm s3 list-objects --bucket my-bucket
-    clm s3 put-object --bucket my-bucket --key file.txt --body "contents"
-    clm s3 get-object --bucket my-bucket --key file.txt
+    clb s3 list-buckets
+    clb s3 list-objects --bucket my-bucket
+    clb s3 put-object --bucket my-bucket --key file.txt --body "contents"
+    clb s3 get-object --bucket my-bucket --key file.txt
     ```
 
 === "Secrets Manager"
 
     ```
-    clm secretsmanager list
-    clm secretsmanager get --name my-secret
-    clm secretsmanager put --name my-secret --value s3cr3t
+    clb secretsmanager list
+    clb secretsmanager get --name my-secret
+    clb secretsmanager put --name my-secret --value s3cr3t
     ```
 
 Responses are printed as JSON:
 
 ```
-$ clm sqs send-message --queue orders --body "hello"
+$ clb sqs send-message --queue orders --body "hello"
 {
   "md5OfBody" : "5d41402abc4b2a76b9719d911017c592",
   "messageId" : "f8eafb78-edcd-46f7-b78a-43b9e160cbef"
@@ -142,8 +142,8 @@ $ clm sqs send-message --queue orders --body "hello"
 
 !!! note "State-backed where the module supports it"
     The CLI and the AWS SDK share the **same state store**. For state-backed modules (SQS),
-    `clm sqs receive-message` returns messages your app sent through the SDK, and a message sent with
-    `clm sqs send-message` is visible to the SDK. State-backing rolls out per module — SQS is live; S3
+    `clb sqs receive-message` returns messages your app sent through the SDK, and a message sent with
+    `clb sqs send-message` is visible to the SDK. State-backing rolls out per module — SQS is live; S3
     and Secrets Manager commands are still synthetic until their own state-backing lands.
 
 ## How new modules appear automatically
@@ -152,7 +152,7 @@ Because commands come from `/api/status`, the CLI needs no change when a module 
 
 - A module that implements [`CloudStubApiService`](module-authoring.md#8-exposing-cli-commands-via-the-rest-api)
   contributes routes under `/api/<service>/…`, each advertising a command name and parameters.
-- Start CloudStub with that module on the classpath and its commands appear under `clm <service>`.
+- Start CloudStub with that module on the classpath and its commands appear under `clb <service>`.
 - Restrict the loaded services with `--services=<a,b>` and the CLI offers only those services — a
   service that is not loaded has no command at all.
 

@@ -30,12 +30,28 @@ public final class CliDispatch {
                     "--maven-base-url",
                     "--host");
 
+    /** Flags the server launcher does not understand, so they belong to the CLI. */
+    private static final Set<String> HELP_VERSION_FLAGS =
+            Set.of("--help", "-h", "--version", "-V");
+
     private CliDispatch() {}
 
     /** True when the arguments name a CLI command rather than a server start. */
     public static boolean isCliInvocation(String[] args) {
-        String command = firstCommandToken(args);
-        return command != null && !command.equals("serve");
+        for (int i = 0; i < args.length; i++) {
+            String a = args[i];
+            if (a.startsWith("-")) {
+                if (HELP_VERSION_FLAGS.contains(a)) {
+                    return true;
+                }
+                if (VALUE_FLAGS.contains(a)) {
+                    i++; // skip the value of a space-form flag
+                }
+                continue;
+            }
+            return !a.equals("serve"); // first command token
+        }
+        return false; // only server flags (or empty) → server start
     }
 
     /**
@@ -60,20 +76,5 @@ public final class CliDispatch {
             return args; // first command token is not `serve`
         }
         return args;
-    }
-
-    /** The first token that is neither a flag nor a space-form flag value, or {@code null}. */
-    private static String firstCommandToken(String[] args) {
-        for (int i = 0; i < args.length; i++) {
-            String a = args[i];
-            if (a.startsWith("-")) {
-                if (VALUE_FLAGS.contains(a)) {
-                    i++; // skip the value of a space-form flag
-                }
-                continue;
-            }
-            return a;
-        }
-        return null;
     }
 }
