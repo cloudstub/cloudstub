@@ -1,7 +1,6 @@
 # Build output and dependencies
 **/build/**
 **/generated/**
-node_modules/
 
 # The Angular console module has its own frontend tooling (eslint/prettier via npm).
 cloudstub-console/

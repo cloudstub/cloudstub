@@ -44,6 +44,7 @@ nav:
       - SDK v1 Support: sdk-v1.md
   - Services:
       - services/index.md
+      - AWS Secrets Manager: services/secretsmanager.md
       - Amazon SNS: services/sns.md
       - Amazon SQS: services/sqs.md
   - Module Authoring: module-authoring.md

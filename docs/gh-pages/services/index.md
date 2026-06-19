@@ -6,6 +6,14 @@ CloudStub mocks one AWS service per module. Type to filter, or pick a service be
 
 <div class="grid cards" markdown>
 
+- **AWS Secrets Manager**
+
+    ---
+
+    Stateful secret storage — a secret created is returned by a later get over the AWS JSON protocol.
+
+    [Open the Secrets Manager guide →](secretsmanager.md)
+
 - **Amazon SNS**
 
     ---
