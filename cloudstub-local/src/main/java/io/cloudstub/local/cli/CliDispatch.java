@@ -31,8 +31,7 @@ public final class CliDispatch {
                     "--host");
 
     /** Flags the server launcher does not understand, so they belong to the CLI. */
-    private static final Set<String> HELP_VERSION_FLAGS =
-            Set.of("--help", "-h", "--version", "-V");
+    private static final Set<String> HELP_VERSION_FLAGS = Set.of("--help", "-h", "--version", "-V");
 
     private CliDispatch() {}
 
