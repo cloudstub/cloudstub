@@ -50,14 +50,16 @@ public class CloudStubCli implements Callable<Integer> {
     @Option(
             names = "--host",
             scope = ScopeType.INHERIT,
+            defaultValue = "${env:CLOUDSTUB_HOST:-localhost}",
             description = "CloudStub host (env: CLOUDSTUB_HOST, default: localhost)")
-    String host = "localhost";
+    String host;
 
     @Option(
             names = "--api-port",
             scope = ScopeType.INHERIT,
+            defaultValue = "${env:CLOUDSTUB_API_PORT:-4567}",
             description = "REST API port (env: CLOUDSTUB_API_PORT, default: 4567)")
-    int apiPort = 4567;
+    int apiPort;
 
     public String apiBaseUrl() {
         return "http://" + host + ":" + apiPort;

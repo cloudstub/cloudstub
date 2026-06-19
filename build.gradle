@@ -120,13 +120,12 @@ tasks.register('checkCompatibility') {
     dependsOn ':cloudstub-example:junit5:test', ':cloudstub-example:junit6:test'
 }
 
-// docs/javadoc/ destination is intentional: the docs workflow copies it under the MkDocs site at /javadoc/.
 tasks.register('generateDocs', Javadoc) {
     group = 'documentation'
     description = 'Generates aggregated Javadoc for the public modules into docs/javadoc/.'
     destinationDir = file("$rootDir/docs/javadoc")
     title = 'CloudStub API'
-    // Doc warnings must not fail the build — this produces a reference, not lint enforcement.
+
     failOnError = false
     options.addStringOption('Xdoclint:none', '-quiet')
     options.addStringOption('-add-stylesheet', file("$rootDir/gradle/javadoc/cloudstub-javadoc.css").absolutePath)
@@ -142,8 +141,6 @@ gradle.projectsEvaluated {
             it.path != ':cloudstub-example' && !it.path.startsWith(':cloudstub-example:')
     }
     tasks.named('generateDocs', Javadoc) {
-        // No explicit dependsOn compileJava needed: `classpath` (a buildable file collection)
-        // carries the implicit task dependency, and Javadoc compiles from sources.
         source docModules.collect { it.sourceSets.main.allJava }
         classpath = files(docModules.collect { it.sourceSets.main.compileClasspath })
     }

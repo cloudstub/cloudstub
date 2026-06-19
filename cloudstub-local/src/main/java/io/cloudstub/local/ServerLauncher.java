@@ -45,23 +45,20 @@ final class ServerLauncher {
 
         CloudStub cloudMock =
                 new CloudStub().withPort(config.port).withMaxRequestHistory(config.maxHistory);
-        // Always pass the enabled set (even when empty): the default is "no services", so the
-        // filter must be applied unconditionally rather than falling back to "all discovered".
+        // Empty enabled set means "no services" — apply the filter unconditionally.
         cloudMock.withEnabledServices(enabled);
         if (config.storeDir != null) {
             cloudMock.withStoreDirectory(config.storeDir);
         }
 
-        // API routes must track the enabled modules: a disabled service has no stubs, so it must
-        // not advertise REST routes (or CLI commands) either, otherwise the two views disagree.
+        // API routes track the enabled modules; a disabled service advertises no routes.
         List<CloudStubApiService> apiServices =
                 ServiceDiscovery.discoverApiServices(pluginLoader).stream()
                         .filter(svc -> enabled.contains(svc.serviceId()))
                         .toList();
 
-        // ModuleInitializer (inside CloudStub.start()) uses the thread's context classloader for
-        // ServiceLoader discovery. Point it at the plugin classloader so the module jars loaded
-        // from the plugin directory are visible when stubs are registered.
+        // CloudStub.start() runs ServiceLoader discovery on the thread's context classloader, so
+        // point it at the plugin classloader to make the module jars visible.
         Thread.currentThread().setContextClassLoader(pluginLoader);
 
         try (cloudMock;
@@ -87,8 +84,7 @@ final class ServerLauncher {
     private static List<String> resolveEnabled(
             List<String> available, Set<String> requested, boolean autoDownload) {
         if (requested == null) {
-            // No --services / CLOUDSTUB_SERVICES selection: load nothing. Services are opt-in,
-            // matching embedded mode where only modules placed on the classpath load.
+            // No selection: services are opt-in, so load nothing.
             return List.of();
         }
         List<String> unknown = requested.stream().filter(id -> !available.contains(id)).toList();

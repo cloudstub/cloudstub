@@ -15,9 +15,8 @@ public final class LocalMain {
     }
 
     public static void main(String[] args) throws Exception {
-        // Dual-mode: a command token (status, reset, sqs send-message, …) runs the CLI against a
-        // running instance; no token — or an explicit `serve` — boots the server. The CLI path must
-        // not touch CloudStub/WireMock classes, so they stay unloaded and CLI startup stays snappy.
+        // A command token runs the CLI; no token (or `serve`) boots the server. The CLI path avoids
+        // loading CloudStub/WireMock classes.
         if (CliDispatch.isCliInvocation(args)) {
             System.exit(CloudStubCli.run(args));
             return;
