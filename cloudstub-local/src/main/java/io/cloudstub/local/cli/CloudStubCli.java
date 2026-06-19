@@ -105,10 +105,6 @@ public class CloudStubCli implements Callable<Integer> {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Dynamic command discovery
-    // -------------------------------------------------------------------------
-
     /** Build {@code <service> <command>} subcommands from the routes advertised by /api/status. */
     private static void addServiceCommands(CommandLine root, JsonNode status) {
         Map<String, CommandLine> groups = new LinkedHashMap<>();
@@ -167,10 +163,6 @@ public class CloudStubCli implements Callable<Integer> {
         }
         return false; // no subcommand token → help/usage, which works offline
     }
-
-    // -------------------------------------------------------------------------
-    // Execution
-    // -------------------------------------------------------------------------
 
     private static int dispatch(ParseResult parseResult, ApiClient api) {
         Integer help = CommandLine.executeHelpRequest(parseResult);
