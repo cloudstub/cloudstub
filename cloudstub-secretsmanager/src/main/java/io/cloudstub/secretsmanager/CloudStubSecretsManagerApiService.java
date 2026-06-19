@@ -90,20 +90,22 @@ public class CloudStubSecretsManagerApiService implements CloudStubApiService {
     private ApiResponse put(ApiRequest req) {
         String name = req.queryParams().getOrDefault("name", "");
         String value = req.queryParams().getOrDefault("value", "");
-        Map<String, String> secret = read(SecretsManagerKeys.secretKey(name));
-        if (secret == null) {
-            secret = new LinkedHashMap<>();
-            secret.put("arn", SecretsManagerJson.arn(name));
-            secret.put("name", name);
-            secret.put("description", "");
-            secret.put("createdDate", String.valueOf(Instant.now().getEpochSecond()));
+        synchronized (store) {
+            Map<String, String> secret = read(SecretsManagerKeys.secretKey(name));
+            if (secret == null) {
+                secret = new LinkedHashMap<>();
+                secret.put("arn", SecretsManagerJson.arn(name));
+                secret.put("name", name);
+                secret.put("description", "");
+                secret.put("createdDate", String.valueOf(Instant.now().getEpochSecond()));
+            }
+            String versionId = UUID.randomUUID().toString();
+            secret.put("secretString", value);
+            secret.put("versionId", versionId);
+            store.put(SecretsManagerKeys.secretKey(name), secret);
+            return new ApiResponse(
+                    200, Map.of("name", name, "arn", secret.get("arn"), "versionId", versionId));
         }
-        String versionId = UUID.randomUUID().toString();
-        secret.put("secretString", value);
-        secret.put("versionId", versionId);
-        store.put(SecretsManagerKeys.secretKey(name), secret);
-        return new ApiResponse(
-                200, Map.of("name", name, "arn", secret.get("arn"), "versionId", versionId));
     }
 
     private ApiResponse delete(ApiRequest req) {

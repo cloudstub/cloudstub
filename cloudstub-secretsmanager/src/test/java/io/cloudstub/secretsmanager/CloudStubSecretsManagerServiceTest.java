@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.secretsmanager.model.DescribeSecretRespon
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
 import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueResponse;
 import software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.secretsmanager.model.SecretsManagerException;
 
 /**
  * Tests for {@link CloudStubSecretsManagerService}.
@@ -164,6 +165,15 @@ class CloudStubSecretsManagerServiceTest {
         assertEquals(1, response.errors().size());
         assertEquals("batch-missing", response.errors().get(0).secretId());
         assertEquals("ResourceNotFoundException", response.errors().get(0).errorCode());
+    }
+
+    @Test
+    void createSecretWithBlankNameIsRejectedAndDoesNotPoisonState() {
+        assertThrows(
+                SecretsManagerException.class,
+                () -> client.createSecret(b -> b.name("").secretString("x")));
+        // The rejected create must not have written a malformed entry that breaks ListSecrets.
+        assertTrue(client.listSecrets().secretList().isEmpty());
     }
 
     @Test
