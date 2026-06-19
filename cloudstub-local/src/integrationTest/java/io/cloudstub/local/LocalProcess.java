@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Socket;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +14,9 @@ import java.util.function.Predicate;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Launches the local fat JAR as a subprocess and waits until it is accepting connections. Captures
- * the process stdout so tests can assert on startup log lines.
+ * Launches the local fat JAR as a subprocess and waits until it has finished registering module
+ * stubs (the "CloudStub started on port" line), not merely until the port binds. Captures the
+ * process stdout so tests can assert on startup log lines.
  */
 final class LocalProcess implements AutoCloseable {
 
@@ -176,11 +176,10 @@ final class LocalProcess implements AutoCloseable {
                 throw new IllegalStateException(
                         "Local process exited unexpectedly (exit=" + process.exitValue() + ")");
             }
-            try (Socket s = new Socket("localhost", port)) {
-                return; // connected — server is ready
-            } catch (IOException e) {
-                Thread.sleep(200);
+            if (output.stream().anyMatch(line -> line.startsWith("CloudStub started on port"))) {
+                return;
             }
+            Thread.sleep(200);
         }
         throw new IllegalStateException(
                 "Local server did not start on port " + port + " within 30 s");

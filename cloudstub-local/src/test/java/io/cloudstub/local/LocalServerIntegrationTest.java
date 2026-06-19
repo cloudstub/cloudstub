@@ -207,10 +207,6 @@ class LocalServerIntegrationTest {
         assertEquals(405, resp.statusCode());
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
     private void restartApiWith(CloudStubApiService... services) throws IOException {
         localServer.stop();
         localServer = new LocalServer(cloudMock, 0, List.of(services));

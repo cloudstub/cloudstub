@@ -107,10 +107,6 @@ public final class LocalServer implements Closeable {
         return server != null ? server.getAddress().getPort() : port;
     }
 
-    // -------------------------------------------------------------------------
-    // Route registration
-    // -------------------------------------------------------------------------
-
     private static final QueryParam SERVICE_PARAM =
             new QueryParam(
                     "service",
@@ -246,10 +242,6 @@ public final class LocalServer implements Closeable {
                 });
     }
 
-    // -------------------------------------------------------------------------
-    // Core route handlers
-    // -------------------------------------------------------------------------
-
     private ApiResponse handleStatus(ApiRequest req) {
         Instant now = Instant.now();
         Instant started = cloudMock.startedAt();
@@ -289,10 +281,6 @@ public final class LocalServer implements Closeable {
 
         return new ApiResponse(200, Map.of("requests", items));
     }
-
-    // -------------------------------------------------------------------------
-    // Serialisation helpers
-    // -------------------------------------------------------------------------
 
     private List<Map<String, Object>> serializeModules(List<ModuleStatus> modules) {
         return modules.stream()
@@ -413,10 +401,6 @@ public final class LocalServer implements Closeable {
         return param;
     }
 
-    // -------------------------------------------------------------------------
-    // HTTP utilities
-    // -------------------------------------------------------------------------
-
     private void sendJson(HttpExchange exchange, int status, Object body) throws IOException {
         byte[] bytes = mapper.writeValueAsBytes(body);
         exchange.getResponseHeaders().set(CONTENT_TYPE, APPLICATION_JSON);
@@ -456,10 +440,6 @@ public final class LocalServer implements Closeable {
     private static String decode(String value) {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
-
-    // -------------------------------------------------------------------------
-    // Internal types
-    // -------------------------------------------------------------------------
 
     @FunctionalInterface
     private interface RouteHandler {

@@ -98,17 +98,34 @@ class SnsTopicTest {
 
 ## REST/CLI access
 
-The module exposes a [REST API](../rest-api.md) under `/api/sns/…`. These routes read and write the
-same state as the AWS-protocol stubs — a topic created with the SDK is returned by
-`GET /api/sns/list-topics`, and vice versa. Parameters are passed as query-string values.
+The module exposes a [REST API](../rest-api.md) under `/api/sns/…`, reachable from the terminal with
+the [CLI](../cli.md) (`clb`) or directly with `curl`. These routes read and write the same state as
+the AWS-protocol stubs — a topic created with the SDK is returned by `GET /api/sns/list-topics`, and
+vice versa. Parameters are passed as query-string values.
 
-```
-$ curl -s -X POST "http://localhost:4567/api/sns/create-topic?topic=orders"
-{"topicArn":"arn:aws:sns:us-east-1:000000000000:orders"}
+=== "CLI"
 
-$ curl -s "http://localhost:4567/api/sns/list-topics"
-{"topics":["arn:aws:sns:us-east-1:000000000000:orders"]}
-```
+    ```
+    $ clb sns create-topic --topic orders
+    {
+      "topicArn" : "arn:aws:sns:us-east-1:000000000000:orders"
+    }
+
+    $ clb sns list-topics
+    {
+      "topics" : [ "arn:aws:sns:us-east-1:000000000000:orders" ]
+    }
+    ```
+
+=== "curl"
+
+    ```
+    $ curl -s -X POST "http://localhost:4567/api/sns/create-topic?topic=orders"
+    {"topicArn":"arn:aws:sns:us-east-1:000000000000:orders"}
+
+    $ curl -s "http://localhost:4567/api/sns/list-topics"
+    {"topics":["arn:aws:sns:us-east-1:000000000000:orders"]}
+    ```
 
 | Route                            | Parameters                     | Description                       |
 | -------------------------------- | ------------------------------ | --------------------------------- |

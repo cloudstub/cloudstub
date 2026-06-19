@@ -24,17 +24,38 @@ Applications talk to it through the **AWS SDK** by pointing the client's endpoin
 (`http://localhost:4566`) — see the [Test example](#test-example) for an `SqsClient` setup and
 [Standalone Mode](../standalone.md) for the full configuration.
 
-To inspect and drive queue state from the terminal, call the [REST API](../rest-api.md) on the API port
-(`4567`) — for example with `curl`. Parameters are passed as query-string values. Send a message and
-receive it back:
+To inspect and drive queue state from the terminal, use the [CLI](../cli.md) (`clb`), or call the
+[REST API](../rest-api.md) on the API port (`4567`) directly — for example with `curl`. Parameters
+are passed as query-string values. Send a message and receive it back:
 
-```
-$ curl -s -X POST "http://localhost:4567/api/sqs/send-message?queue=orders&body=hello"
-{"md5OfBody":"5d41402abc4b2a76b9719d911017c592","messageId":"7568e4c5-4484-4291-a44b-e648b8c47a26"}
+=== "CLI"
 
-$ curl -s "http://localhost:4567/api/sqs/receive-message?queue=orders"
-{"messages":[{"body":"hello","messageId":"7568e4c5-4484-4291-a44b-e648b8c47a26","receiptHandle":"7568e4c5-4484-4291-a44b-e648b8c47a26"}]}
-```
+    ```
+    $ clb sqs send-message --queue orders --body hello
+    {
+      "md5OfBody" : "5d41402abc4b2a76b9719d911017c592",
+      "messageId" : "7568e4c5-4484-4291-a44b-e648b8c47a26"
+    }
+
+    $ clb sqs receive-message --queue orders
+    {
+      "messages" : [ {
+        "body" : "hello",
+        "messageId" : "7568e4c5-4484-4291-a44b-e648b8c47a26",
+        "receiptHandle" : "7568e4c5-4484-4291-a44b-e648b8c47a26"
+      } ]
+    }
+    ```
+
+=== "curl"
+
+    ```
+    $ curl -s -X POST "http://localhost:4567/api/sqs/send-message?queue=orders&body=hello"
+    {"md5OfBody":"5d41402abc4b2a76b9719d911017c592","messageId":"7568e4c5-4484-4291-a44b-e648b8c47a26"}
+
+    $ curl -s "http://localhost:4567/api/sqs/receive-message?queue=orders"
+    {"messages":[{"body":"hello","messageId":"7568e4c5-4484-4291-a44b-e648b8c47a26","receiptHandle":"7568e4c5-4484-4291-a44b-e648b8c47a26"}]}
+    ```
 
 The REST API and the SDK share the same state store, so a message your application sends through the
 SDK is returned by `GET /api/sqs/receive-message`, and vice versa. See
