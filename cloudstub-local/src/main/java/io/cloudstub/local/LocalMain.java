@@ -4,6 +4,8 @@ import io.cloudstub.core.CloudStub;
 import io.cloudstub.core.download.ModuleDownloadException;
 import io.cloudstub.core.download.ModuleDownloader;
 import io.cloudstub.core.spi.CloudStubApiService;
+import io.cloudstub.local.cli.CliDispatch;
+import io.cloudstub.local.cli.CloudStubCli;
 import io.cloudstub.local.config.LocalConfig;
 import io.cloudstub.local.config.exception.LocalConfigException;
 import io.cloudstub.local.config.resolver.ApiPortResolver;
@@ -37,6 +39,17 @@ public final class LocalMain {
     private static final Logger log = LoggerFactory.getLogger(LocalMain.class);
 
     public static void main(String[] args) throws Exception {
+        // Dual-mode: a command token (status, reset, sqs send-message, …) runs the CLI against a
+        // running instance; no token — or an explicit `serve` — boots the server. The CLI path must
+        // not touch CloudStub/WireMock classes, so they stay unloaded and CLI startup stays snappy.
+        if (CliDispatch.isCliInvocation(args)) {
+            System.exit(CloudStubCli.run(args));
+            return;
+        }
+        serve(CliDispatch.stripServe(args));
+    }
+
+    private static void serve(String[] args) throws Exception {
         Config resolved;
         try {
             resolved = Config.resolve(args);

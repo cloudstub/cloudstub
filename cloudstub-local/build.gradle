@@ -15,6 +15,7 @@ configurations {
 dependencies {
     implementation project(':cloudstub-core')
     implementation libs.jackson.databind
+    implementation libs.picocli
     implementation libs.slf4j.api
     runtimeOnly libs.slf4j.simple
 
@@ -65,6 +66,41 @@ shadowJar {
 tasks.register('copyModuleJars', Copy) {
     from configurations.integrationTestModuleJars
     into "${buildDir}/modules"
+}
+
+// Distribution: the fat JAR plus the launcher scripts, laid out so the launchers find the jar at
+// `../lib/cloudstub-local.jar`. One unpack puts `cloudstub` / `clb` on PATH and the server + CLI with
+// them — the "one download" install. `-Pconsole` bundles the web console into the jar (see below).
+def distLayout = copySpec {
+    into('bin') {
+        from('bin')
+        fileMode = 0755
+    }
+    into('lib') {
+        from(shadowJar)
+    }
+}
+
+tasks.register('cloudstubDistTar', Tar) {
+    dependsOn shadowJar
+    archiveBaseName.set('cloudstub')
+    archiveVersion.set(project.version.toString())
+    compression = Compression.GZIP
+    archiveExtension.set('tar.gz')
+    into('cloudstub') { with distLayout }
+}
+
+tasks.register('cloudstubDistZip', Zip) {
+    dependsOn shadowJar
+    archiveBaseName.set('cloudstub')
+    archiveVersion.set(project.version.toString())
+    into('cloudstub') { with distLayout }
+}
+
+tasks.register('cloudstubDist') {
+    description = 'Build the cloudstub distribution archives (jar + launchers).'
+    group = 'distribution'
+    dependsOn 'cloudstubDistTar', 'cloudstubDistZip'
 }
 
 // The web console (built by :cloudstub-console) is embedded into the fat JAR and the `run` task only

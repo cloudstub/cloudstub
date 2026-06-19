@@ -7,6 +7,7 @@ awssdkv1 = "1.12.770"
 junit    = "6.1.0"
 junit5   = "5.11.4"
 slf4j    = "2.0.18"
+picocli  = "4.7.6"
 
 [libraries]
 wiremock           = { module = "org.wiremock:wiremock",                     version.ref = "wiremock" }
@@ -26,3 +27,4 @@ slf4j-api          = { module = "org.slf4j:slf4j-api",                       ver
 slf4j-simple       = { module = "org.slf4j:slf4j-simple",                    version.ref = "slf4j" }
 smithy-model       = { module = "software.amazon.smithy:smithy-model",       version.ref = "smithy" }
 smithy-aws-traits  = { module = "software.amazon.smithy:smithy-aws-traits",  version.ref = "smithy" }
+picocli            = { module = "info.picocli:picocli",                      version.ref = "picocli" }
