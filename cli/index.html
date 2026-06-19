@@ -1076,10 +1076,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#clm-status" class="md-nav__link">
+  <a href="#clb-status" class="md-nav__link">
     <span class="md-ellipsis">
       
-        clm status
+        clb status
       
     </span>
   </a>
@@ -1087,10 +1087,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#clm-reset" class="md-nav__link">
+  <a href="#clb-reset" class="md-nav__link">
     <span class="md-ellipsis">
       
-        clm reset
+        clb reset
       
     </span>
   </a>
@@ -1156,37 +1156,36 @@
 
 
 <h1 id="cli">CLI</h1>
-<p><code>cloudstub-cli</code> is a small command-line client for a running <a href="../standalone/">standalone</a> CloudStub
+<p>The CloudStub CLI is a small command-line client for a running <a href="../standalone/">standalone</a> CloudStub
 instance. It lets you inspect and drive mock state from the terminal — list resources, send test
 data, reset services — without writing code or installing the AWS CLI.</p>
-<p>The CLI is a <strong>thin HTTP client over the <a href="../rest-api/">REST API</a></strong>. It has no dependency on
-CloudStub internals, WireMock, or any service module, and it does not need the AWS SDK. It
-discovers the available commands at runtime from <code>GET /api/status</code>, so a CloudStub instance with
-more modules loaded simply offers more commands — the CLI itself never changes.</p>
+<p>The CLI is a <strong>thin HTTP client over the <a href="../rest-api/">REST API</a></strong>. It discovers the available
+commands at runtime from <code>GET /api/status</code>, so a CloudStub instance with more modules loaded simply
+offers more commands — the CLI itself never changes.</p>
+<p>It ships in the same <code>cloudstub-local</code> fat JAR as the server: the jar is <strong>dual-mode</strong>. With no
+arguments (or an explicit <code>serve</code>) it starts the server; with a command token (<code>status</code>, <code>reset</code>,
+<code>sqs send-message</code>, …) it runs the CLI against an already-running instance. The CLI path never boots
+the mock, so commands start quickly.</p>
 <h2 id="install">Install</h2>
-<p>The CLI ships in its own repository, <a href="https://github.com/cloudstub/cloudstub-cli">cloudstub/cloudstub-cli</a>
-— it has no dependency on CloudStub and is released independently. Build the fat JAR from a clone
-(requires Java 17+):</p>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git clone https://github.com/cloudstub/cloudstub-cli
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>cd cloudstub-cli
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>./gradlew shadowJar
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a># output: build/libs/cloudstub-cli.jar
+<p>Build the <code>cloudstub-local</code> fat JAR (requires Java 17+):</p>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>./gradlew :cloudstub-local:shadowJar
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a># output: cloudstub-local/build/libs/cloudstub-local.jar
 </span></code></pre></div>
-<p>Run it via the bundled launcher scripts in <code>bin/</code> (<code>cloudstub</code> is the binary, <code>clm</code> is an identical
-alias — both work; put <code>bin/</code> on your <code>PATH</code>), or directly with <code>java -jar</code>:</p>
+<p>Run it via the bundled launcher scripts in <code>cloudstub-local/bin/</code> (<code>cloudstub</code> is the binary, <code>clb</code>
+is an identical short alias — both work; put <code>bin/</code> on your <code>PATH</code>), or directly with <code>java -jar</code>:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Launcher script</label><label for="__tabbed_1_2">java -jar</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>./bin/clm status
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>./bin/clb status
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>java -jar build/libs/cloudstub-cli.jar status
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar status
 </span></code></pre></div>
 </div>
 </div>
 </div>
-<p>The examples below use <code>clm</code>.</p>
+<p>The examples below use <code>clb</code>.</p>
 <h2 id="connecting">Connecting</h2>
 <p>The CLI talks only to the REST API port. Defaults match standalone mode, so with a server on the
 default port no configuration is needed.</p>
@@ -1216,19 +1215,19 @@ default port no configuration is needed.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>clm --api-port=9001 status
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>CLOUDSTUB_API_PORT=9001 clm status
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>clb --api-port=9001 status
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>CLOUDSTUB_API_PORT=9001 clb status
 </span></code></pre></div>
 <p>If the server is not reachable the CLI prints a clear message and exits non-zero:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$ clm status
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$ clb status
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>CloudStub is not running at http://localhost:4567.
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Start it with: java -jar cloudstub-local.jar
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Start it with: cloudstub serve
 </span></code></pre></div>
 <h2 id="global-commands">Global commands</h2>
 <p>These are always available, regardless of which modules are loaded.</p>
-<h3 id="clm-status"><code>clm status</code></h3>
+<h3 id="clb-status"><code>clb status</code></h3>
 <p>Shows the running instance: ports, uptime, and each loaded module with its stub count.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>$ clm status
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>$ clb status
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>mock port:     4566
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>api port:      4567
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>started at:    2026-06-06T10:00:00Z
@@ -1240,44 +1239,44 @@ default port no configuration is needed.</p>
 </span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>  secretsmanager   5 stub(s)
 </span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>  sqs              23 stub(s)
 </span></code></pre></div>
-<h3 id="clm-reset"><code>clm reset</code></h3>
+<h3 id="clb-reset"><code>clb reset</code></h3>
 <p>Clears mock state. With no argument it resets everything (and clears the request history); with
 <code>--service</code> it resets a single service.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>clm reset
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>clm reset --service sqs
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>clb reset
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>clb reset --service sqs
 </span></code></pre></div>
 <h2 id="service-commands">Service commands</h2>
-<p>Service commands follow the pattern <code>clm &lt;service&gt; &lt;action&gt;</code>. They are <strong>discovered at runtime</strong>:
+<p>Service commands follow the pattern <code>clb &lt;service&gt; &lt;action&gt;</code>. They are <strong>discovered at runtime</strong>:
 every module route advertised by <code>/api/status</code> becomes a subcommand, and each route parameter
-becomes an option. Run <code>clm --help</code> to see the services the connected instance exposes, and
-<code>clm &lt;service&gt; --help</code> for its actions.</p>
+becomes an option. Run <code>clb --help</code> to see the services the connected instance exposes, and
+<code>clb &lt;service&gt; --help</code> for its actions.</p>
 <p>The commands available today, with the reference modules loaded:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">SQS</label><label for="__tabbed_2_2">S3</label><label for="__tabbed_2_3">Secrets Manager</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>clm sqs list-queues
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>clm sqs send-message --queue orders --body &quot;hello&quot;
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>clm sqs receive-message --queue orders
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>clm sqs purge-queue --queue orders
+<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>clb sqs list-queues
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>clb sqs send-message --queue orders --body &quot;hello&quot;
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>clb sqs receive-message --queue orders
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>clb sqs purge-queue --queue orders
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>clm s3 list-buckets
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>clm s3 list-objects --bucket my-bucket
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>clm s3 put-object --bucket my-bucket --key file.txt --body &quot;contents&quot;
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>clm s3 get-object --bucket my-bucket --key file.txt
+<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>clb s3 list-buckets
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>clb s3 list-objects --bucket my-bucket
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>clb s3 put-object --bucket my-bucket --key file.txt --body &quot;contents&quot;
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>clb s3 get-object --bucket my-bucket --key file.txt
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>clm secretsmanager list
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>clm secretsmanager get --name my-secret
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>clm secretsmanager put --name my-secret --value s3cr3t
+<div class="highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>clb secretsmanager list
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>clb secretsmanager get --name my-secret
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>clb secretsmanager put --name my-secret --value s3cr3t
 </span></code></pre></div>
 </div>
 </div>
 </div>
 <p>Responses are printed as JSON:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>$ clm sqs send-message --queue orders --body &quot;hello&quot;
+<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>$ clb sqs send-message --queue orders --body &quot;hello&quot;
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>{
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  &quot;md5OfBody&quot; : &quot;5d41402abc4b2a76b9719d911017c592&quot;,
 </span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  &quot;messageId&quot; : &quot;f8eafb78-edcd-46f7-b78a-43b9e160cbef&quot;
@@ -1286,8 +1285,8 @@ becomes an option. Run <code>clm --help</code> to see the services the connected
 <div class="admonition note">
 <p class="admonition-title">State-backed where the module supports it</p>
 <p>The CLI and the AWS SDK share the <strong>same state store</strong>. For state-backed modules (SQS),
-<code>clm sqs receive-message</code> returns messages your app sent through the SDK, and a message sent with
-<code>clm sqs send-message</code> is visible to the SDK. State-backing rolls out per module — SQS is live; S3
+<code>clb sqs receive-message</code> returns messages your app sent through the SDK, and a message sent with
+<code>clb sqs send-message</code> is visible to the SDK. State-backing rolls out per module — SQS is live; S3
 and Secrets Manager commands are still synthetic until their own state-backing lands.</p>
 </div>
 <h2 id="how-new-modules-appear-automatically">How new modules appear automatically</h2>
@@ -1295,7 +1294,7 @@ and Secrets Manager commands are still synthetic until their own state-backing l
 <ul>
 <li>A module that implements <a href="../module-authoring/#8-exposing-cli-commands-via-the-rest-api"><code>CloudStubApiService</code></a>
   contributes routes under <code>/api/&lt;service&gt;/…</code>, each advertising a command name and parameters.</li>
-<li>Start CloudStub with that module on the classpath and its commands appear under <code>clm &lt;service&gt;</code>.</li>
+<li>Start CloudStub with that module on the classpath and its commands appear under <code>clb &lt;service&gt;</code>.</li>
 <li>Restrict the loaded services with <code>--services=&lt;a,b&gt;</code> and the CLI offers only those services — a
   service that is not loaded has no command at all.</li>
 </ul>

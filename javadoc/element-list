@@ -9,6 +9,10 @@ io.cloudstub.core.spi
 io.cloudstub.core.spi.restapi
 io.cloudstub.junit
 io.cloudstub.local
+io.cloudstub.local.cli
+io.cloudstub.local.cli.command
+io.cloudstub.local.cli.http
+io.cloudstub.local.cli.util
 io.cloudstub.local.config
 io.cloudstub.local.config.exception
 io.cloudstub.local.config.resolver

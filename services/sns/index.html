@@ -1333,15 +1333,34 @@ service end to end with <code>CloudStubExtension</code>:</p>
 </span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="restcli-access">REST/CLI access</h2>
-<p>The module exposes a <a href="../../rest-api/">REST API</a> under <code>/api/sns/…</code>. These routes read and write the
-same state as the AWS-protocol stubs — a topic created with the SDK is returned by
-<code>GET /api/sns/list-topics</code>, and vice versa. Parameters are passed as query-string values.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$ curl -s -X POST &quot;http://localhost:4567/api/sns/create-topic?topic=orders&quot;
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>{&quot;topicArn&quot;:&quot;arn:aws:sns:us-east-1:000000000000:orders&quot;}
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>$ curl -s &quot;http://localhost:4567/api/sns/list-topics&quot;
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>{&quot;topics&quot;:[&quot;arn:aws:sns:us-east-1:000000000000:orders&quot;]}
+<p>The module exposes a <a href="../../rest-api/">REST API</a> under <code>/api/sns/…</code>, reachable from the terminal with
+the <a href="../../cli/">CLI</a> (<code>clb</code>) or directly with <code>curl</code>. These routes read and write the same state as
+the AWS-protocol stubs — a topic created with the SDK is returned by <code>GET /api/sns/list-topics</code>, and
+vice versa. Parameters are passed as query-string values.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">curl</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$ clb sns create-topic --topic orders
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>{
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  &quot;topicArn&quot; : &quot;arn:aws:sns:us-east-1:000000000000:orders&quot;
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>}
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>$ clb sns list-topics
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>{
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  &quot;topics&quot; : [ &quot;arn:aws:sns:us-east-1:000000000000:orders&quot; ]
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>}
 </span></code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$ curl -s -X POST &quot;http://localhost:4567/api/sns/create-topic?topic=orders&quot;
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>{&quot;topicArn&quot;:&quot;arn:aws:sns:us-east-1:000000000000:orders&quot;}
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>$ curl -s &quot;http://localhost:4567/api/sns/list-topics&quot;
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>{&quot;topics&quot;:[&quot;arn:aws:sns:us-east-1:000000000000:orders&quot;]}
+</span></code></pre></div>
+</div>
+</div>
+</div>
 <table>
 <thead>
 <tr>

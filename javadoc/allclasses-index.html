@@ -60,6 +60,14 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/local/cli/http/ApiClient.html" title="class in io.cloudstub.local.cli.http">ApiClient</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Generic HTTP client for the CloudStub REST API.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab4"><a href="io/cloudstub/local/cli/http/ApiClient.Result.html" title="class in io.cloudstub.local.cli.http">ApiClient.Result</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab4">
+<div class="block">Result of an API call: the HTTP status and the parsed JSON body (never null).</div>
+</div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/restapi/ApiHandler.html" title="interface in io.cloudstub.core.spi.restapi">ApiHandler</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Handler for a single API route registered by a service module.</div>
@@ -99,20 +107,28 @@ loadScripts(document, 'script');</script>
 <div class="block">Manages the <code>aws.endpoint-url</code> system property that redirects AWS SDK v2 traffic to the
  embedded mock server.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/local/cli/CliDispatch.html" title="class in io.cloudstub.local.cli">CliDispatch</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Decides whether a <code>cloudstub-local</code> invocation runs the server or the CLI.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Entry point for the CloudStub framework.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab5"><a href="io/cloudstub/core/exception/CloudStubAlreadyStartedException.html" title="class in io.cloudstub.core.exception">CloudStubAlreadyStartedException</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab5">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/restapi/CloudStubApiContext.html" title="interface in io.cloudstub.core.spi.restapi">CloudStubApiContext</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab5"><a href="io/cloudstub/core/exception/CloudStubAlreadyStartedException.html" title="class in io.cloudstub.core.exception">CloudStubAlreadyStartedException</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab5">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/restapi/CloudStubApiContext.html" title="interface in io.cloudstub.core.spi.restapi">CloudStubApiContext</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Passed to <a href="io/cloudstub/core/spi/CloudStubApiService.html#registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)"><code>CloudStubApiService.registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)</code></a> at API-server startup.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/CloudStubApiService.html" title="interface in io.cloudstub.core.spi">CloudStubApiService</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/CloudStubApiService.html" title="interface in io.cloudstub.core.spi">CloudStubApiService</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Optional companion to <a href="io/cloudstub/core/spi/CloudStubService.html" title="interface in io.cloudstub.core.spi"><code>CloudStubService</code></a> for modules that want to expose API routes under
  <code>/api/&lt;serviceId&gt;/…</code>.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/local/cli/CloudStubCli.html" title="class in io.cloudstub.local.cli">CloudStubCli</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Entry point for the CloudStub CLI surface of <code>cloudstub-local</code>.</div>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/CloudStubContext.html" title="interface in io.cloudstub.core.spi">CloudStubContext</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
@@ -179,9 +195,17 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab5">
 <div class="block">Thrown when the persistent state store cannot read or write its backing file.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/sdkv1/CloudStubV1Endpoints.html" title="class in io.cloudstub.sdkv1">CloudStubV1Endpoints</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab5"><a href="io/cloudstub/local/cli/http/CloudStubUnavailableException.html" title="class in io.cloudstub.local.cli.http">CloudStubUnavailableException</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab5">
+<div class="block">Thrown when the CloudStub REST API cannot be reached (server down, wrong port, network error).</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/sdkv1/CloudStubV1Endpoints.html" title="class in io.cloudstub.sdkv1">CloudStubV1Endpoints</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Helper for pointing AWS SDK v1 clients at a running CloudStub instance.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab4"><a href="io/cloudstub/local/cli/Conn.html" title="class in io.cloudstub.local.cli">Conn</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab4">
+<div class="block">Connection settings for a running CloudStub instance.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/download/CoreVersion.html" title="class in io.cloudstub.core.download">CoreVersion</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -281,14 +305,20 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Resolves the port the mock server binds.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/internal/RequestHistory.html" title="class in io.cloudstub.core.internal">RequestHistory</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/local/cli/util/Printer.html" title="class in io.cloudstub.local.cli.util">Printer</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Terminal output helpers.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/internal/RequestHistory.html" title="class in io.cloudstub.core.internal">RequestHistory</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Read/clear view over the WireMock request journal, translated into CloudStub's <a href="io/cloudstub/core/restapi/RequestRecord.html" title="class in io.cloudstub.core.restapi"><code>RequestRecord</code></a> domain model.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab4"><a href="io/cloudstub/core/restapi/RequestRecord.html" title="class in io.cloudstub.core.restapi">RequestRecord</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab4">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab4"><a href="io/cloudstub/core/restapi/RequestRecord.html" title="class in io.cloudstub.core.restapi">RequestRecord</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab4">
 <div class="block">Immutable snapshot of a single request served by the mock engine.</div>
 </div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/local/cli/command/ResetCommand.html" title="class in io.cloudstub.local.cli.command">ResetCommand</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/internal/ServiceRegistry.html" title="class in io.cloudstub.core.internal">ServiceRegistry</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Records which stubs each service module registered, so <a href="io/cloudstub/core/internal/CloudStubResponseTransformer.html" title="class in io.cloudstub.core.internal"><code>CloudStubResponseTransformer</code></a> can
@@ -335,41 +365,43 @@ loadScripts(document, 'script');</script>
  requested <a href="io/cloudstub/core/StatePersistence.html" title="enum class in io.cloudstub.core"><code>StatePersistence</code></a> backend when a directory is configured, otherwise a throwaway
  in-memory store.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/local/config/resolver/StoreDirectoryResolver.html" title="class in io.cloudstub.local.config.resolver">StoreDirectoryResolver</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/local/cli/command/StatusCommand.html" title="class in io.cloudstub.local.cli.command">StatusCommand</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/local/config/resolver/StoreDirectoryResolver.html" title="class in io.cloudstub.local.config.resolver">StoreDirectoryResolver</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Resolves the directory used for persistent state in local mode.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/StubHandler.html" title="interface in io.cloudstub.core.spi">StubHandler</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/StubHandler.html" title="interface in io.cloudstub.core.spi">StubHandler</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">A request-time handler for a stateful stub.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab4"><a href="io/cloudstub/core/restapi/StubInfo.html" title="class in io.cloudstub.core.restapi">StubInfo</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab4">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab4"><a href="io/cloudstub/core/restapi/StubInfo.html" title="class in io.cloudstub.core.restapi">StubInfo</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab4">
 <div class="block">Describes a single registered stub: its protocol and match key.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/StubRegistrar.html" title="interface in io.cloudstub.core.spi">StubRegistrar</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/StubRegistrar.html" title="interface in io.cloudstub.core.spi">StubRegistrar</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Facade through which service modules register HTTP stubs without any direct dependency on the
  underlying networking driver (WireMock).</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/StubRequest.html" title="interface in io.cloudstub.core.spi">StubRequest</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/cloudstub/core/spi/StubRequest.html" title="interface in io.cloudstub.core.spi">StubRequest</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Read-only view of an incoming HTTP request, handed to a <a href="io/cloudstub/core/spi/StubHandler.html" title="interface in io.cloudstub.core.spi"><code>StubHandler</code></a> at request time.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/spi/StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/spi/StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Immutable HTTP response returned by a <a href="io/cloudstub/core/spi/StubHandler.html" title="interface in io.cloudstub.core.spi"><code>StubHandler</code></a>.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/spi/StubTemplates.html" title="class in io.cloudstub.core.spi">StubTemplates</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/spi/StubTemplates.html" title="class in io.cloudstub.core.spi">StubTemplates</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Loads Handlebars response templates bundled as classpath resources in a module's JAR.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/internal/WireMockServerFactory.html" title="class in io.cloudstub.core.internal">WireMockServerFactory</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/internal/WireMockServerFactory.html" title="class in io.cloudstub.core.internal">WireMockServerFactory</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Builds and starts the embedded WireMock server from <a href="io/cloudstub/core/internal/CloudStubSettings.html" title="class in io.cloudstub.core.internal"><code>CloudStubSettings</code></a>.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/internal/WireMockStubRegistrar.html" title="class in io.cloudstub.core.internal">WireMockStubRegistrar</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/cloudstub/core/internal/WireMockStubRegistrar.html" title="class in io.cloudstub.core.internal">WireMockStubRegistrar</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Internal <a href="io/cloudstub/core/spi/StubRegistrar.html" title="interface in io.cloudstub.core.spi"><code>StubRegistrar</code></a> implementation that delegates to a live WireMock server.</div>
 </div>
 </div>
