@@ -1217,12 +1217,12 @@
 
 <h1 id="console">Console</h1>
 <p>The CloudStub Console is a web interface for a running <a href="../standalone/">standalone</a> CloudStub
-instance — visual access to mock state (loaded modules, request history, per-service operations)
+instance: visual access to mock state (loaded modules, request history, per-service operations)
 without the terminal or writing code.</p>
 <p>It is <strong>served by the standalone server itself</strong>: start <code>cloudstub-local</code> and open
-<strong><code>http://localhost:4567/console</code></strong> in a browser (the API port — opening <code>http://localhost:4567/</code>
+<strong><code>http://localhost:4567/console</code></strong> in a browser (the API port; opening <code>http://localhost:4567/</code>
 redirects there). There is no separate app to install or host.</p>
-<p>The console is a <strong>thin client over the <a href="../rest-api/">REST API</a></strong> — it only speaks HTTP to
+<p>The console is a <strong>thin client over the <a href="../rest-api/">REST API</a></strong>: it only speaks HTTP to
 <code>/api/status</code> and <code>/api/&lt;service&gt;/…</code>, building its navigation at runtime from <code>GET /api/status</code>, so
 an instance with more modules loaded simply shows more services; the console itself never changes.</p>
 <h2 id="open-it">Open it</h2>
@@ -1231,7 +1231,7 @@ an instance with more modules loaded simply shows more services; the console its
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a># then open http://localhost:4567/console
 </span></code></pre></div>
 <p>The console is bundled in the <code>cloudstub-local</code> distributable, so there is nothing else to download.
-Because it is served from the same origin as the API it calls, no connection setup is needed — it
+Because it is served from the same origin as the API it calls, no connection setup is needed; it
 talks to the instance that served it.</p>
 <div class="admonition note">
 <p class="admonition-title">Developing the console</p>
@@ -1243,15 +1243,15 @@ headers, so a <code>npm start</code> dev server on another port can call a runni
 <p>The console polls <code>GET /api/status</code> every few seconds, so the dashboard and navigation stay current
 as modules load or state changes.</p>
 <ul>
-<li><strong>Dashboard</strong> — uptime, mock and API ports, the loaded modules, and the number of stubs each
+<li><strong>Dashboard</strong>: uptime, mock and API ports, the loaded modules, and the number of stubs each
   registers. Reset all state or a single service with one click.</li>
-<li><strong>Request history</strong> — every request captured by the mock, filterable by service, with method and
+<li><strong>Request history</strong>: every request captured by the mock, filterable by service, with method and
   status shown at a glance. Backed by <a href="../rest-api/"><code>GET /api/history</code></a>.</li>
-<li><strong>Service browser</strong> — one panel per module, <strong>built dynamically from the module's routes</strong>. Each
+<li><strong>Service browser</strong>: one panel per module, <strong>built dynamically from the module's routes</strong>. Each
   route advertised by <code>/api/status</code> becomes a form: fill in its parameters, send it, and the
   response is shown with JSON syntax highlighting. For state-backed modules (SQS) the response is
   live data, so a message your app sent through the AWS SDK shows up here.</li>
-<li><strong>Dark and light mode</strong> — follows your system preference and can be toggled; the choice is
+<li><strong>Dark and light mode</strong>: follows your system preference and can be toggled; the choice is
   remembered.</li>
 </ul>
 <h2 id="how-new-modules-appear-automatically">How new modules appear automatically</h2>
@@ -1261,7 +1261,7 @@ as modules load or state changes.</p>
   contributes routes under <code>/api/&lt;service&gt;/…</code>, each advertising a command name and parameters.</li>
 <li>Start CloudStub with that module on the classpath and a panel for it appears in the service
   browser, with a form per route.</li>
-<li>Restrict the loaded services with <code>--services=&lt;a,b&gt;</code> and the console shows only those services — a
+<li>Restrict the loaded services with <code>--services=&lt;a,b&gt;</code> and the console shows only those services: a
   service that is not loaded has no panel at all.</li>
 </ul>
 <div class="admonition note">
@@ -1269,7 +1269,7 @@ as modules load or state changes.</p>
 <p>The console and the AWS SDK read the <strong>same state store</strong>, just through different ports. The mock
 port speaks the AWS wire protocol; the API port (which the console uses) is a friendly JSON view of
 the same data. So for state-backed modules, <code>receive-message</code> in the console returns the message
-your app sent through the SDK. State-backing rolls out per module — SQS is live; S3 and Secrets
+your app sent through the SDK. State-backing rolls out per module: SQS is live; S3 and Secrets
 Manager API commands are still synthetic until their own state-backing lands.</p>
 </div>
 

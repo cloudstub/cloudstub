@@ -1651,7 +1651,7 @@ and point your application at <code>http://localhost:4566</code>.</p>
 </tr>
 <tr>
 <td>CI pipeline tests</td>
-<td><a href="../getting-started/">Embedded mode</a> — faster, no external process</td>
+<td><a href="../getting-started/">Embedded mode</a>: faster, no external process</td>
 </tr>
 </tbody>
 </table>
@@ -1661,12 +1661,12 @@ Service modules ship as separate jars that the launcher loads at runtime from a 
 download the server jar once, then let the launcher fetch the modules you declare with <code>--services</code> (auto-download,
 on by default), or drop the jars into the plugin directory yourself.</p>
 <ul>
-<li><code>--modules-dir</code> controls what is <strong>available</strong> — which module jars are on the classpath.</li>
+<li><code>--modules-dir</code> controls what is <strong>available</strong>: which module jars are on the classpath.</li>
 <li><code>--services</code> (below) narrows what is <strong>enabled</strong> among those.</li>
 </ul>
 <h2 id="get-the-server-jar">Get the server JAR</h2>
 <p>The runnable server is distributed on the <a href="https://github.com/cloudstub/cloudstub/releases">GitHub Releases</a>
-page — it is <strong>not</strong> on Maven Central (Central carries the libraries). Download the latest:</p>
+page; it is <strong>not</strong> on Maven Central (Central carries the libraries). Download the latest:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl -L -o cloudstub-local.jar \
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  https://github.com/cloudstub/cloudstub/releases/latest/download/cloudstub-local.jar
 </span></code></pre></div>
@@ -1678,29 +1678,29 @@ page — it is <strong>not</strong> on Maven Central (Central carries the librar
 <code>cloudstub-local.jar</code> if you downloaded it.</p>
 <h2 id="add-the-services-you-need">Add the services you need</h2>
 <p>Declare the services you want with <code>--services=sqs,s3</code> (or <code>CLOUDSTUB_SERVICES</code>). Before it starts, the launcher makes sure
-each declared module's jar is in the plugin directory — and by default it <strong>downloads any that are missing</strong>, so for
+each declared module's jar is in the plugin directory, and by default it <strong>downloads any that are missing</strong>, so for
 published modules you never manage jars by hand.</p>
 <h3 id="auto-download-default">Auto-download (default)</h3>
 <p>Auto-download is <strong>on by default</strong>: when you declare a service whose jar is not already in the plugin directory, the
 launcher fetches <code>io.github.cloudstub:cloudstub-&lt;service&gt;:&lt;version&gt;</code> from Maven Central, verifies it, writes it into
-the plugin directory, and loads it. <code>--services</code> is the single source of truth — declare what you want and it
+the plugin directory, and loads it. <code>--services</code> is the single source of truth: declare what you want and it
 appears:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
 </span></code></pre></div>
 <ul>
 <li><strong>Version:</strong> defaults to the running <code>cloudstub-core</code> version, so a downloaded module matches the SPI the core
   provides. Override with <code>--module-version=&lt;v&gt;</code> or <code>CLOUDSTUB_MODULE_VERSION</code>. (Development builds are <code>-SNAPSHOT</code>,
-  which is not published to Central — point <code>--module-version</code> at a released version such as <code>0.1.0-beta.3</code>.)</li>
+  which is not published to Central, so point <code>--module-version</code> at a released version such as <code>0.1.0-beta.3</code>.)</li>
 <li><strong>Cache:</strong> the plugin directory is the cache. A jar that is already present is <strong>never</strong> re-downloaded, so the
   next start is offline-fast. When no <code>--modules-dir</code> is set and a download is needed, the default <code>./modules</code>
   directory is created to hold it.</li>
 <li><strong>Integrity:</strong> every download is checksum-verified (the strongest published of SHA-512 / SHA-256 / SHA-1) before
   the jar is trusted and loaded. A mismatch fails the start.</li>
 <li><strong>Source:</strong> the canonical Maven Central host. Point at an internal mirror with <code>--maven-base-url=&lt;url&gt;</code> or
-  <code>CLOUDSTUB_MAVEN_BASE_URL</code> (a single Maven-layout repository root — not a general multi-repository resolver).</li>
+  <code>CLOUDSTUB_MAVEN_BASE_URL</code> (a single Maven-layout repository root, not a general multi-repository resolver).</li>
 </ul>
 <h3 id="place-module-jars-manually">Place module jars manually</h3>
-<p>You can also manage the jars yourself — useful for locally built modules (the <a href="#get-the-server-jar">server JAR build</a>
+<p>You can also manage the jars yourself, which is useful for locally built modules (the <a href="#get-the-server-jar">server JAR build</a>
 produces each service jar) or a curated offline set. The launcher loads every <code>.jar</code> in the plugin directory
 (default <code>./modules</code>), so drop them in and start:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mkdir -p modules
@@ -1721,7 +1721,7 @@ produces each service jar) or a curated offline set. The launcher loads every <c
 </div>
 <p>Plugin directory precedence: <code>--modules-dir</code> flag → <code>CLOUDSTUB_MODULES_DIR</code> env var → default <code>./modules</code>. An
 explicitly provided <code>--modules-dir</code> that does not exist fails fast; a missing or empty default
-<code>./modules</code> is <strong>not</strong> fatal — the server starts and serves nothing. A jar already present is used as-is and never
+<code>./modules</code> is <strong>not</strong> fatal: the server starts and serves nothing. A jar already present is used as-is and never
 re-downloaded.</p>
 <h3 id="disable-auto-download-offline-air-gapped">Disable auto-download (offline / air-gapped)</h3>
 <p>Turn auto-download off with <code>--no-download</code> or <code>CLOUDSTUB_AUTO_DOWNLOAD=false</code>. A declared service whose jar is then
@@ -1770,7 +1770,7 @@ request.</p>
 </div>
 <p>Service selection precedence: <code>--services</code> flag → <code>CLOUDSTUB_SERVICES</code> env var → nothing enabled.</p>
 <p>If you start with no <code>--services</code>, the server warns you and tells you how to enable services:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>[CloudStub] WARNING: no services enabled — the mock will serve nothing.
+<div class="highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>[CloudStub] WARNING: no services enabled; the mock will serve nothing.
 </span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>[CloudStub]          Enable services with --services=&lt;id&gt;[,&lt;id&gt;...] or CLOUDSTUB_SERVICES=&lt;id&gt;[,&lt;id&gt;...].
 </span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>[CloudStub]          Available services: sqs, sns, secretsmanager, s3
 </span></code></pre></div>
@@ -1812,7 +1812,7 @@ naming the coordinate, version, and destination, so downloaded jars are distingu
 <div class="highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>[CloudStub] Downloaded io.github.cloudstub:cloudstub-sqs:0.1.0-beta.3 -&gt; /path/to/modules/cloudstub-sqs-0.1.0-beta.3.jar
 </span></code></pre></div>
 <p>The REST API is available at <code>http://localhost:4567</code> (see <a href="../rest-api/">REST API</a> for the full reference), and the
-web <a href="../console/">Console</a> is served at <code>http://localhost:4567/console</code> — opening <code>http://localhost:4567/</code> redirects
+web <a href="../console/">Console</a> is served at <code>http://localhost:4567/console</code>; opening <code>http://localhost:4567/</code> redirects
 there. A command-line client is coming soon.</p>
 <h2 id="configuration-file">Configuration file</h2>
 <p>Every option above can also be set in an optional <code>.properties</code> file, so a developer's local CloudStub setup is
@@ -1892,12 +1892,12 @@ directory.</p>
 <p>Each option is resolved independently in this order, the first source that supplies a value winning:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>CLI flag → environment variable → config file → built-in default
 </span></code></pre></div>
-<p>A CLI flag therefore always overrides the file, and the file overrides nothing but the defaults — the same
+<p>A CLI flag therefore always overrides the file, and the file overrides nothing but the defaults: the same
 flag-over-environment ordering CloudStub already uses, with the file slotted in just above the defaults. The keys are
 namespaced under <code>cloudstub.</code> with room to grow.</p>
 <h3 id="absent-or-malformed-files">Absent or malformed files</h3>
 <ul>
-<li>A <strong>missing</strong> default <code>cloudstub.properties</code> is not an error — the server starts on defaults exactly as it does
+<li>A <strong>missing</strong> default <code>cloudstub.properties</code> is not an error: the server starts on defaults exactly as it does
   with no file. Only a <code>--config</code> (or <code>CLOUDSTUB_CONFIG</code>) path that does not exist fails fast.</li>
 <li>A file that <strong>cannot be parsed</strong>, that contains an <strong>unknown key</strong>, or that holds a <strong>non-numeric value</strong> for a
   numeric key fails fast with a message naming the file and the offending key, not a stack trace:</li>
@@ -1908,7 +1908,7 @@ namespaced under <code>cloudstub.</code> with room to grow.</p>
 <p>In <strong>embedded mode</strong> no endpoint configuration is needed: <code>CloudStubExtension</code> sets the
 <code>aws.endpoint-url</code> system property to its embedded port before any AWS client is built, so SDK v2 clients in the
 test JVM are redirected automatically. In <strong>standalone mode</strong> CloudStub is a separate process, so the application
-must be told where it is. Three forms supply the endpoint — pick by how the client is built:</p>
+must be told where it is. Three forms supply the endpoint, picked by how the client is built:</p>
 <table>
 <thead>
 <tr>
@@ -1919,7 +1919,7 @@ must be told where it is. Three forms supply the endpoint — pick by how the cl
 <tbody>
 <tr>
 <td><code>AWS_ENDPOINT_URL</code> environment variable</td>
-<td>Any AWS SDK v2 client — the SDK reads it automatically, no code change.</td>
+<td>Any AWS SDK v2 client: the SDK reads it automatically, no code change.</td>
 </tr>
 <tr>
 <td><code>aws.endpoint-url</code> Spring property</td>
@@ -1947,7 +1947,7 @@ must be told where it is. Three forms supply the endpoint — pick by how the cl
 <p>For the Spring property form, the <code>local</code> / <code>prod</code> profiles, an IDE run setup, and the resolution precedence
 between these forms, see <a href="../spring-boot/#pointing-an-application-at-cloudstub">Pointing an application at CloudStub</a>.</p>
 <h2 id="stop-the-server">Stop the server</h2>
-<p>Press <code>Ctrl-C</code> or send <code>SIGTERM</code>. CloudStub prints a shutdown message and exits cleanly — no stack trace:</p>
+<p>Press <code>Ctrl-C</code> or send <code>SIGTERM</code>. CloudStub prints a shutdown message and exits cleanly, with no stack trace:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>^C
 </span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>[CloudStub] Shutting down...
 </span></code></pre></div>

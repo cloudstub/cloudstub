@@ -1233,7 +1233,7 @@
 
 
 <h1 id="getting-started">Getting Started</h1>
-<p>This guide walks you from zero to a passing CloudStub integration test in under five minutes.</p>
+<p>This guide walks you through creating your first integration test with CloudStub.</p>
 <h2 id="1-add-dependencies">1. Add dependencies</h2>
 <p>CloudStub is modular. Add <code>cloudstub-testing</code> (it brings in <code>cloudstub-core</code> and the JUnit extension), plus only the AWS service modules your project needs.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Gradle</label><label for="__tabbed_1_2">Maven</label></div>
@@ -1310,9 +1310,9 @@
 </span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="p">}</span>
 </span></code></pre></div>
 <ol>
-<li>Starts CloudStub before the first test and stops it after the last. Service modules on the classpath are discovered automatically via <code>ServiceLoader</code> — no registration required.</li>
+<li>Starts CloudStub before the first test and stops it after the last. Service modules on the classpath are discovered automatically via <code>ServiceLoader</code>, with no registration required.</li>
 <li>CloudStub sets <code>aws.endpoint-url</code> to <code>http://localhost:&lt;port&gt;</code> before any test runs. The SDK reads it automatically.</li>
-<li>Send and receive are state-backed, so you assert on what your code actually did — the order reached the queue — not on the mock returning a value.</li>
+<li>Send and receive are state-backed, so you assert on what your code actually did (the order reached the queue), not on the mock returning a value.</li>
 </ol>
 <h2 id="3-run-it">3. Run it</h2>
 <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>./gradlew test
@@ -1321,11 +1321,11 @@
 <hr />
 <h2 id="next-steps">Next steps</h2>
 <ul>
-<li><a href="../junit-extension/">JUnit Extension</a> — learn the <code>@RegisterExtension</code> pattern for port access and explicit service registration</li>
-<li><a href="../spring-boot/">Spring Boot Integration</a> — use CloudStub with a full Spring Boot application context</li>
-<li><a href="../fault-injection/">Fault Injection</a> — simulate throttling, timeouts, and network brownouts</li>
-<li><a href="../standalone/">Standalone Mode</a> — run CloudStub as a long-lived local development server instead of embedding it in tests</li>
-<li><a href="../sdk-v1/">SDK v1 Support</a> — redirect AWS SDK <strong>v1</strong> clients to CloudStub while you migrate to v2</li>
+<li><a href="../junit-extension/">JUnit Extension</a>: learn the <code>@RegisterExtension</code> pattern for port access and explicit service registration</li>
+<li><a href="../spring-boot/">Spring Boot Integration</a>: use CloudStub with a full Spring Boot application context</li>
+<li><a href="../fault-injection/">Fault Injection</a>: simulate throttling, timeouts, and network brownouts</li>
+<li><a href="../standalone/">Standalone Mode</a>: run CloudStub as a long-lived local development server instead of embedding it in tests</li>
+<li><a href="../sdk-v1/">SDK v1 Support</a>: redirect AWS SDK <strong>v1</strong> clients to CloudStub while you migrate to v2</li>
 </ul>
 
 

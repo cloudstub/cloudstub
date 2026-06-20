@@ -1328,7 +1328,7 @@
 
 
 <h1 id="logging">Logging</h1>
-<p>CloudStub uses SLF4J as its logging facade. No logging implementation is bundled — you bring your own.</p>
+<p>CloudStub uses SLF4J as its logging facade. No logging implementation is bundled; you bring your own.</p>
 <h2 id="default-output-standalone-mode">Default output (standalone mode)</h2>
 <p>In standalone mode the JAR ships <code>slf4j-simple</code>, which writes all log output to stdout. The default level is <strong>INFO</strong>.</p>
 <p>Startup produces output similar to:</p>
@@ -1396,7 +1396,7 @@ is acquired. Both promote the root level from INFO to DEBUG.</p>
 </span></code></pre></div>
 <h2 id="custom-logging-implementation">Custom logging implementation</h2>
 <p>In standalone mode you can replace <code>slf4j-simple</code> with any SLF4J-compatible implementation by placing its JAR on the
-classpath ahead of the standalone JAR. In embedded mode, add your preferred implementation to your test dependencies —
+classpath ahead of the standalone JAR. In embedded mode, add your preferred implementation to your test dependencies;
 CloudStub will bind to it automatically.</p>
 <h3 id="logback-example-embedded-spring-boot">Logback example (embedded / Spring Boot)</h3>
 <p>Add the dependency (Spring Boot users: already present via <code>spring-boot-starter</code>):</p>

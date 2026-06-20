@@ -1241,13 +1241,13 @@
 <p>CloudStub's first-party service modules target the <strong>AWS SDK for Java v2</strong>. For teams still mid-migration, the
 <code>cloudstub-sdk-v1</code> companion library lets AWS SDK <strong>v1</strong> clients reach a running CloudStub instance.</p>
 <div class="admonition warning">
-<p class="admonition-title">What the companion does — and does not — do</p>
+<p class="admonition-title">What the companion does, and does not, do</p>
 <p><code>cloudstub-sdk-v1</code> redirects the <strong>endpoint</strong> of an SDK v1 client to CloudStub. That is all. It guarantees
 <strong>connectivity</strong>; it does not provide v1-shaped stub responses. See
 <a href="#connectivity-vs-response-fidelity">Connectivity vs response fidelity</a> below before you rely on it.</p>
 </div>
 <p>The AWS Java SDK v1 reached <a href="https://aws.amazon.com/de/blogs/developer/announcing-end-of-support-for-aws-sdk-for-java-v1-x-on-december-31-2025/">end-of-support on 2025-12-31</a>.
-The companion exists to support teams mid-migration. <strong>Per-service first-party v1 stubs are explicitly a non-goal</strong> —
+The companion exists to support teams mid-migration. <strong>Per-service first-party v1 stubs are explicitly a non-goal</strong>:
 new service modules target the v2 protocol shape only.</p>
 <h2 id="dependencies">Dependencies</h2>
 <p>Add the companion, a CloudStub service module, and the <code>com.amazonaws:aws-java-sdk-*</code> client for the service you call.</p>
@@ -1340,18 +1340,18 @@ builder's <code>.withEndpointConfiguration(...)</code>:</p>
 <p class="admonition-title">The signing region and credentials are inert</p>
 <p>SDK v1 requires a signing region and credentials to construct a client, so <code>forPort</code> supplies a dummy region of
 <code>us-east-1</code> and the example uses <code>AnonymousAWSCredentials</code>. CloudStub does not verify signatures, so <strong>neither value
-affects stub matching</strong> — they exist only to satisfy the v1 builder.</p>
+affects stub matching</strong>; they exist only to satisfy the v1 builder.</p>
 </div>
-<p>The companion is JUnit-agnostic — <code>@BeforeAll</code>/<code>@AfterAll</code> above are illustrative; you can drive CloudStub from any
+<p>The companion is JUnit-agnostic. <code>@BeforeAll</code>/<code>@AfterAll</code> above are illustrative; you can drive CloudStub from any
 lifecycle.</p>
 <h2 id="connectivity-vs-response-fidelity">Connectivity vs response fidelity</h2>
 <p>This is the boundary that matters. The companion redirects the <strong>endpoint</strong>; it does not translate protocols.</p>
 <ul>
-<li>Most first-party modules — <strong>SQS</strong>, Secrets Manager, DynamoDB — target the <strong>SDK v2</strong> protocol shape: JSON with an
+<li>Most first-party modules (<strong>SQS</strong>, Secrets Manager, DynamoDB) target the <strong>SDK v2</strong> protocol shape: JSON with an
   <code>X-Amz-Target</code> header. SDK v1 speaks the <strong>XML / QUERY</strong> protocol, identifying the operation with an <code>Action</code>
   form-body parameter, so a v1 call to these services matches no first-party stub.</li>
 <li><strong>SNS is the exception:</strong> it uses the XML / QUERY protocol in <em>both</em> v1 and v2, so the first-party <code>cloudstub-sns</code>
-  module's <code>Action</code>-keyed stubs can already match a v1 SNS call — provided <code>cloudstub-sns</code> is on your classpath.</li>
+  module's <code>Action</code>-keyed stubs can already match a v1 SNS call, provided <code>cloudstub-sns</code> is on your classpath.</li>
 </ul>
 <p>For the JSON/<code>X-Amz-Target</code> services, a v1 call therefore arrives in a shape that no first-party stub matches, so
 <strong>WireMock returns 404</strong> and the v1 client raises an <code>AmazonServiceException</code>. Connectivity is proven (you reached the
@@ -1376,18 +1376,18 @@ without claiming a matched stub.</p>
 <tr>
 <td>Response fidelity (a stub matches and answers)</td>
 <td>⚠️ Your responsibility</td>
-<td>Author an XML/QUERY stub — see below</td>
+<td>Author an XML/QUERY stub (see below)</td>
 </tr>
 </tbody>
 </table>
 <h2 id="bring-your-own-stub">Bring your own stub</h2>
 <p>To get a <em>populated</em> response for a v1 call against a JSON/<code>X-Amz-Target</code> service, register a stub in the v1
 (XML / QUERY) protocol yourself. You author a <code>CloudStubService</code> and register through
-<code>registerXmlFormStub(actionName, responseTemplate)</code> — keyed on the <code>Action</code> form parameter the v1 client sends. The
+<code>registerXmlFormStub(actionName, responseTemplate)</code>, keyed on the <code>Action</code> form parameter the v1 client sends. The
 full SPI walkthrough lives in the <a href="../module-authoring/">Module Authoring guide</a>.</p>
 <p>The short version below uses SNS <code>Publish</code>. SNS shares the XML / QUERY protocol across v1 and v2, so the first-party
 <code>cloudstub-sns</code> module would also serve this call; the example deliberately omits <code>cloudstub-sns</code> from its classpath to
-demonstrate the bring-your-own-stub path in isolation — the general escape hatch for any v1 operation no first-party
+demonstrate the bring-your-own-stub path in isolation: the general escape hatch for any v1 operation no first-party
 module covers:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">io.cloudstub.core.spi.CloudStubService</span><span class="p">;</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">io.cloudstub.core.spi.StubRegistrar</span><span class="p">;</span>
@@ -1414,11 +1414,11 @@ module covers:</p>
 </span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="p">}</span>
 </span></code></pre></div>
 <ol>
-<li>Matches <code>Action=Publish</code> in the form body — the wire shape a v1 SNS client produces — and returns the XML response
+<li>Matches <code>Action=Publish</code> in the form body (the wire shape a v1 SNS client produces) and returns the XML response
    the v1 client knows how to parse.</li>
 </ol>
 <p>Install your stub explicitly with <code>withService(...)</code> and drive it with a real v1 client. A populated <code>MessageId</code> proves
-the stub matched and the response was parsed — fidelity, not just connectivity:</p>
+the stub matched and the response was parsed, proving fidelity, not just connectivity:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@RegisterExtension</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">static</span><span class="w"> </span><span class="n">CloudStubExtension</span><span class="w"> </span><span class="n">cloudMock</span><span class="w"> </span><span class="o">=</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">CloudStubExtension</span><span class="p">().</span><span class="na">withService</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">SnsV1PublishStubService</span><span class="p">());</span><span class="w"> </span><span class="c1">// (1)!</span>
@@ -1428,7 +1428,7 @@ the stub matched and the response was parsed — fidelity, not just connectivity
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">PublishResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snsClient</span><span class="p">.</span><span class="na">publish</span><span class="p">(</span>
 </span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">        </span><span class="s">&quot;arn:aws:sns:us-east-1:000000000000:demo-topic&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;hello from SDK v1&quot;</span><span class="p">);</span>
 </span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">assertNotNull</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">getMessageId</span><span class="p">());</span><span class="w"> </span><span class="c1">// populated — the XML/QUERY stub was served</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">assertNotNull</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">getMessageId</span><span class="p">());</span><span class="w"> </span><span class="c1">// populated: the XML/QUERY stub was served</span>
 </span></code></pre></div>
 <ol>
 <li><code>withService(...)</code> installs the user-authored stub. The <code>cloudstub-sns</code> first-party module is not on the test

@@ -1187,11 +1187,11 @@
 
 <h1 id="cli">CLI</h1>
 <p>The CloudStub CLI is a small command-line client for a running <a href="../standalone/">standalone</a> CloudStub
-instance. It lets you inspect and drive mock state from the terminal — list resources, send test
-data, reset services — without writing code or installing the AWS CLI.</p>
+instance. It lets you inspect and drive mock state from the terminal: list resources, send test
+data, reset services, without writing code or installing the AWS CLI.</p>
 <p>The CLI is a <strong>thin HTTP client over the <a href="../rest-api/">REST API</a></strong>. It discovers the available
 commands at runtime from <code>GET /api/status</code>, so a CloudStub instance with more modules loaded simply
-offers more commands — the CLI itself never changes.</p>
+offers more commands; the CLI itself never changes.</p>
 <p>It ships in the same <code>cloudstub-local</code> fat JAR as the server: the jar is <strong>dual-mode</strong>. With no
 arguments (or an explicit <code>serve</code>) it starts the server; with a command token (<code>status</code>, <code>reset</code>,
 <code>sqs send-message</code>, …) it runs the CLI against an already-running instance. The CLI path never boots
@@ -1202,7 +1202,7 @@ the mock, so commands start quickly.</p>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a># output: cloudstub-local/build/libs/cloudstub-local.jar
 </span></code></pre></div>
 <p>Run it via the bundled launcher scripts in <code>cloudstub-local/bin/</code> (<code>cloudstub</code> is the binary, <code>clb</code>
-is an identical short alias — both work; put <code>bin/</code> on your <code>PATH</code>), or directly with <code>java -jar</code>:</p>
+is an identical short alias; both work, so put <code>bin/</code> on your <code>PATH</code>), or directly with <code>java -jar</code>:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Launcher script</label><label for="__tabbed_1_2">java -jar</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1316,7 +1316,7 @@ becomes an option. Run <code>clb --help</code> to see the services the connected
 <p class="admonition-title">State-backed where the module supports it</p>
 <p>The CLI and the AWS SDK share the <strong>same state store</strong>. For state-backed modules (SQS),
 <code>clb sqs receive-message</code> returns messages your app sent through the SDK, and a message sent with
-<code>clb sqs send-message</code> is visible to the SDK. State-backing rolls out per module — SQS is live; S3
+<code>clb sqs send-message</code> is visible to the SDK. State-backing rolls out per module: SQS is live; S3
 and Secrets Manager commands are still synthetic until their own state-backing lands.</p>
 </div>
 <h2 id="how-new-modules-appear-automatically">How new modules appear automatically</h2>
@@ -1325,16 +1325,16 @@ and Secrets Manager commands are still synthetic until their own state-backing l
 <li>A module that implements <a href="../module-authoring/#8-exposing-cli-commands-via-the-rest-api"><code>CloudStubApiService</code></a>
   contributes routes under <code>/api/&lt;service&gt;/…</code>, each advertising a command name and parameters.</li>
 <li>Start CloudStub with that module on the classpath and its commands appear under <code>clb &lt;service&gt;</code>.</li>
-<li>Restrict the loaded services with <code>--services=&lt;a,b&gt;</code> and the CLI offers only those services — a
+<li>Restrict the loaded services with <code>--services=&lt;a,b&gt;</code> and the CLI offers only those services: a
   service that is not loaded has no command at all.</li>
 </ul>
 <h2 id="error-behaviour">Error behaviour</h2>
 <ul>
-<li><strong>Server not running</strong> — a connection failure prints the "not running" message above and exits 1.</li>
-<li><strong>Service not loaded</strong> — the service simply has no command; the CLI lists the commands that
+<li><strong>Server not running</strong>: a connection failure prints the "not running" message above and exits 1.</li>
+<li><strong>Service not loaded</strong>: the service simply has no command; the CLI lists the commands that
   <em>are</em> available.</li>
-<li><strong>Missing required option</strong> — picocli reports it and prints usage before any request is made.</li>
-<li><strong>Server-side error</strong> — a non-2xx response is surfaced with the server's error message and a
+<li><strong>Missing required option</strong>: picocli reports it and prints usage before any request is made.</li>
+<li><strong>Server-side error</strong>: a non-2xx response is surfaced with the server's error message and a
   non-zero exit code, rather than being treated as success.</li>
 </ul>
 

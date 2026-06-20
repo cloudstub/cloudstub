@@ -1339,7 +1339,7 @@
 
 <h1 id="rest-api">REST API</h1>
 <p>When running in standalone mode CloudStub exposes a REST API on a secondary port (<code>4567</code> by default).
-The API and the AWS mock port (<code>4566</code>) run in the same process — no extra server to start.</p>
+The API and the AWS mock port (<code>4566</code>) run in the same process, with no extra server to start.</p>
 <h2 id="configuration">Configuration</h2>
 <table>
 <thead>
@@ -1441,7 +1441,7 @@ stubs, and the full list of available API routes.</p>
 </span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a><span class="w">  </span><span class="p">]</span>
 </span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Use <code>GET /api/status</code> as the discovery endpoint — the <code>routes</code> array tells you exactly what
+<p>Use <code>GET /api/status</code> as the discovery endpoint: the <code>routes</code> array tells you exactly what
 operations are available without consulting documentation. Module routes additionally carry a
 <code>service</code>, a <code>command</code> name, and a <code>params</code> list (each with <code>name</code>, <code>required</code>, and <code>description</code>).
 That metadata is what will let a command-line client (coming soon) build <code>&lt;service&gt; &lt;command&gt;</code>
@@ -1451,7 +1451,7 @@ subcommands with typed options at runtime, with no hardcoded knowledge of any mo
 <p>Clears all state in the store. Use this to start each test scenario with a clean slate when
 running tests against a long-lived standalone process.</p>
 <p>A full reset (no <code>service</code>) also clears the request history. A single-service reset clears only
-that service's state and leaves the history intact — the history is one shared journal with no
+that service's state and leaves the history intact: the history is one shared journal with no
 per-service partition.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Clear everything</label><label for="__tabbed_2_2">Clear one service</label></div>
 <div class="tabbed-content">
@@ -1511,7 +1511,7 @@ HTTP status code returned.</p>
 </span><span id="__span-9-21"><a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="w">  </span><span class="p">]</span>
 </span><span id="__span-9-22"><a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Unmatched requests — those not handled by any registered stub — appear with <code>"matched": false</code>
+<p>Unmatched requests (those not handled by any registered stub) appear with <code>"matched": false</code>
 and <code>"serviceId": null</code>. They are the most common source of integration issues; check the <code>url</code>
 field to diagnose why a stub did not match.</p>
 <p>The history is capped at the last 1000 requests by default so a long-lived process does not grow
@@ -1523,11 +1523,11 @@ without bound. Change the cap with <code>--max-history=&lt;n&gt;</code> (or <cod
 contributed by module-specific <code>CloudStubApiService</code> implementations.</p>
 <div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>GET /api/openapi.json
 </span></code></pre></div>
-<p>The spec updates automatically when modules are added or removed — no manual maintenance required.</p>
+<p>The spec updates automatically when modules are added or removed, with no manual maintenance required.</p>
 <h2 id="module-routes">Module routes</h2>
 <p>Modules can expose their own routes under <code>/api/&lt;serviceId&gt;/…</code> by implementing the
-<code>CloudStubApiService</code> SPI interface. If a module JAR is not on the classpath — or the service is
-not enabled with <code>--services</code> — its routes do not exist; loading the module makes them available
+<code>CloudStubApiService</code> SPI interface. If a module JAR is not on the classpath, or the service is
+not enabled with <code>--services</code>, its routes do not exist; loading the module makes them available
 automatically. Each route may advertise a <code>command</code> name and <code>params</code>, which a command-line client
 (coming soon) turns into a <code>&lt;service&gt; &lt;command&gt;</code> subcommand.</p>
 <p>Parameters are passed as query-string values (<code>POST /api/sqs/send-message?queue=q&amp;body=hello</code>);

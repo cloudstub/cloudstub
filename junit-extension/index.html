@@ -646,7 +646,7 @@
   <a href="#extendwith-zero-boilerplate" class="md-nav__link">
     <span class="md-ellipsis">
       
-        @ExtendWith — zero boilerplate
+        @ExtendWith: zero boilerplate
       
     </span>
   </a>
@@ -657,7 +657,7 @@
   <a href="#registerextension-port-access-and-explicit-registration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        @RegisterExtension — port access and explicit registration
+        @RegisterExtension: port access and explicit registration
       
     </span>
   </a>
@@ -1228,7 +1228,7 @@
   <a href="#extendwith-zero-boilerplate" class="md-nav__link">
     <span class="md-ellipsis">
       
-        @ExtendWith — zero boilerplate
+        @ExtendWith: zero boilerplate
       
     </span>
   </a>
@@ -1239,7 +1239,7 @@
   <a href="#registerextension-port-access-and-explicit-registration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        @RegisterExtension — port access and explicit registration
+        @RegisterExtension: port access and explicit registration
       
     </span>
   </a>
@@ -1297,7 +1297,7 @@
 <p><code>CloudStubExtension</code> manages the CloudStub lifecycle around a test class and applies fault injection annotations to individual test methods.</p>
 <p>Compatible with JUnit 5 and JUnit 6. JUnit 4 is not supported.</p>
 <h2 id="dependency">Dependency</h2>
-<p>Most projects get <code>cloudstub-junit</code> transitively via <a href="../getting-started/"><code>cloudstub-testing</code></a>; add it directly only to use the extension without the aggregator. <code>cloudstub-junit</code> declares JUnit as <code>compileOnly</code> — bring your own JUnit version; the module does not force one on your classpath.</p>
+<p>Most projects get <code>cloudstub-junit</code> transitively via <a href="../getting-started/"><code>cloudstub-testing</code></a>; add it directly only to use the extension without the aggregator. <code>cloudstub-junit</code> declares JUnit as <code>compileOnly</code>, so you bring your own JUnit version; the module does not force one on your classpath.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Gradle</label><label for="__tabbed_1_2">Maven</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1316,27 +1316,31 @@
 </div>
 </div>
 <h2 id="usage-patterns">Usage patterns</h2>
-<h3 id="extendwith-zero-boilerplate"><code>@ExtendWith</code> — zero boilerplate</h3>
+<h3 id="extendwith-zero-boilerplate"><code>@ExtendWith</code>: zero boilerplate</h3>
 <p>The simplest form. Service modules on the classpath are discovered via <code>ServiceLoader</code> automatically.</p>
 <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">CloudStubExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">class</span> <span class="nc">MyTest</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">class</span> <span class="nc">OrderServiceTest</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nd">@Test</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">test</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">        </span><span class="c1">// aws.endpoint-url is already set — build clients and call AWS normally</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">placingAnOrderPublishesIt</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">        </span><span class="c1">// aws.endpoint-url is already set, so build clients and call AWS normally.</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="n">SqsClient</span><span class="w"> </span><span class="n">sqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SqsClient</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">            </span><span class="p">.</span><span class="na">endpointOverride</span><span class="p">(</span><span class="n">URI</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="s">&quot;aws.endpoint-url&quot;</span><span class="p">)))</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">            </span><span class="p">.</span><span class="na">credentialsProvider</span><span class="p">(</span><span class="n">AnonymousCredentialsProvider</span><span class="p">.</span><span class="na">create</span><span class="p">())</span>
 </span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">            </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">US_EAST_1</span><span class="p">)</span>
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">        </span><span class="n">assertNotNull</span><span class="p">(</span><span class="n">sqs</span><span class="p">.</span><span class="na">createQueue</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueName</span><span class="p">(</span><span class="s">&quot;q&quot;</span><span class="p">)).</span><span class="na">queueUrl</span><span class="p">());</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="p">}</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">queueUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqs</span><span class="p">.</span><span class="na">createQueue</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueName</span><span class="p">(</span><span class="s">&quot;orders&quot;</span><span class="p">)).</span><span class="na">queueUrl</span><span class="p">();</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">OrderService</span><span class="p">(</span><span class="n">sqs</span><span class="p">,</span><span class="w"> </span><span class="n">queueUrl</span><span class="p">).</span><span class="na">placeOrder</span><span class="p">(</span><span class="s">&quot;sku-42&quot;</span><span class="p">);</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">body</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqs</span><span class="p">.</span><span class="na">receiveMessage</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueUrl</span><span class="p">(</span><span class="n">queueUrl</span><span class="p">)).</span><span class="na">messages</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="na">body</span><span class="p">();</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">        </span><span class="n">assertTrue</span><span class="p">(</span><span class="n">body</span><span class="p">.</span><span class="na">contains</span><span class="p">(</span><span class="s">&quot;sku-42&quot;</span><span class="p">));</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="p">}</span>
 </span></code></pre></div>
-<h3 id="registerextension-port-access-and-explicit-registration"><code>@RegisterExtension</code> — port access and explicit registration</h3>
+<h3 id="registerextension-port-access-and-explicit-registration"><code>@RegisterExtension</code>: port access and explicit registration</h3>
 <p>Use this form when you need the server port directly (e.g. to build clients once in <code>@BeforeAll</code>) or to register service modules explicitly rather than relying on <code>ServiceLoader</code>.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">class</span> <span class="nc">MyTest</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">class</span> <span class="nc">OrderServiceTest</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nd">@RegisterExtension</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">CloudStubExtension</span><span class="w"> </span><span class="n">cloudMock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CloudStubExtension</span><span class="p">()</span>
@@ -1354,14 +1358,19 @@
 </span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>
 </span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">    </span><span class="nd">@Test</span>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">test</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">        </span><span class="n">assertNotNull</span><span class="p">(</span><span class="n">sqsClient</span><span class="p">.</span><span class="na">createQueue</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueName</span><span class="p">(</span><span class="s">&quot;q&quot;</span><span class="p">)).</span><span class="na">queueUrl</span><span class="p">());</span>
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="p">}</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">placingAnOrderPublishesIt</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">queueUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqsClient</span><span class="p">.</span><span class="na">createQueue</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueName</span><span class="p">(</span><span class="s">&quot;orders&quot;</span><span class="p">)).</span><span class="na">queueUrl</span><span class="p">();</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">OrderService</span><span class="p">(</span><span class="n">sqsClient</span><span class="p">,</span><span class="w"> </span><span class="n">queueUrl</span><span class="p">).</span><span class="na">placeOrder</span><span class="p">(</span><span class="s">&quot;sku-42&quot;</span><span class="p">);</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">body</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqsClient</span><span class="p">.</span><span class="na">receiveMessage</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueUrl</span><span class="p">(</span><span class="n">queueUrl</span><span class="p">)).</span><span class="na">messages</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="na">body</span><span class="p">();</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="w">        </span><span class="n">assertTrue</span><span class="p">(</span><span class="n">body</span><span class="p">.</span><span class="na">contains</span><span class="p">(</span><span class="s">&quot;sku-42&quot;</span><span class="p">));</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="p">}</span>
 </span></code></pre></div>
 <ol>
 <li><code>.withService()</code> adds a module explicitly, in addition to any modules discovered via <code>ServiceLoader</code>. Useful in module-level tests where the classpath structure may prevent auto-discovery.</li>
-<li><code>cloudMock.port()</code> is only valid after <code>beforeAll</code> has run — safe inside <code>@BeforeAll</code> and all <code>@Test</code> methods.</li>
+<li><code>cloudMock.port()</code> is only valid after <code>beforeAll</code> has run, so it is safe inside <code>@BeforeAll</code> and all <code>@Test</code> methods.</li>
 </ol>
 <h2 id="lifecycle">Lifecycle</h2>
 <p><code>CloudStubExtension</code> creates one <code>CloudStub</code> instance per test class. The lifecycle is:</p>
@@ -1385,7 +1394,7 @@
 </span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
 </span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="nd">@Test</span>
 </span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">normalAfterThrottle</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">        </span><span class="c1">// Fault was cleared — normal response returned</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">        </span><span class="c1">// Fault was cleared, so a normal response is returned.</span>
 </span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="p">}</span>
 </span></code></pre></div>

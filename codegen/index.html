@@ -1289,7 +1289,7 @@
 
 
 <h1 id="cloudstub-codegen">CloudStub Codegen</h1>
-<p>CloudStub Codegen takes a Smithy service model as input and produces a complete <code>CloudStubService</code> implementation — the
+<p>CloudStub Codegen takes a Smithy service model as input and produces a complete <code>CloudStubService</code> implementation: the
 Java class, Handlebars response templates, and the <code>META-INF/services</code> registration file.</p>
 <h2 id="when-to-use-it">When to use it</h2>
 <p>Use CloudStub Codegen when you need to add support for an AWS service that has a Smithy model. For services with only a
@@ -1297,17 +1297,17 @@ handful of operations, writing the module by hand (following the <a href="../mod
 faster. Codegen pays off for services with many operations (20+).</p>
 <h2 id="running-the-codegen">Running the codegen</h2>
 <h3 id="in-the-monorepo-gradlew-run">In the monorepo (<code>./gradlew run</code>)</h3>
-<p>Inside this repository, run the generator in one step — no fat JAR build required:</p>
+<p>Inside this repository, run the generator in one step, with no fat JAR build required:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>./gradlew :cloudstub-codegen:run --args=&quot;--model &lt;path-or-url&gt; --output &lt;dir&gt;&quot;
 </span></code></pre></div>
 <p>The task's working directory is pinned to the repo root, so relative <code>--model</code> and <code>--output</code> paths resolve from the
 repo root exactly as the <code>java -jar</code> invocation does.</p>
-<p>To check a model without generating anything, use the <code>validate</code> task — it reports the derived service id, module name,
+<p>To check a model without generating anything, use the <code>validate</code> task: it reports the derived service id, module name,
 protocol, and operations, then exits without writing files:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>./gradlew :cloudstub-codegen:validate --args=&quot;--model &lt;path&gt;&quot;
 </span></code></pre></div>
 <h3 id="standalone-distribution-java-jar">Standalone / distribution (<code>java -jar</code>)</h3>
-<p>Outside the monorepo — and in CI — the codegen ships as an executable fat JAR on the
+<p>Outside the monorepo (and in CI), the codegen ships as an executable fat JAR on the
 <a href="https://github.com/cloudstub/cloudstub/releases">GitHub Releases</a> page (it is not on Maven Central).
 Download it:</p>
 <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl -L -o cloudstub-codegen.jar \
@@ -1336,7 +1336,7 @@ Download it:</p>
 <tr>
 <td><code>--model</code></td>
 <td>yes</td>
-<td>—</td>
+<td>(none)</td>
 <td>Path or <code>https://</code> URL to a single Smithy model file (<code>.smithy</code> IDL or <code>.json</code> AST)</td>
 </tr>
 <tr>
@@ -1354,7 +1354,7 @@ Download it:</p>
 <tr>
 <td><code>--validate</code></td>
 <td>no</td>
-<td>—</td>
+<td>(none)</td>
 <td>Validate the model and report what would be generated, without writing any files</td>
 </tr>
 </tbody>
@@ -1369,21 +1369,21 @@ Download it:</p>
 <li>A local <code>.smithy</code> IDL file (e.g. downloaded from
   the <a href="https://github.com/aws/aws-sdk-java-v2/tree/master/services">AWS SDK v2 Smithy models</a>)</li>
 <li>A local <code>.json</code> Smithy AST model</li>
-<li>An <code>https://</code> URL pointing directly at a <code>.smithy</code> or <code>.json</code> file — the model is downloaded to a temporary file and
+<li>An <code>https://</code> URL pointing directly at a <code>.smithy</code> or <code>.json</code> file: the model is downloaded to a temporary file and
   used as-is</li>
 </ul>
 <p>Constraints:</p>
 <ul>
-<li><code>http://</code> URLs are rejected — use <code>https://</code>.</li>
+<li><code>http://</code> URLs are rejected; use <code>https://</code>.</li>
 <li><code>--model</code> must be a single file (not a directory) and the name must end in <code>.smithy</code> or <code>.json</code>.</li>
 </ul>
 <h2 id="what-the-codegen-produces">What the codegen produces</h2>
 <p>The codegen writes a complete, compilable module skeleton:</p>
 <ul>
-<li><code>build.gradle</code> — <code>compileOnly</code>/<code>testImplementation</code> on <code>cloudstub-core</code> at the pinned <code>--core-version</code></li>
-<li>The <code>CloudStub&lt;Service&gt;Service</code> class — one <code>register*Stub</code> call per operation, each loading its body from the
+<li><code>build.gradle</code>: <code>compileOnly</code>/<code>testImplementation</code> on <code>cloudstub-core</code> at the pinned <code>--core-version</code></li>
+<li>The <code>CloudStub&lt;Service&gt;Service</code> class: one <code>register*Stub</code> call per operation, each loading its body from the
   classpath via a generated <code>loadTemplate(name)</code> helper</li>
-<li><code>META-INF/services/io.cloudstub.core.spi.CloudStubService</code> — registers the generated class for <code>ServiceLoader</code>
+<li><code>META-INF/services/io.cloudstub.core.spi.CloudStubService</code>: registers the generated class for <code>ServiceLoader</code>
   discovery</li>
 <li>One <code>src/main/resources/templates/&lt;Operation&gt;.hbs</code> template per operation</li>
 <li>A <code>CloudStub&lt;Service&gt;ServiceTest</code> skeleton with one stubbed <code>@Test</code> per operation</li>
@@ -1398,11 +1398,11 @@ Download it:</p>
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Each operation's response body lives in its own file. For example <code>src/main/resources/templates/DescribeStream.hbs</code> (
-illustrative — the generated placeholder reflects the model's output shape):</p>
-<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>{{! REVIEW REQUIRED — output: DescribeStreamOutput [StreamDescription: structure] }}
+illustrative; the generated placeholder reflects the model's output shape):</p>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>{{! REVIEW REQUIRED, output: DescribeStreamOutput [StreamDescription: structure] }}
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>{&quot;StreamDescription&quot;:{}}
 </span></code></pre></div>
-<p><code>TARGET_PREFIX</code> itself is a generated guess derived from the service name and carries a <code>TODO</code> comment — confirm the
+<p><code>TARGET_PREFIX</code> itself is a generated guess derived from the service name and carries a <code>TODO</code> comment; confirm the
 real <code>X-Amz-Target</code> prefix during review (see step 1 below).</p>
 <h2 id="manual-review-steps">Manual review steps</h2>
 <p>The generated output is a starting point, not a finished module. Always review and adjust:</p>

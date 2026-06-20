@@ -1215,10 +1215,10 @@
 <p>CloudStub runs entirely inside the JVM. No Docker. No external process. No credentials. Tests that touch AWS services
 start at the same speed as tests that don't.</p>
 <p>It also ships as a <strong>standalone runnable JAR</strong> for local development: start it once and any application that reads
-<code>AWS_ENDPOINT_URL</code> connects to it — no container, no daemon, no setup.</p>
+<code>AWS_ENDPOINT_URL</code> connects to it: no container, no daemon, no setup.</p>
 <hr />
 <h2 id="why-cloudstub">Why CloudStub</h2>
-<p>Testing AWS integrations on the JVM typically means running an external process — a Docker container, a Python runtime, or both. That adds startup time and environment dependencies to every test and CI run.</p>
+<p>Testing AWS integrations on the JVM typically means running an external process: a Docker container, a Python runtime, or both. That adds startup time and environment dependencies to every test and CI run.</p>
 <p>CloudStub answers a simpler question: what if the mock ran inside the JVM itself?</p>
 <hr />
 <h2 id="how-it-works">How it works</h2>
@@ -1226,7 +1226,7 @@ start at the same speed as tests that don't.</p>
 redirect the AWS SDK v2, and discovers service modules via <code>ServiceLoader</code>. Each <strong>service module</strong> is an independently
 installable JAR that registers its stubs through the <code>StubRegistrar</code> SPI.</p>
 <p>First-party modules target the AWS SDK for Java <strong>v2</strong>. Teams still on <strong>v1</strong> can redirect their clients to CloudStub
-with the <code>cloudstub-sdk-v1</code> companion — see <a href="sdk-v1/">SDK v1 Support</a>.</p>
+with the <code>cloudstub-sdk-v1</code> companion; see <a href="sdk-v1/">SDK v1 Support</a>.</p>
 <hr />
 <h2 id="quick-example">Quick example</h2>
 <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">CloudStubExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
@@ -1248,7 +1248,7 @@ with the <code>cloudstub-sdk-v1</code> companion — see <a href="sdk-v1/">SDK v
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">}</span>
 </span></code></pre></div>
-<p><a href="getting-started/">Get started in five minutes →</a></p>
+<p><a href="getting-started/">Get started →</a></p>
 
 
 
