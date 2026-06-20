@@ -22,8 +22,7 @@ CloudStub answers a simpler question: what if the mock ran inside the JVM itself
 
 The **core engine** boots an embedded HTTP server on a random port, sets the `aws.endpoint-url` system property to
 redirect the AWS SDK v2, and discovers service modules via `ServiceLoader`. Each **service module** is an independently
-installable JAR that registers its stubs through the `StubRegistrar` SPI. The underlying HTTP server (WireMock) is
-completely hidden — you never interact with it directly.
+installable JAR that registers its stubs through the `StubRegistrar` SPI.
 
 First-party modules target the AWS SDK for Java **v2**. Teams still on **v1** can redirect their clients to CloudStub
 with the `cloudstub-sdk-v1` companion — see [SDK v1 Support](sdk-v1.md).
