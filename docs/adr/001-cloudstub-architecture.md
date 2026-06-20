@@ -1,12 +1,12 @@
-# ADR-001: CloudStub — Ultra-Lightweight, Containerless AWS Mock Framework
+# ADR-001: CloudStub, an Ultra-Lightweight Containerless AWS Mock Framework
 
 | Field             | Value               |
 | ----------------- | ------------------- |
 | **Status**        | Accepted            |
 | **Date**          | 2026-06-01          |
 | **Authors**       | CloudStub Core Team |
-| **Supersedes**    | —                   |
-| **Superseded by** | —                   |
+| **Supersedes**    | (none)              |
+| **Superseded by** | (none)              |
 
 ---
 
@@ -29,7 +29,7 @@
 
 ## Context
 
-Modern Java/JVM services depend heavily on AWS managed services — SQS, S3, DynamoDB, Secrets Manager, and others.
+Modern Java/JVM services depend heavily on AWS managed services: SQS, S3, DynamoDB, Secrets Manager, and others.
 Testing these integrations reliably requires either hitting real AWS endpoints (slow, costly, requires credentials) or
 running a local mock.
 
@@ -38,7 +38,7 @@ reimplementation of AWS services. While comprehensive, this model introduces mea
 
 - Container startup adds 5–30 seconds on a modern machine, and 60+ seconds under CI resource constraints, to every test
   run.
-- Docker must be available in the test environment — a constraint that breaks lightweight CI runners and local setups
+- Docker must be available in the test environment, a constraint that breaks lightweight CI runners and local setups
   without Docker Desktop.
 - The free tier of LocalStack has feature gaps; the Pro tier requires an online license check.
 - Every module is always loaded, regardless of which services a project actually uses.
@@ -52,7 +52,7 @@ There is no lightweight, in-process, JVM-native alternative with a modular depen
 We need a local AWS mock framework that:
 
 - Starts in milliseconds, not seconds, so unit and integration test feedback loops remain fast.
-- Runs entirely inside the JVM — no Docker, no Python, no external process.
+- Runs entirely inside the JVM: no Docker, no Python, no external process.
 - Loads only the AWS service modules a project declares as dependencies, keeping the memory footprint proportional to
   actual usage.
 - Requires zero configuration, zero credentials, and zero internet connectivity.
@@ -65,7 +65,7 @@ We need a local AWS mock framework that:
 We will build **CloudStub**: an open-source, in-memory, modular AWS mock framework for the JVM.
 
 The framework uses **WireMock** as an embedded, fully encapsulated networking driver. WireMock is invisible to the
-developer — no WireMock APIs are exposed. Service behaviour is delivered through independently installable JAR modules,
+developer: no WireMock APIs are exposed. Service behaviour is delivered through independently installable JAR modules,
 each discovered at runtime via Java's native **ServiceLoader** (SPI) mechanism.
 
 ---
@@ -109,7 +109,7 @@ code changes are required.
 
 ## System layers
 
-### Layer 1 — Orchestration (`cloudstub-core`)
+### Layer 1: Orchestration (`cloudstub-core`)
 
 The core engine is responsible for:
 
@@ -121,7 +121,7 @@ The core engine is responsible for:
 The core has **zero compile-time dependencies on any AWS service module** and no knowledge of SQS, S3, DynamoDB, or any
 other service.
 
-### Layer 2 — Extension modules (`cloudstub-*`)
+### Layer 2: Extension modules (`cloudstub-*`)
 
 Each module is an independently installable JAR. It implements the `CloudStubService` SPI interface and registers its
 stubs against the shared WireMock instance during startup.
@@ -129,7 +129,7 @@ stubs against the shared WireMock instance during startup.
 Modules are strictly isolated: `cloudstub-sqs` cannot depend on `cloudstub-s3`. A project that only needs SQS downloads
 only `cloudstub-core` and `cloudstub-sqs`.
 
-### Layer 3 — Driver (WireMock embedded)
+### Layer 3: Driver (WireMock embedded)
 
 WireMock handles all low-level networking, request matching, and Handlebars template processing. It is entirely hidden
 behind CloudStub's own APIs. Developers never interact with WireMock directly.
@@ -255,23 +255,23 @@ on WireMock internals.
 
 ## Implementation roadmap
 
-### Phase 1 — Monorepo foundation
+### Phase 1: Monorepo foundation
 
 - Establish Gradle multi-project build with strict inter-module isolation enforced by CI.
-- Implement the `CloudStubService` SPI interface and `StubRegistrar` facade — **this contract is established before any
+- Implement the `CloudStubService` SPI interface and `StubRegistrar` facade. **This contract is established before any
   module work begins**.
 - Implement `cloudstub-core`: embedded WireMock bootstrap, system property injection, `ServiceLoader` discovery loop.
 - Publish to Maven local; validate with a minimal smoke test.
 
-### Phase 2 — Proof-of-concept modules
+### Phase 2: Proof-of-concept modules
 
 - `cloudstub-sqs`: establishes the XML/Form routing and Handlebars template standard for all SOAP-style services.
 - `cloudstub-secretsmanager`: establishes the JSON/target-header routing standard for all JSON services.
 - These two modules serve as the canonical reference implementation for all future module authors.
 
-### Phase 3 — Developer experience
+### Phase 3: Developer experience
 
-- Junit 6 `@ExtendWith(CloudStubExtension.class)` — zero-boilerplate test lifecycle management.
+- Junit 6 `@ExtendWith(CloudStubExtension.class)`: zero-boilerplate test lifecycle management.
 - Fault injection API: `@SimulateThrottle`, `@SimulateTimeout`, `@SimulateNetworkBrownout` annotations for resilience
   testing.
 - First pass of the stub generation agent (Smithy model → module skeleton).
@@ -287,7 +287,7 @@ on WireMock internals.
   milliseconds.
 - No Docker dependency removes a major CI environment constraint.
 - Modular dependency model means unused service code is never on the classpath.
-- No license verification — works fully offline and in air-gapped environments.
+- No license verification: works fully offline and in air-gapped environments.
 - The SPI contract enables community-contributed modules without changes to core.
 
 ### Negative
@@ -311,13 +311,13 @@ designed specifically as the lightweight alternative.
 
 ### WireMock used directly
 
-Rejected because raw WireMock requires developers to hand-author AWS request matchers and response stubs — significant
+Rejected because raw WireMock requires developers to hand-author AWS request matchers and response stubs, which is significant
 boilerplate and deep protocol knowledge per service. CloudStub encapsulates this entirely.
 
 ### Mockito / in-process AWS client mocks
 
 Rejected because they mock the Java client, not the HTTP layer. Tests using Mockito mocks do not exercise the SDK's
-serialisation, retry logic, or endpoint resolution — the parts most likely to fail in production.
+serialisation, retry logic, or endpoint resolution: the parts most likely to fail in production.
 
 ### Testcontainers with LocalStack module
 
@@ -344,7 +344,7 @@ The three routing methods (`registerXmlFormStub`, `registerJsonTargetStub`, `reg
 protocol planned through Phase 3. Exposing `MappingBuilder` would permanently bind the public API to WireMock, making
 it impossible to swap the underlying networking driver without a breaking change. If a module author needs behaviour
 that
-`StubRegistrar` cannot express, the correct path is to open an issue requesting a new registration method — not to
+`StubRegistrar` cannot express, the correct path is to open an issue requesting a new registration method, not to
 reach through to WireMock directly.
 
 If a genuine escape hatch becomes necessary in a future phase, it will be introduced as a separate, clearly marked
@@ -374,12 +374,12 @@ methods their module calls. Consumers manage transitive version resolution throu
 **Resolved:** Java 17 LTS.
 
 CloudStub is a library that runs inside the consumer's JVM. The minimum version is not a constraint on CloudStub's own
-development environment — it is a constraint on every project that wants to adopt CloudStub. Setting the floor too high
+development environment; it is a constraint on every project that wants to adopt CloudStub. Setting the floor too high
 at launch would exclude a significant portion of the target audience before the project has established itself.
 
 Java 17 remains the dominant LTS in enterprise and Spring Boot 3.x ecosystems as of the time this decision was made,
-even though Java 21 is the current LTS. None of the features introduced in Java 21 — virtual threads, finalised pattern
-matching for switch, sequenced collections — are meaningful for CloudStub's core implementation: an embedded WireMock
+even though Java 21 is the current LTS. None of the features introduced in Java 21 (virtual threads, finalised pattern
+matching for switch, sequenced collections) are meaningful for CloudStub's core implementation: an embedded WireMock
 server, a `ServiceLoader` loop, and Handlebars response templates. The upgrade would carry adoption cost with no
 technical benefit at this stage.
 

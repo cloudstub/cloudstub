@@ -6,13 +6,13 @@ CloudStub runs entirely inside the JVM. No Docker. No external process. No crede
 start at the same speed as tests that don't.
 
 It also ships as a **standalone runnable JAR** for local development: start it once and any application that reads
-`AWS_ENDPOINT_URL` connects to it — no container, no daemon, no setup.
+`AWS_ENDPOINT_URL` connects to it: no container, no daemon, no setup.
 
 ---
 
 ## Why CloudStub
 
-Testing AWS integrations on the JVM typically means running an external process — a Docker container, a Python runtime, or both. That adds startup time and environment dependencies to every test and CI run.
+Testing AWS integrations on the JVM typically means running an external process: a Docker container, a Python runtime, or both. That adds startup time and environment dependencies to every test and CI run.
 
 CloudStub answers a simpler question: what if the mock ran inside the JVM itself?
 
@@ -25,7 +25,7 @@ redirect the AWS SDK v2, and discovers service modules via `ServiceLoader`. Each
 installable JAR that registers its stubs through the `StubRegistrar` SPI.
 
 First-party modules target the AWS SDK for Java **v2**. Teams still on **v1** can redirect their clients to CloudStub
-with the `cloudstub-sdk-v1` companion — see [SDK v1 Support](sdk-v1.md).
+with the `cloudstub-sdk-v1` companion; see [SDK v1 Support](sdk-v1.md).
 
 ---
 

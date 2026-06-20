@@ -3,13 +3,13 @@
 CloudStub's first-party service modules target the **AWS SDK for Java v2**. For teams still mid-migration, the
 `cloudstub-sdk-v1` companion library lets AWS SDK **v1** clients reach a running CloudStub instance.
 
-!!! warning "What the companion does — and does not — do"
+!!! warning "What the companion does, and does not, do"
     `cloudstub-sdk-v1` redirects the **endpoint** of an SDK v1 client to CloudStub. That is all. It guarantees
     **connectivity**; it does not provide v1-shaped stub responses. See
     [Connectivity vs response fidelity](#connectivity-vs-response-fidelity) below before you rely on it.
 
 The AWS Java SDK v1 reached [end-of-support on 2025-12-31](https://aws.amazon.com/de/blogs/developer/announcing-end-of-support-for-aws-sdk-for-java-v1-x-on-december-31-2025/).
-The companion exists to support teams mid-migration. **Per-service first-party v1 stubs are explicitly a non-goal** —
+The companion exists to support teams mid-migration. **Per-service first-party v1 stubs are explicitly a non-goal**:
 new service modules target the v2 protocol shape only.
 
 ## Dependencies
@@ -107,20 +107,20 @@ class MyV1Test {
 !!! note "The signing region and credentials are inert"
     SDK v1 requires a signing region and credentials to construct a client, so `forPort` supplies a dummy region of
     `us-east-1` and the example uses `AnonymousAWSCredentials`. CloudStub does not verify signatures, so **neither value
-    affects stub matching** — they exist only to satisfy the v1 builder.
+    affects stub matching**; they exist only to satisfy the v1 builder.
 
-The companion is JUnit-agnostic — `@BeforeAll`/`@AfterAll` above are illustrative; you can drive CloudStub from any
+The companion is JUnit-agnostic. `@BeforeAll`/`@AfterAll` above are illustrative; you can drive CloudStub from any
 lifecycle.
 
 ## Connectivity vs response fidelity
 
 This is the boundary that matters. The companion redirects the **endpoint**; it does not translate protocols.
 
-- Most first-party modules — **SQS**, Secrets Manager, DynamoDB — target the **SDK v2** protocol shape: JSON with an
+- Most first-party modules (**SQS**, Secrets Manager, DynamoDB) target the **SDK v2** protocol shape: JSON with an
   `X-Amz-Target` header. SDK v1 speaks the **XML / QUERY** protocol, identifying the operation with an `Action`
   form-body parameter, so a v1 call to these services matches no first-party stub.
 - **SNS is the exception:** it uses the XML / QUERY protocol in *both* v1 and v2, so the first-party `cloudstub-sns`
-  module's `Action`-keyed stubs can already match a v1 SNS call — provided `cloudstub-sns` is on your classpath.
+  module's `Action`-keyed stubs can already match a v1 SNS call, provided `cloudstub-sns` is on your classpath.
 
 For the JSON/`X-Amz-Target` services, a v1 call therefore arrives in a shape that no first-party stub matches, so
 **WireMock returns 404** and the v1 client raises an `AmazonServiceException`. Connectivity is proven (you reached the
@@ -132,18 +132,18 @@ without claiming a matched stub.
 | Concern | Guaranteed? | How |
 |---|---|---|
 | Connectivity (v1 client reaches CloudStub) | ✅ Yes | `CloudStubV1Endpoints.forPort(...)` |
-| Response fidelity (a stub matches and answers) | ⚠️ Your responsibility | Author an XML/QUERY stub — see below |
+| Response fidelity (a stub matches and answers) | ⚠️ Your responsibility | Author an XML/QUERY stub (see below) |
 
 ## Bring your own stub
 
 To get a *populated* response for a v1 call against a JSON/`X-Amz-Target` service, register a stub in the v1
 (XML / QUERY) protocol yourself. You author a `CloudStubService` and register through
-`registerXmlFormStub(actionName, responseTemplate)` — keyed on the `Action` form parameter the v1 client sends. The
+`registerXmlFormStub(actionName, responseTemplate)`, keyed on the `Action` form parameter the v1 client sends. The
 full SPI walkthrough lives in the [Module Authoring guide](module-authoring.md).
 
 The short version below uses SNS `Publish`. SNS shares the XML / QUERY protocol across v1 and v2, so the first-party
 `cloudstub-sns` module would also serve this call; the example deliberately omits `cloudstub-sns` from its classpath to
-demonstrate the bring-your-own-stub path in isolation — the general escape hatch for any v1 operation no first-party
+demonstrate the bring-your-own-stub path in isolation: the general escape hatch for any v1 operation no first-party
 module covers:
 
 ```java
@@ -172,11 +172,11 @@ public final class SnsV1PublishStubService implements CloudStubService {
 }
 ```
 
-1. Matches `Action=Publish` in the form body — the wire shape a v1 SNS client produces — and returns the XML response
+1. Matches `Action=Publish` in the form body (the wire shape a v1 SNS client produces) and returns the XML response
    the v1 client knows how to parse.
 
 Install your stub explicitly with `withService(...)` and drive it with a real v1 client. A populated `MessageId` proves
-the stub matched and the response was parsed — fidelity, not just connectivity:
+the stub matched and the response was parsed, proving fidelity, not just connectivity:
 
 ```java
 @RegisterExtension
@@ -188,7 +188,7 @@ static CloudStubExtension cloudMock =
 PublishResult result = snsClient.publish(
         "arn:aws:sns:us-east-1:000000000000:demo-topic", "hello from SDK v1");
 
-assertNotNull(result.getMessageId()); // populated — the XML/QUERY stub was served
+assertNotNull(result.getMessageId()); // populated: the XML/QUERY stub was served
 ```
 
 1. `withService(...)` installs the user-authored stub. The `cloudstub-sns` first-party module is not on the test

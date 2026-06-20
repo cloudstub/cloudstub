@@ -28,7 +28,7 @@ public class AwsConfig {
 
 1. The `:` default means the property is optional. In production `aws.endpoint-url` is absent and the SDK uses real AWS endpoints. In tests CloudStub sets it before the context starts.
 
-Your services are plain Spring `@Service` classes with no CloudStub imports — see [`QueuePublisher`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/service/QueuePublisher.java) and [`SecretLoader`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/service/SecretLoader.java) in `cloudstub-example` for the full code.
+Your services are plain Spring `@Service` classes with no CloudStub imports. See [`QueuePublisher`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/service/QueuePublisher.java) and [`SecretLoader`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/service/SecretLoader.java) in `cloudstub-example` for the full code.
 
 ## Integration tests
 
@@ -43,10 +43,10 @@ class QueuePublisherIntegrationTest {
     @Autowired QueuePublisher publisher;
 
     @Test
-    void publishCreatesQueueAndReturnsMessageId() {
-        String messageId = publisher.publish("order-placed");
-        assertNotNull(messageId);
-        assertFalse(messageId.isBlank());
+    void publishedMessageCanBePolledBack() {
+        publisher.publish("order-placed");
+
+        assertTrue(publisher.poll().contains("order-placed"));
     }
 }
 ```
@@ -63,16 +63,16 @@ See the full working tests in `cloudstub-example`:
 
 In **embedded mode** (the integration tests above) no endpoint configuration is needed: `CloudStubExtension` sets the `aws.endpoint-url` system property to its embedded port before Spring builds any client bean, so the `@Value("${aws.endpoint-url:}")` injection picks it up automatically. In **standalone mode** CloudStub runs as a separate process, so the application must be told where it is. Any of these supply the endpoint:
 
-- **`AWS_ENDPOINT_URL` environment variable** — AWS SDK v2 reads it directly, so it works even without the `@Value` wiring. `export AWS_ENDPOINT_URL=http://localhost:4566` before `bootRun`.
-- **`aws.endpoint-url` property** — on the command line (`--aws.endpoint-url=...`), as a system property (`-Daws.endpoint-url=...`), or from an `application.properties` file. Read by the example [`AwsConfig`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/config/AwsConfig.java).
-- **Manual `endpointOverride(...)`** — call it directly on the client builder for explicit per-client control.
+- **`AWS_ENDPOINT_URL` environment variable**: AWS SDK v2 reads it directly, so it works even without the `@Value` wiring. `export AWS_ENDPOINT_URL=http://localhost:4566` before `bootRun`.
+- **`aws.endpoint-url` property**: on the command line (`--aws.endpoint-url=...`), as a system property (`-Daws.endpoint-url=...`), or from an `application.properties` file. Read by the example [`AwsConfig`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/java/io/cloudstub/example/config/AwsConfig.java).
+- **Manual `endpointOverride(...)`**: call it directly on the client builder for explicit per-client control.
 
 ### Environment profiles
 
 The example app carries the endpoint on a Spring profile:
 
-- **`local`** — [`application-local.properties`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/resources/application-local.properties) sets `aws.endpoint-url=http://localhost:4566`, so the clients hit a standalone CloudStub server.
-- **`prod`** — [`application-prod.properties`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/resources/application-prod.properties) sets no endpoint override, so the SDK uses the real regional endpoints.
+- **`local`**: [`application-local.properties`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/resources/application-local.properties) sets `aws.endpoint-url=http://localhost:4566`, so the clients hit a standalone CloudStub server.
+- **`prod`**: [`application-prod.properties`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/resources/application-prod.properties) sets no endpoint override, so the SDK uses the real regional endpoints.
 
 The base [`application.properties`](https://github.com/cloudstub/cloudstub/blob/main/cloudstub-example/junit6/src/main/resources/application.properties) sets no endpoint, so with no profile active the SDK uses real AWS. Run against a standalone server with `--spring.profiles.active=local`.
 
@@ -80,10 +80,10 @@ The base [`application.properties`](https://github.com/cloudstub/cloudstub/blob/
 
 When client beans read `aws.endpoint-url` through Spring, Spring's property precedence decides which value wins. From highest to lowest:
 
-1. **Command-line argument** — `--aws.endpoint-url=http://...`.
-2. **System property** — `-Daws.endpoint-url=http://...` (the form `CloudStubExtension` sets in tests).
-3. **Active profile properties** — `application-local.properties` (`aws.endpoint-url=http://localhost:4566`) when `local` is active.
-4. **Base `application.properties`** — no endpoint, so the SDK uses real AWS.
+1. **Command-line argument**: `--aws.endpoint-url=http://...`.
+2. **System property**: `-Daws.endpoint-url=http://...` (the form `CloudStubExtension` sets in tests).
+3. **Active profile properties**: `application-local.properties` (`aws.endpoint-url=http://localhost:4566`) when `local` is active.
+4. **Base `application.properties`**: no endpoint, so the SDK uses real AWS.
 
 So a test's injected system property outranks the profile, and an explicit `--aws.endpoint-url` outranks both.
 

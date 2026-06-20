@@ -11,8 +11,8 @@ Publishes the refactored `cloudstub-sqs` module.
 ### Changed
 
 - `cloudstub-sqs` regenerated from the AWS SQS Smithy model with full coverage of all 23 operations.
-  The eight core queue and message operations remain state-backed — a message sent with `SendMessage`
-  is returned by a later `ReceiveMessage` — while the remaining operations return well-formed template
+  The eight core queue and message operations remain state-backed: a message sent with `SendMessage`
+  is returned by a later `ReceiveMessage`, while the remaining operations return well-formed template
   responses.
 
 ## [0.1.0-beta.2] - 2026-06-17

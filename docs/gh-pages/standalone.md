@@ -10,7 +10,7 @@ and point your application at `http://localhost:4566`.
 | JUnit integration tests                           | [Embedded mode](getting-started.md) via `CloudStubExtension`      |
 | `./gradlew bootRun` or other long-lived local dev | **Standalone mode**                                               |
 | Docker Compose local environment                  | **Standalone mode**                                               |
-| CI pipeline tests                                 | [Embedded mode](getting-started.md) — faster, no external process |
+| CI pipeline tests                                 | [Embedded mode](getting-started.md): faster, no external process |
 
 ## Distribution model
 
@@ -19,13 +19,13 @@ Service modules ship as separate jars that the launcher loads at runtime from a 
 download the server jar once, then let the launcher fetch the modules you declare with `--services` (auto-download,
 on by default), or drop the jars into the plugin directory yourself.
 
-- `--modules-dir` controls what is **available** — which module jars are on the classpath.
+- `--modules-dir` controls what is **available**: which module jars are on the classpath.
 - `--services` (below) narrows what is **enabled** among those.
 
 ## Get the server JAR
 
 The runnable server is distributed on the [GitHub Releases](https://github.com/cloudstub/cloudstub/releases)
-page — it is **not** on Maven Central (Central carries the libraries). Download the latest:
+page; it is **not** on Maven Central (Central carries the libraries). Download the latest:
 
 ```
 curl -L -o cloudstub-local.jar \
@@ -45,14 +45,14 @@ The examples below use the build path `cloudstub-local/build/libs/cloudstub-loca
 ## Add the services you need
 
 Declare the services you want with `--services=sqs,s3` (or `CLOUDSTUB_SERVICES`). Before it starts, the launcher makes sure
-each declared module's jar is in the plugin directory — and by default it **downloads any that are missing**, so for
+each declared module's jar is in the plugin directory, and by default it **downloads any that are missing**, so for
 published modules you never manage jars by hand.
 
 ### Auto-download (default)
 
 Auto-download is **on by default**: when you declare a service whose jar is not already in the plugin directory, the
 launcher fetches `io.github.cloudstub:cloudstub-<service>:<version>` from Maven Central, verifies it, writes it into
-the plugin directory, and loads it. `--services` is the single source of truth — declare what you want and it
+the plugin directory, and loads it. `--services` is the single source of truth: declare what you want and it
 appears:
 
 ```
@@ -61,18 +61,18 @@ java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
 
 - **Version:** defaults to the running `cloudstub-core` version, so a downloaded module matches the SPI the core
   provides. Override with `--module-version=<v>` or `CLOUDSTUB_MODULE_VERSION`. (Development builds are `-SNAPSHOT`,
-  which is not published to Central — point `--module-version` at a released version such as `0.1.0-beta.3`.)
+  which is not published to Central, so point `--module-version` at a released version such as `0.1.0-beta.3`.)
 - **Cache:** the plugin directory is the cache. A jar that is already present is **never** re-downloaded, so the
   next start is offline-fast. When no `--modules-dir` is set and a download is needed, the default `./modules`
   directory is created to hold it.
 - **Integrity:** every download is checksum-verified (the strongest published of SHA-512 / SHA-256 / SHA-1) before
   the jar is trusted and loaded. A mismatch fails the start.
 - **Source:** the canonical Maven Central host. Point at an internal mirror with `--maven-base-url=<url>` or
-  `CLOUDSTUB_MAVEN_BASE_URL` (a single Maven-layout repository root — not a general multi-repository resolver).
+  `CLOUDSTUB_MAVEN_BASE_URL` (a single Maven-layout repository root, not a general multi-repository resolver).
 
 ### Place module jars manually
 
-You can also manage the jars yourself — useful for locally built modules (the [server JAR build](#get-the-server-jar)
+You can also manage the jars yourself, which is useful for locally built modules (the [server JAR build](#get-the-server-jar)
 produces each service jar) or a curated offline set. The launcher loads every `.jar` in the plugin directory
 (default `./modules`), so drop them in and start:
 
@@ -96,7 +96,7 @@ java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
 
 Plugin directory precedence: `--modules-dir` flag → `CLOUDSTUB_MODULES_DIR` env var → default `./modules`. An
 explicitly provided `--modules-dir` that does not exist fails fast; a missing or empty default
-`./modules` is **not** fatal — the server starts and serves nothing. A jar already present is used as-is and never
+`./modules` is **not** fatal: the server starts and serves nothing. A jar already present is used as-is and never
 re-downloaded.
 
 ### Disable auto-download (offline / air-gapped)
@@ -162,7 +162,7 @@ Service selection precedence: `--services` flag → `CLOUDSTUB_SERVICES` env var
 If you start with no `--services`, the server warns you and tells you how to enable services:
 
 ```
-[CloudStub] WARNING: no services enabled — the mock will serve nothing.
+[CloudStub] WARNING: no services enabled; the mock will serve nothing.
 [CloudStub]          Enable services with --services=<id>[,<id>...] or CLOUDSTUB_SERVICES=<id>[,<id>...].
 [CloudStub]          Available services: sqs, sns, secretsmanager, s3
 ```
@@ -218,7 +218,7 @@ naming the coordinate, version, and destination, so downloaded jars are distingu
 ```
 
 The REST API is available at `http://localhost:4567` (see [REST API](rest-api.md) for the full reference), and the
-web [Console](console.md) is served at `http://localhost:4567/console` — opening `http://localhost:4567/` redirects
+web [Console](console.md) is served at `http://localhost:4567/console`; opening `http://localhost:4567/` redirects
 there. A command-line client is coming soon.
 
 ## Configuration file
@@ -265,13 +265,13 @@ Each option is resolved independently in this order, the first source that suppl
 CLI flag → environment variable → config file → built-in default
 ```
 
-A CLI flag therefore always overrides the file, and the file overrides nothing but the defaults — the same
+A CLI flag therefore always overrides the file, and the file overrides nothing but the defaults: the same
 flag-over-environment ordering CloudStub already uses, with the file slotted in just above the defaults. The keys are
 namespaced under `cloudstub.` with room to grow.
 
 ### Absent or malformed files
 
-- A **missing** default `cloudstub.properties` is not an error — the server starts on defaults exactly as it does
+- A **missing** default `cloudstub.properties` is not an error: the server starts on defaults exactly as it does
   with no file. Only a `--config` (or `CLOUDSTUB_CONFIG`) path that does not exist fails fast.
 - A file that **cannot be parsed**, that contains an **unknown key**, or that holds a **non-numeric value** for a
   numeric key fails fast with a message naming the file and the offending key, not a stack trace:
@@ -285,11 +285,11 @@ namespaced under `cloudstub.` with room to grow.
 In **embedded mode** no endpoint configuration is needed: `CloudStubExtension` sets the
 `aws.endpoint-url` system property to its embedded port before any AWS client is built, so SDK v2 clients in the
 test JVM are redirected automatically. In **standalone mode** CloudStub is a separate process, so the application
-must be told where it is. Three forms supply the endpoint — pick by how the client is built:
+must be told where it is. Three forms supply the endpoint, picked by how the client is built:
 
 | Form                                    | Applies when                                                                                       |
 |-----------------------------------------|----------------------------------------------------------------------------------------------------|
-| `AWS_ENDPOINT_URL` environment variable | Any AWS SDK v2 client — the SDK reads it automatically, no code change.                             |
+| `AWS_ENDPOINT_URL` environment variable | Any AWS SDK v2 client: the SDK reads it automatically, no code change.                             |
 | `aws.endpoint-url` Spring property      | A Spring Boot app whose client beans read the property (see [Spring Boot](spring-boot.md)).         |
 | `endpointOverride(...)` on the builder  | A hand-built client, or anywhere you need explicit per-client control.                              |
 
@@ -318,7 +318,7 @@ between these forms, see [Pointing an application at CloudStub](spring-boot.md#p
 
 ## Stop the server
 
-Press `Ctrl-C` or send `SIGTERM`. CloudStub prints a shutdown message and exits cleanly — no stack trace:
+Press `Ctrl-C` or send `SIGTERM`. CloudStub prints a shutdown message and exits cleanly, with no stack trace:
 
 ```
 ^C

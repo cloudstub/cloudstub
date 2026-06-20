@@ -1,6 +1,6 @@
 # Logging
 
-CloudStub uses SLF4J as its logging facade. No logging implementation is bundled — you bring your own.
+CloudStub uses SLF4J as its logging facade. No logging implementation is bundled; you bring your own.
 
 ## Default output (standalone mode)
 
@@ -79,7 +79,7 @@ Configure DEBUG on your own logging implementation. For Logback, add a logger en
 ## Custom logging implementation
 
 In standalone mode you can replace `slf4j-simple` with any SLF4J-compatible implementation by placing its JAR on the
-classpath ahead of the standalone JAR. In embedded mode, add your preferred implementation to your test dependencies —
+classpath ahead of the standalone JAR. In embedded mode, add your preferred implementation to your test dependencies;
 CloudStub will bind to it automatically.
 
 ### Logback example (embedded / Spring Boot)

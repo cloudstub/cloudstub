@@ -83,9 +83,9 @@ class OrderServiceTest {
 }
 ```
 
-1. Starts CloudStub before the first test and stops it after the last. Service modules on the classpath are discovered automatically via `ServiceLoader` — no registration required.
+1. Starts CloudStub before the first test and stops it after the last. Service modules on the classpath are discovered automatically via `ServiceLoader`, with no registration required.
 2. CloudStub sets `aws.endpoint-url` to `http://localhost:<port>` before any test runs. The SDK reads it automatically.
-3. Send and receive are state-backed, so you assert on what your code actually did — the order reached the queue — not on the mock returning a value.
+3. Send and receive are state-backed, so you assert on what your code actually did (the order reached the queue), not on the mock returning a value.
 
 ## 3. Run it
 
@@ -99,8 +99,8 @@ CloudStub starts in under 200 ms. No containers, no credentials, no network.
 
 ## Next steps
 
-- [JUnit Extension](junit-extension.md) — learn the `@RegisterExtension` pattern for port access and explicit service registration
-- [Spring Boot Integration](spring-boot.md) — use CloudStub with a full Spring Boot application context
-- [Fault Injection](fault-injection.md) — simulate throttling, timeouts, and network brownouts
-- [Standalone Mode](standalone.md) — run CloudStub as a long-lived local development server instead of embedding it in tests
-- [SDK v1 Support](sdk-v1.md) — redirect AWS SDK **v1** clients to CloudStub while you migrate to v2
+- [JUnit Extension](junit-extension.md): learn the `@RegisterExtension` pattern for port access and explicit service registration
+- [Spring Boot Integration](spring-boot.md): use CloudStub with a full Spring Boot application context
+- [Fault Injection](fault-injection.md): simulate throttling, timeouts, and network brownouts
+- [Standalone Mode](standalone.md): run CloudStub as a long-lived local development server instead of embedding it in tests
+- [SDK v1 Support](sdk-v1.md): redirect AWS SDK **v1** clients to CloudStub while you migrate to v2
