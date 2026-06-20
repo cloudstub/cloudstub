@@ -1,7 +1,7 @@
 # REST API
 
 When running in standalone mode CloudStub exposes a REST API on a secondary port (`4567` by default).
-The API and the AWS mock port (`4566`) run in the same process — no extra server to start.
+The API and the AWS mock port (`4566`) run in the same process, with no extra server to start.
 
 ## Configuration
 
@@ -104,7 +104,7 @@ stubs, and the full list of available API routes.
 }
 ```
 
-Use `GET /api/status` as the discovery endpoint — the `routes` array tells you exactly what
+Use `GET /api/status` as the discovery endpoint: the `routes` array tells you exactly what
 operations are available without consulting documentation. Module routes additionally carry a
 `service`, a `command` name, and a `params` list (each with `name`, `required`, and `description`).
 That metadata is what will let a command-line client (coming soon) build `<service> <command>`
@@ -118,7 +118,7 @@ Clears all state in the store. Use this to start each test scenario with a clean
 running tests against a long-lived standalone process.
 
 A full reset (no `service`) also clears the request history. A single-service reset clears only
-that service's state and leaves the history intact — the history is one shared journal with no
+that service's state and leaves the history intact: the history is one shared journal with no
 per-service partition.
 
 === "Clear everything"
@@ -188,7 +188,7 @@ HTTP status code returned.
 }
 ```
 
-Unmatched requests — those not handled by any registered stub — appear with `"matched": false`
+Unmatched requests (those not handled by any registered stub) appear with `"matched": false`
 and `"serviceId": null`. They are the most common source of integration issues; check the `url`
 field to diagnose why a stub did not match.
 
@@ -207,13 +207,13 @@ contributed by module-specific `CloudStubApiService` implementations.
 GET /api/openapi.json
 ```
 
-The spec updates automatically when modules are added or removed — no manual maintenance required.
+The spec updates automatically when modules are added or removed, with no manual maintenance required.
 
 ## Module routes
 
 Modules can expose their own routes under `/api/<serviceId>/…` by implementing the
-`CloudStubApiService` SPI interface. If a module JAR is not on the classpath — or the service is
-not enabled with `--services` — its routes do not exist; loading the module makes them available
+`CloudStubApiService` SPI interface. If a module JAR is not on the classpath, or the service is
+not enabled with `--services`, its routes do not exist; loading the module makes them available
 automatically. Each route may advertise a `command` name and `params`, which a command-line client
 (coming soon) turns into a `<service> <command>` subcommand.
 

@@ -2,6 +2,8 @@
 
 CloudStub can simulate three categories of AWS failure at the test-method level. Faults are applied by annotating individual test methods and are automatically cleared after each test, even if the test throws.
 
+The examples below drive your own code (an `OrderService` that publishes to SQS, a `SecretLoader` that reads from Secrets Manager) so you assert how your code behaves when AWS misbehaves, not how the mock responds.
+
 ## Annotations
 
 ### `@SimulateThrottle`
@@ -11,9 +13,10 @@ Makes all requests to the specified service return HTTP 400 with error code `Thr
 ```java
 @SimulateThrottle(service = "sqs")
 @Test
-void retryLogicHandlesThrottling() {
-    SqsException ex = assertThrows(SqsException.class, () ->
-            sqsClient.sendMessage(b -> b.queueUrl(QUEUE_URL).messageBody("test")));
+void placeOrderFailsWhenSqsIsThrottled() {
+    OrderService orders = new OrderService(sqs, queueUrl);
+
+    SqsException ex = assertThrows(SqsException.class, () -> orders.placeOrder("sku-42"));
     assertEquals("ThrottlingException", ex.awsErrorDetails().errorCode());
 }
 ```
@@ -25,7 +28,7 @@ Injects a 30-second fixed delay on the server side. The AWS SDK's call timeout f
 ```java
 @SimulateTimeout(service = "sqs")
 @Test
-void timeoutHandlerRaisesCallTimeoutException() {
+void placeOrderRaisesCallTimeout() {
     try (SqsClient shortTimeout = SqsClient.builder()
             .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
             .credentialsProvider(AnonymousCredentialsProvider.create())
@@ -33,8 +36,8 @@ void timeoutHandlerRaisesCallTimeoutException() {
             .overrideConfiguration(c -> c.apiCallTimeout(Duration.ofMillis(500)))
             .build()) {
 
-        assertThrows(ApiCallTimeoutException.class, () ->
-                shortTimeout.sendMessage(b -> b.queueUrl(QUEUE_URL).messageBody("test")));
+        OrderService orders = new OrderService(shortTimeout, queueUrl);
+        assertThrows(ApiCallTimeoutException.class, () -> orders.placeOrder("sku-42"));
     }
 }
 ```
@@ -46,9 +49,10 @@ Causes a configurable fraction of requests to fail with a connection reset (`Sdk
 ```java
 @SimulateNetworkBrownout(service = "sqs", rate = 1.0) // (1)!
 @Test
-void allRequestsFailWithConnectionReset() {
-    assertThrows(SdkClientException.class, () ->
-            sqsClient.sendMessage(b -> b.queueUrl(QUEUE_URL).messageBody("test")));
+void placeOrderFailsWhenEveryRequestResets() {
+    OrderService orders = new OrderService(sqs, queueUrl);
+
+    assertThrows(SdkClientException.class, () -> orders.placeOrder("sku-42"));
 }
 ```
 
@@ -65,14 +69,14 @@ void allRequestsFailWithConnectionReset() {
 ```java
 @SimulateThrottle(service = "sqs")
 @Test
-void throttled() {
-    assertThrows(SqsException.class, () -> sqsClient.sendMessage(...));
+void throttledOrderFails() {
+    assertThrows(SqsException.class, () -> orders.placeOrder("sku-42"));
 }
 
 @Test
-void normalAfterThrottle() {
-    // Throttle was cleared — this succeeds
-    assertDoesNotThrow(() -> sqsClient.sendMessage(...));
+void orderSucceedsAfterThrottleCleared() {
+    // The throttle from the previous test is gone, so this order goes through.
+    assertDoesNotThrow(() -> orders.placeOrder("sku-42"));
 }
 ```
 
@@ -84,9 +88,9 @@ All three annotations are repeatable. Multiple annotations on the same method ar
 @SimulateThrottle(service = "sqs")
 @SimulateThrottle(service = "secretsmanager")
 @Test
-void bothServicesThrottled() {
-    assertThrows(SqsException.class, () -> sqsClient.sendMessage(...));
-    assertThrows(SecretsManagerException.class, () -> smClient.getSecretValue(...));
+void orderAndSecretBothFailWhenThrottled() {
+    assertThrows(SqsException.class, () -> orders.placeOrder("sku-42"));
+    assertThrows(SecretsManagerException.class, () -> secrets.load("api-key"));
 }
 ```
 

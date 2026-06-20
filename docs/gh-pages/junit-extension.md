@@ -6,7 +6,7 @@ Compatible with JUnit 5 and JUnit 6. JUnit 4 is not supported.
 
 ## Dependency
 
-Most projects get `cloudstub-junit` transitively via [`cloudstub-testing`](getting-started.md); add it directly only to use the extension without the aggregator. `cloudstub-junit` declares JUnit as `compileOnly` — bring your own JUnit version; the module does not force one on your classpath.
+Most projects get `cloudstub-junit` transitively via [`cloudstub-testing`](getting-started.md); add it directly only to use the extension without the aggregator. `cloudstub-junit` declares JUnit as `compileOnly`, so you bring your own JUnit version; the module does not force one on your classpath.
 
 === "Gradle"
 
@@ -27,34 +27,38 @@ Most projects get `cloudstub-junit` transitively via [`cloudstub-testing`](getti
 
 ## Usage patterns
 
-### `@ExtendWith` — zero boilerplate
+### `@ExtendWith`: zero boilerplate
 
 The simplest form. Service modules on the classpath are discovered via `ServiceLoader` automatically.
 
 ```java
 @ExtendWith(CloudStubExtension.class)
-class MyTest {
+class OrderServiceTest {
 
     @Test
-    void test() {
-        // aws.endpoint-url is already set — build clients and call AWS normally
+    void placingAnOrderPublishesIt() {
+        // aws.endpoint-url is already set, so build clients and call AWS normally.
         SqsClient sqs = SqsClient.builder()
             .endpointOverride(URI.create(System.getProperty("aws.endpoint-url")))
             .credentialsProvider(AnonymousCredentialsProvider.create())
             .region(Region.US_EAST_1)
             .build();
+        String queueUrl = sqs.createQueue(b -> b.queueName("orders")).queueUrl();
 
-        assertNotNull(sqs.createQueue(b -> b.queueName("q")).queueUrl());
+        new OrderService(sqs, queueUrl).placeOrder("sku-42");
+
+        String body = sqs.receiveMessage(b -> b.queueUrl(queueUrl)).messages().get(0).body();
+        assertTrue(body.contains("sku-42"));
     }
 }
 ```
 
-### `@RegisterExtension` — port access and explicit registration
+### `@RegisterExtension`: port access and explicit registration
 
 Use this form when you need the server port directly (e.g. to build clients once in `@BeforeAll`) or to register service modules explicitly rather than relying on `ServiceLoader`.
 
 ```java
-class MyTest {
+class OrderServiceTest {
 
     @RegisterExtension
     static CloudStubExtension cloudMock = new CloudStubExtension()
@@ -72,14 +76,19 @@ class MyTest {
     }
 
     @Test
-    void test() {
-        assertNotNull(sqsClient.createQueue(b -> b.queueName("q")).queueUrl());
+    void placingAnOrderPublishesIt() {
+        String queueUrl = sqsClient.createQueue(b -> b.queueName("orders")).queueUrl();
+
+        new OrderService(sqsClient, queueUrl).placeOrder("sku-42");
+
+        String body = sqsClient.receiveMessage(b -> b.queueUrl(queueUrl)).messages().get(0).body();
+        assertTrue(body.contains("sku-42"));
     }
 }
 ```
 
 1. `.withService()` adds a module explicitly, in addition to any modules discovered via `ServiceLoader`. Useful in module-level tests where the classpath structure may prevent auto-discovery.
-2. `cloudMock.port()` is only valid after `beforeAll` has run — safe inside `@BeforeAll` and all `@Test` methods.
+2. `cloudMock.port()` is only valid after `beforeAll` has run, so it is safe inside `@BeforeAll` and all `@Test` methods.
 
 ## Lifecycle
 
@@ -111,7 +120,7 @@ class ResilienceTest {
 
     @Test
     void normalAfterThrottle() {
-        // Fault was cleared — normal response returned
+        // Fault was cleared, so a normal response is returned.
     }
 }
 ```

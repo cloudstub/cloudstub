@@ -38,7 +38,7 @@ cloudstub-myservice/
 ```groovy
 // cloudstub-myservice/build.gradle
 dependencies {
-    compileOnly project(':cloudstub-core')      // SPI only — not bundled in the module JAR
+    compileOnly project(':cloudstub-core')      // SPI only, not bundled in the module JAR
     testImplementation project(':cloudstub-core')
     testImplementation 'software.amazon.awssdk:myservice:2.25.70'
 }
@@ -159,7 +159,7 @@ discovers and calls `register()` automatically.
 ## 6. Write the module test
 
 Test your module by driving real AWS SDK v2 clients against a live `CloudStub` instance. The goal is to verify that the
-SDK can parse your responses without error — not to reproduce AWS semantics.
+SDK can parse your responses without error, not to reproduce AWS semantics.
 
 ```java
 class CloudStubMyServiceTest {
@@ -209,7 +209,7 @@ dependencies {
 }
 ```
 
-`testImplementation` is exempt — integration tests may combine multiple modules.
+`testImplementation` is exempt: integration tests may combine multiple modules.
 
 ---
 
@@ -245,7 +245,7 @@ public class CloudStubMyServiceApiService implements CloudStubApiService {
 
     @Override
     public void registerRoutes(CloudStubApiContext context) {
-        // context.stateStore() is the same store the module's stubs use — read/write it here to
+        // context.stateStore() is the same store the module's stubs use; read/write it here to
         // return live data instead of synthetic responses.
         var r = context.registrar();
         r.register(
@@ -272,10 +272,10 @@ Now `POST /api/myservice/describe-widget?id=w-123` works against any standalone 
 module loaded; a command-line client to drive it is coming soon. Routes for a service that is not
 enabled with `--services` are not registered, keeping the stub view and the API view consistent.
 
-!!! note "State-backed or synthetic — your call"
+!!! note "State-backed or synthetic: your call"
     Handlers receive the shared `StateStore` via `context.stateStore()`, so they can read and write the
     same data as the module's stubs (use the same key scheme on both surfaces so they can't drift).
-    `CloudStubSqsApiService` does this — a message sent through the AWS SDK is returned by its
+    `CloudStubSqsApiService` does this: a message sent through the AWS SDK is returned by its
     `receive-message` route. A handler that ignores the store simply stays synthetic.
 
 ---

@@ -1,6 +1,6 @@
 # CloudStub Codegen
 
-CloudStub Codegen takes a Smithy service model as input and produces a complete `CloudStubService` implementation — the
+CloudStub Codegen takes a Smithy service model as input and produces a complete `CloudStubService` implementation: the
 Java class, Handlebars response templates, and the `META-INF/services` registration file.
 
 ## When to use it
@@ -13,7 +13,7 @@ faster. Codegen pays off for services with many operations (20+).
 
 ### In the monorepo (`./gradlew run`)
 
-Inside this repository, run the generator in one step — no fat JAR build required:
+Inside this repository, run the generator in one step, with no fat JAR build required:
 
 ```
 ./gradlew :cloudstub-codegen:run --args="--model <path-or-url> --output <dir>"
@@ -22,7 +22,7 @@ Inside this repository, run the generator in one step — no fat JAR build requi
 The task's working directory is pinned to the repo root, so relative `--model` and `--output` paths resolve from the
 repo root exactly as the `java -jar` invocation does.
 
-To check a model without generating anything, use the `validate` task — it reports the derived service id, module name,
+To check a model without generating anything, use the `validate` task: it reports the derived service id, module name,
 protocol, and operations, then exits without writing files:
 
 ```
@@ -31,7 +31,7 @@ protocol, and operations, then exits without writing files:
 
 ### Standalone / distribution (`java -jar`)
 
-Outside the monorepo — and in CI — the codegen ships as an executable fat JAR on the
+Outside the monorepo (and in CI), the codegen ships as an executable fat JAR on the
 [GitHub Releases](https://github.com/cloudstub/cloudstub/releases) page (it is not on Maven Central).
 Download it:
 
@@ -56,10 +56,10 @@ Both invocation paths share the same entry point and produce identical output fo
 
 | Flag             | Required | Default           | Description                                                                         |
 |------------------|----------|-------------------|-------------------------------------------------------------------------------------|
-| `--model`        | yes      | —                 | Path or `https://` URL to a single Smithy model file (`.smithy` IDL or `.json` AST) |
+| `--model`        | yes      | (none)            | Path or `https://` URL to a single Smithy model file (`.smithy` IDL or `.json` AST) |
 | `--output`       | no       | `./<module-name>` | Directory to write the generated module into                                        |
 | `--core-version` | no       | `0.1.0-SNAPSHOT`  | `cloudstub-core` version pinned in the generated `build.gradle`                     |
-| `--validate`     | no       | —                 | Validate the model and report what would be generated, without writing any files    |
+| `--validate`     | no       | (none)            | Validate the model and report what would be generated, without writing any files    |
 
 **Example:**
 
@@ -74,22 +74,22 @@ The `--model` argument accepts:
 - A local `.smithy` IDL file (e.g. downloaded from
   the [AWS SDK v2 Smithy models](https://github.com/aws/aws-sdk-java-v2/tree/master/services))
 - A local `.json` Smithy AST model
-- An `https://` URL pointing directly at a `.smithy` or `.json` file — the model is downloaded to a temporary file and
+- An `https://` URL pointing directly at a `.smithy` or `.json` file: the model is downloaded to a temporary file and
   used as-is
 
 Constraints:
 
-- `http://` URLs are rejected — use `https://`.
+- `http://` URLs are rejected; use `https://`.
 - `--model` must be a single file (not a directory) and the name must end in `.smithy` or `.json`.
 
 ## What the codegen produces
 
 The codegen writes a complete, compilable module skeleton:
 
-- `build.gradle` — `compileOnly`/`testImplementation` on `cloudstub-core` at the pinned `--core-version`
-- The `CloudStub<Service>Service` class — one `register*Stub` call per operation, each loading its body from the
+- `build.gradle`: `compileOnly`/`testImplementation` on `cloudstub-core` at the pinned `--core-version`
+- The `CloudStub<Service>Service` class: one `register*Stub` call per operation, each loading its body from the
   classpath via a generated `loadTemplate(name)` helper
-- `META-INF/services/io.cloudstub.core.spi.CloudStubService` — registers the generated class for `ServiceLoader`
+- `META-INF/services/io.cloudstub.core.spi.CloudStubService`: registers the generated class for `ServiceLoader`
   discovery
 - One `src/main/resources/templates/<Operation>.hbs` template per operation
 - A `CloudStub<Service>ServiceTest` skeleton with one stubbed `@Test` per operation
@@ -109,14 +109,14 @@ public void register(StubRegistrar registrar) {
 ```
 
 Each operation's response body lives in its own file. For example `src/main/resources/templates/DescribeStream.hbs` (
-illustrative — the generated placeholder reflects the model's output shape):
+illustrative; the generated placeholder reflects the model's output shape):
 
 ```
-{{! REVIEW REQUIRED — output: DescribeStreamOutput [StreamDescription: structure] }}
+{{! REVIEW REQUIRED, output: DescribeStreamOutput [StreamDescription: structure] }}
 {"StreamDescription":{}}
 ```
 
-`TARGET_PREFIX` itself is a generated guess derived from the service name and carries a `TODO` comment — confirm the
+`TARGET_PREFIX` itself is a generated guess derived from the service name and carries a `TODO` comment; confirm the
 real `X-Amz-Target` prefix during review (see step 1 below).
 
 ## Manual review steps

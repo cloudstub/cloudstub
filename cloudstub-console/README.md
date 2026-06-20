@@ -21,7 +21,7 @@ Requires a running [CloudStub standalone instance](https://cloudstub.github.io/c
 The console connects to a running CloudStub standalone instance over the REST API.
 It calls `/api/status` on startup to discover which modules are loaded and builds
 its navigation dynamically. Adding a module to CloudStub adds it to the console
-automatically — no console update required.
+automatically, with no console update required.
 
 ## Requirements
 
@@ -52,7 +52,7 @@ Start the development server:
 npm start
 ```
 
-This runs `ng serve`. Open `http://localhost:4200/` in your browser — the app
+This runs `ng serve`. Open `http://localhost:4200/` in your browser; the app
 reloads automatically when you change source files.
 
 ## Building

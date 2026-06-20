@@ -26,7 +26,7 @@ plugin directory):
 java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sns
 ```
 
-Point any AWS client at the mock port (`http://localhost:4566`) — see
+Point any AWS client at the mock port (`http://localhost:4566`). See
 [Standalone Mode](standalone.md) for the full configuration. With the AWS CLI, a created topic is
 returned by `list-topics` and a subscription by `list-subscriptions-by-topic`:
 
@@ -54,7 +54,7 @@ $ aws --endpoint-url=http://localhost:4566 sns list-topics
 ```
 
 To inspect and drive topic state from the terminal, call the [REST API](rest-api.md) on the API port
-(`4567`) — see [REST/CLI access](#restcli-access).
+(`4567`). See [REST/CLI access](#restcli-access).
 
 ## Test example
 
@@ -74,19 +74,19 @@ import java.net.URI;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(CloudStubExtension.class)
-class SnsTopicTest {
+class OrderNotificationsTest {
 
     @Test
-    void createdTopicIsListed() {
+    void subscribingRegistersTheQueueOnTheTopic() {
         SnsClient sns = SnsClient.builder()
             .endpointOverride(URI.create(System.getProperty("aws.endpoint-url")))
             .credentialsProvider(AnonymousCredentialsProvider.create())
             .region(Region.US_EAST_1)
             .build();
 
-        String topicArn = sns.createTopic(b -> b.name("orders")).topicArn();
-        sns.subscribe(b -> b.topicArn(topicArn).protocol("sqs")
-            .endpoint("arn:aws:sqs:us-east-1:000000000000:orders-queue"));
+        // Your code under test creates the topic and subscribes the queue.
+        OrderNotifications notifications = new OrderNotifications(sns);
+        String topicArn = notifications.subscribe("arn:aws:sqs:us-east-1:000000000000:orders-queue");
 
         assertTrue(sns.listTopics().topics().stream()
             .anyMatch(t -> t.topicArn().equals(topicArn)));
@@ -99,7 +99,7 @@ class SnsTopicTest {
 ## REST/CLI access
 
 The module exposes a [REST API](rest-api.md) under `/api/sns/…`. These routes read and write the
-same state as the AWS-protocol stubs — a topic created with the SDK is returned by
+same state as the AWS-protocol stubs: a topic created with the SDK is returned by
 `GET /api/sns/list-topics`, and vice versa. Parameters are passed as query-string values.
 
 ```
@@ -112,7 +112,7 @@ $ curl -s "http://localhost:4567/api/sns/list-topics"
 
 | Route                            | Parameters                     | Description                       |
 | -------------------------------- | ------------------------------ | --------------------------------- |
-| `GET /api/sns/list-topics`       | —                              | List topics                       |
+| `GET /api/sns/list-topics`       | (none)                         | List topics                       |
 | `POST /api/sns/create-topic`     | `topic`                        | Create a topic                    |
 | `POST /api/sns/delete-topic`     | `topic`                        | Delete a topic and subscriptions  |
 | `POST /api/sns/subscribe`        | `topic`, `protocol`, `endpoint`| Subscribe an endpoint to a topic  |
@@ -146,9 +146,9 @@ platform-endpoint, SMS-sandbox, phone-number, and data-protection-policy operati
 ## Limitations
 
 - **No message delivery.** `Publish` and `PublishBatch` return a `MessageId` but do not fan out to
-  subscribers — nothing is delivered to subscribed SQS queues, HTTP endpoints, Lambda, email, or
-  SMS. A published message cannot be read back from SNS (this matches AWS — SNS has no message
-  store — but CloudStub also performs no delivery).
+  subscribers. Nothing is delivered to subscribed SQS queues, HTTP endpoints, Lambda, email, or
+  SMS. A published message cannot be read back from SNS (this matches AWS, which has no message
+  store, but CloudStub also performs no delivery).
 - **No subscription confirmation.** `Subscribe` records the subscription as immediately confirmed;
   `ConfirmSubscription` is a no-op and no confirmation token is sent.
 - `SetTopicAttributes` and `SetSubscriptionAttributes` are placeholders: attributes returned by the

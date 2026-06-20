@@ -25,7 +25,7 @@ for an already-implemented service it tracks regenerating the hand-written modul
 
 ## Target services
 
-### JSON / X-Amz-Target — `registerJsonTargetStub`
+### JSON / X-Amz-Target: `registerJsonTargetStub`
 
 | Service               | Status | GH-Issue                                                  |
 | --------------------- | ------ | --------------------------------------------------------- |
@@ -42,7 +42,7 @@ for an already-implemented service it tracks regenerating the hand-written modul
 | Step Functions        | ⬜     | [#123](https://github.com/cloudstub/cloudstub/issues/123) |
 | EventBridge           | ⬜     | [#124](https://github.com/cloudstub/cloudstub/issues/124) |
 
-### AWS Query / XML-Form — `registerXmlFormStub`
+### AWS Query / XML-Form: `registerXmlFormStub`
 
 | Service              | Status | GH-Issue                                                  |
 | -------------------- | ------ | --------------------------------------------------------- |
@@ -55,14 +55,14 @@ for an already-implemented service it tracks regenerating the hand-written modul
 | SES                  | ⬜     | [#130](https://github.com/cloudstub/cloudstub/issues/130) |
 | Redshift             | ⬜     | [#131](https://github.com/cloudstub/cloudstub/issues/131) |
 
-### REST (restXml) — `registerRestStub`
+### REST (restXml): `registerRestStub`
 
 | Service  | Status | GH-Issue                                                  |
 | -------- | ------ | --------------------------------------------------------- |
-| S3       | ✅     | —                                                         |
+| S3       | ✅     | (none)                                                    |
 | Route 53 | ⬜     | [#132](https://github.com/cloudstub/cloudstub/issues/132) |
 
-### REST (restJson1) — `registerRestStub`
+### REST (restJson1): `registerRestStub`
 
 | Service                    | Status | GH-Issue                                                  |
 | -------------------------- | ------ | --------------------------------------------------------- |
@@ -81,7 +81,7 @@ for an already-implemented service it tracks regenerating the hand-written modul
 
 ## Behavior simulation scope
 
-These are deliberate effort-and-priority choices. They are deferred for later — as CloudStub matures, the
+These are deliberate effort-and-priority choices. They are deferred for later: as CloudStub matures, the
 items below are candidates for implementation. Until a behavior is implemented, tests that depend on it
 should use real AWS.
 
@@ -92,7 +92,7 @@ should use real AWS.
 - DynamoDB conditional expressions / transactions
 - IAM policy evaluation
 
-**Lower priority — hard or expensive to simulate faithfully:**
+**Lower priority, hard or expensive to simulate faithfully:**
 
 - Streaming / event-stream operations (Kinesis `SubscribeToShard`, Transcribe streaming, Lex audio)
 - Real cryptographic semantics (KMS actual encrypt/decrypt)

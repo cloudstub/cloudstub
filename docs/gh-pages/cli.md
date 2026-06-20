@@ -1,12 +1,12 @@
 # CLI
 
 The CloudStub CLI is a small command-line client for a running [standalone](standalone.md) CloudStub
-instance. It lets you inspect and drive mock state from the terminal — list resources, send test
-data, reset services — without writing code or installing the AWS CLI.
+instance. It lets you inspect and drive mock state from the terminal: list resources, send test
+data, reset services, without writing code or installing the AWS CLI.
 
 The CLI is a **thin HTTP client over the [REST API](rest-api.md)**. It discovers the available
 commands at runtime from `GET /api/status`, so a CloudStub instance with more modules loaded simply
-offers more commands — the CLI itself never changes.
+offers more commands; the CLI itself never changes.
 
 It ships in the same `cloudstub-local` fat JAR as the server: the jar is **dual-mode**. With no
 arguments (or an explicit `serve`) it starts the server; with a command token (`status`, `reset`,
@@ -23,7 +23,7 @@ Build the `cloudstub-local` fat JAR (requires Java 17+):
 ```
 
 Run it via the bundled launcher scripts in `cloudstub-local/bin/` (`cloudstub` is the binary, `clb`
-is an identical short alias — both work; put `bin/` on your `PATH`), or directly with `java -jar`:
+is an identical short alias; both work, so put `bin/` on your `PATH`), or directly with `java -jar`:
 
 === "Launcher script"
 
@@ -143,7 +143,7 @@ $ clb sqs send-message --queue orders --body "hello"
 !!! note "State-backed where the module supports it"
     The CLI and the AWS SDK share the **same state store**. For state-backed modules (SQS),
     `clb sqs receive-message` returns messages your app sent through the SDK, and a message sent with
-    `clb sqs send-message` is visible to the SDK. State-backing rolls out per module — SQS is live; S3
+    `clb sqs send-message` is visible to the SDK. State-backing rolls out per module: SQS is live; S3
     and Secrets Manager commands are still synthetic until their own state-backing lands.
 
 ## How new modules appear automatically
@@ -153,14 +153,14 @@ Because commands come from `/api/status`, the CLI needs no change when a module 
 - A module that implements [`CloudStubApiService`](module-authoring.md#8-exposing-cli-commands-via-the-rest-api)
   contributes routes under `/api/<service>/…`, each advertising a command name and parameters.
 - Start CloudStub with that module on the classpath and its commands appear under `clb <service>`.
-- Restrict the loaded services with `--services=<a,b>` and the CLI offers only those services — a
+- Restrict the loaded services with `--services=<a,b>` and the CLI offers only those services: a
   service that is not loaded has no command at all.
 
 ## Error behaviour
 
-- **Server not running** — a connection failure prints the "not running" message above and exits 1.
-- **Service not loaded** — the service simply has no command; the CLI lists the commands that
+- **Server not running**: a connection failure prints the "not running" message above and exits 1.
+- **Service not loaded**: the service simply has no command; the CLI lists the commands that
   *are* available.
-- **Missing required option** — picocli reports it and prints usage before any request is made.
-- **Server-side error** — a non-2xx response is surfaced with the server's error message and a
+- **Missing required option**: picocli reports it and prints usage before any request is made.
+- **Server-side error**: a non-2xx response is surfaced with the server's error message and a
   non-zero exit code, rather than being treated as success.
