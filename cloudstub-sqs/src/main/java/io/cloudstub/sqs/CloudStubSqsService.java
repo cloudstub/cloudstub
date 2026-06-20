@@ -2,13 +2,13 @@ package io.cloudstub.sqs;
 
 import io.cloudstub.core.spi.CloudStubContext;
 import io.cloudstub.core.spi.CloudStubService;
+import io.cloudstub.core.spi.Json;
 import io.cloudstub.core.spi.StateStore;
 import io.cloudstub.core.spi.StubRegistrar;
 import io.cloudstub.core.spi.StubRequest;
 import io.cloudstub.core.spi.StubResponse;
 import io.cloudstub.core.spi.StubTemplates;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -93,12 +93,12 @@ public class CloudStubSqsService implements CloudStubService {
         String name = req.jsonField("QueueName");
         String url = ACCOUNT_URL + name;
         store.put(SqsKeys.queueKey(name), url);
-        return StubResponse.json(obj("QueueUrl", url));
+        return StubResponse.json(Json.object("QueueUrl", url));
     }
 
     private StubResponse getQueueUrl(StubRequest req, StateStore store) {
         String name = req.jsonField("QueueName");
-        return StubResponse.json(obj("QueueUrl", ACCOUNT_URL + name));
+        return StubResponse.json(Json.object("QueueUrl", ACCOUNT_URL + name));
     }
 
     private StubResponse sendMessage(StubRequest req, StateStore store) {
@@ -109,7 +109,8 @@ public class CloudStubSqsService implements CloudStubService {
         }
         String id = UUID.randomUUID().toString();
         store.put(SqsKeys.messageKey(name, id), body);
-        return StubResponse.json(obj("MessageId", id, "MD5OfMessageBody", SqsHelpers.md5(body)));
+        return StubResponse.json(
+                Json.object("MessageId", id, "MD5OfMessageBody", SqsHelpers.md5(body)));
     }
 
     private StubResponse receiveMessage(StubRequest req, StateStore store) {
@@ -130,7 +131,7 @@ public class CloudStubSqsService implements CloudStubService {
             String id = key.substring(key.lastIndexOf('/') + 1);
             String body = stored.toString();
             messages.add(
-                    obj(
+                    Json.object(
                             "MessageId", id,
                             "ReceiptHandle", id,
                             "Body", body,
@@ -140,7 +141,7 @@ public class CloudStubSqsService implements CloudStubService {
         if (messages.isEmpty()) {
             return StubResponse.json(Map.of());
         }
-        return StubResponse.json(obj("Messages", messages));
+        return StubResponse.json(Json.object("Messages", messages));
     }
 
     private StubResponse deleteMessage(StubRequest req, StateStore store) {
@@ -171,7 +172,7 @@ public class CloudStubSqsService implements CloudStubService {
             }
             urls.add(url.toString());
         }
-        return StubResponse.json(obj("QueueUrls", urls));
+        return StubResponse.json(Json.object("QueueUrls", urls));
     }
 
     private StubResponse getQueueAttributes(StubRequest req, StateStore store) {
@@ -179,14 +180,14 @@ public class CloudStubSqsService implements CloudStubService {
         int messageCount = store.list(SqsKeys.messagePrefix(name)).size();
         // SQS reports queue attributes as strings.
         Map<String, Object> attributes =
-                obj(
+                Json.object(
                         "VisibilityTimeout", "30",
                         "ApproximateNumberOfMessages", String.valueOf(messageCount),
                         "ApproximateNumberOfMessagesNotVisible", "0",
                         "MaximumMessageSize", "262144",
                         "MessageRetentionPeriod", "345600",
                         "ReceiveMessageWaitTimeSeconds", "0");
-        return StubResponse.json(obj("Attributes", attributes));
+        return StubResponse.json(Json.object("Attributes", attributes));
     }
 
     /**
@@ -202,18 +203,5 @@ public class CloudStubSqsService implements CloudStubService {
         } catch (NumberFormatException e) {
             return 1;
         }
-    }
-
-    /** Builds an ordered JSON object from alternating key/value arguments. */
-    private static Map<String, Object> obj(Object... keyValues) {
-        if (keyValues.length % 2 != 0) {
-            throw new IllegalArgumentException(
-                    "obj() requires an even number of key/value arguments");
-        }
-        Map<String, Object> m = new LinkedHashMap<>();
-        for (int i = 0; i < keyValues.length; i += 2) {
-            m.put((String) keyValues[i], keyValues[i + 1]);
-        }
-        return m;
     }
 }

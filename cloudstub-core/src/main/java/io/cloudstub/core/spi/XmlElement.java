@@ -13,7 +13,7 @@ import java.util.Map;
  * <p>Pass the root element to {@link StubResponse#xml(XmlElement)} to produce a response. Elements
  * render as {@code <name attr="v">...</name>}; an element with neither text nor children renders as
  * {@code <name></name>} (not self-closing). Text and child elements are independent; if both are
- * set, the text is rendered before the children.
+ * set, the text is rendered before the children. A null text or attribute value renders as empty.
  *
  * <p>JDK-only and exposes no networking or serialisation type.
  */
@@ -85,6 +85,9 @@ public final class XmlElement {
     }
 
     private static String escapeText(String s) {
+        if (s == null) {
+            return "";
+        }
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 

@@ -34,6 +34,12 @@ class XmlElementTest {
     }
 
     @Test
+    void nullTextAndAttributeValueRenderAsEmpty() {
+        XmlElement el = XmlElement.of("Endpoint").attr("kind", null).text(null);
+        assertEquals("<Endpoint kind=\"\"></Endpoint>", el.render());
+    }
+
+    @Test
     void repeatedChildrenModelQueryProtocolMemberLists() {
         XmlElement topics =
                 XmlElement.of("Topics")
