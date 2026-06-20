@@ -53,4 +53,4 @@ class OrderServiceTest {
 }
 ```
 
-[Get started in five minutes →](getting-started.md)
+[Get started →](getting-started.md)

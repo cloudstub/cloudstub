@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide walks you from zero to a passing CloudStub integration test in under five minutes.
+This guide walks you through creating your first integration test with CloudStub.
 
 ## 1. Add dependencies
 
