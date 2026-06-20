@@ -874,6 +874,8 @@
       
         
       
+        
+      
     
     
     
@@ -926,6 +928,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="services/secretsmanager/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS Secrets Manager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1194,8 +1224,7 @@ start at the same speed as tests that don't.</p>
 <h2 id="how-it-works">How it works</h2>
 <p>The <strong>core engine</strong> boots an embedded HTTP server on a random port, sets the <code>aws.endpoint-url</code> system property to
 redirect the AWS SDK v2, and discovers service modules via <code>ServiceLoader</code>. Each <strong>service module</strong> is an independently
-installable JAR that registers its stubs through the <code>StubRegistrar</code> SPI. The underlying HTTP server (WireMock) is
-completely hidden — you never interact with it directly.</p>
+installable JAR that registers its stubs through the <code>StubRegistrar</code> SPI.</p>
 <p>First-party modules target the AWS SDK for Java <strong>v2</strong>. Teams still on <strong>v1</strong> can redirect their clients to CloudStub
 with the <code>cloudstub-sdk-v1</code> companion — see <a href="sdk-v1/">SDK v1 Support</a>.</p>
 <hr />
@@ -1204,22 +1233,20 @@ with the <code>cloudstub-sdk-v1</code> companion — see <a href="sdk-v1/">SDK v
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">class</span> <span class="nc">OrderServiceTest</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nd">@Test</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">publishesOrderEvent</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">placingAnOrderPublishesIt</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="n">SqsClient</span><span class="w"> </span><span class="n">sqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SqsClient</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">            </span><span class="p">.</span><span class="na">endpointOverride</span><span class="p">(</span><span class="n">URI</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="s">&quot;aws.endpoint-url&quot;</span><span class="p">)))</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">            </span><span class="p">.</span><span class="na">credentialsProvider</span><span class="p">(</span><span class="n">AnonymousCredentialsProvider</span><span class="p">.</span><span class="na">create</span><span class="p">())</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">            </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">US_EAST_1</span><span class="p">)</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">queueUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqs</span><span class="p">.</span><span class="na">createQueue</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueName</span><span class="p">(</span><span class="s">&quot;orders&quot;</span><span class="p">)).</span><span class="na">queueUrl</span><span class="p">();</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">messageId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqs</span><span class="p">.</span><span class="na">sendMessage</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">                </span><span class="p">.</span><span class="na">queueUrl</span><span class="p">(</span><span class="n">queueUrl</span><span class="p">)</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">                </span><span class="p">.</span><span class="na">messageBody</span><span class="p">(</span><span class="s">&quot;order-placed&quot;</span><span class="p">))</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">            </span><span class="p">.</span><span class="na">messageId</span><span class="p">();</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">        </span><span class="n">assertNotNull</span><span class="p">(</span><span class="n">messageId</span><span class="p">);</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">}</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">queueUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqs</span><span class="p">.</span><span class="na">createQueue</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueName</span><span class="p">(</span><span class="s">&quot;orders&quot;</span><span class="p">)).</span><span class="na">queueUrl</span><span class="p">();</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">OrderService</span><span class="p">(</span><span class="n">sqs</span><span class="p">,</span><span class="w"> </span><span class="n">queueUrl</span><span class="p">).</span><span class="na">placeOrder</span><span class="p">(</span><span class="s">&quot;sku-42&quot;</span><span class="p">);</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">body</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqs</span><span class="p">.</span><span class="na">receiveMessage</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueUrl</span><span class="p">(</span><span class="n">queueUrl</span><span class="p">)).</span><span class="na">messages</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="na">body</span><span class="p">();</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">        </span><span class="n">assertTrue</span><span class="p">(</span><span class="n">body</span><span class="p">.</span><span class="na">contains</span><span class="p">(</span><span class="s">&quot;sku-42&quot;</span><span class="p">));</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">}</span>
 </span></code></pre></div>
 <p><a href="getting-started/">Get started in five minutes →</a></p>
 

@@ -82,9 +82,10 @@ loadScripts(document, 'script');</script>
  body string, and any additional response headers the networking driver should send back. No
  WireMock type is exposed.
 
- <p>Use the <a href="#json(java.lang.String)"><code>json(String)</code></a> / <a href="#xml(java.lang.String)"><code>xml(String)</code></a> factories for the common AWS wire
- formats, or <a href="#of(int,java.lang.String,java.lang.String)"><code>of(int, String, String)</code></a> for full control over status and content type. Add
- protocol-specific headers (e.g. an S3 <code>ETag</code>) with <a href="#withHeader(java.lang.String,java.lang.String)"><code>withHeader(String, String)</code></a>.</div>
+ <p>Use <a href="#json(java.util.Map)"><code>json(Map)</code></a> to serialise a response body from plain JDK collections (the engine
+ does the JSON encoding and escaping, so handlers never hand-write JSON), <a href="#json(java.lang.String)"><code>json(String)</code></a> /
+ <a href="#xml(java.lang.String)"><code>xml(String)</code></a> when a handler already holds a body string, or <a href="#of(int,java.lang.String,java.lang.String)"><code>of(int, String, String)</code></a> for full control over status and content type. Add protocol-specific headers (e.g. an S3
+ <code>ETag</code>) with <a href="#withHeader(java.lang.String,java.lang.String)"><code>withHeader(String, String)</code></a>.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -133,9 +134,21 @@ loadScripts(document, 'script');</script>
 <div class="block">Additional response headers beyond <code>Content-Type</code>; never null, possibly empty.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#json(java.lang.String)" class="member-name-link">json</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;body)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#json(int,java.util.Map)" class="member-name-link">json</a><wbr>(int&nbsp;status,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr>?&gt;&nbsp;body)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">A JSON response with an explicit status, serialised from a JDK map/list/value tree (see
+ <a href="#json(java.util.Map)"><code>json(Map)</code></a>).</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#json(java.lang.String)" class="member-name-link">json</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;body)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">A <code>200 OK</code> JSON response with the AWS JSON content type.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#json(java.util.Map)" class="member-name-link">json</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr>?&gt;&nbsp;body)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">A <code>200 OK</code> JSON response whose body is serialised from a JDK map/list/value tree.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#of(int,java.lang.String,java.lang.String)" class="member-name-link">of</a><wbr>(int&nbsp;status,
@@ -218,6 +231,36 @@ loadScripts(document, 'script');</script>
 <h3>json</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></span>&nbsp;<span class="element-name">json</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;body)</span></div>
 <div class="block">A <code>200 OK</code> JSON response with the AWS JSON content type.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="json(java.util.Map)">
+<h3>json</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></span>&nbsp;<span class="element-name">json</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr>?&gt;&nbsp;body)</span></div>
+<div class="block">A <code>200 OK</code> JSON response whose body is serialised from a JDK map/list/value tree. The
+ engine performs the JSON encoding and string escaping, so handlers build the response from
+ <code>Map</code>, <code>List</code>, <code>String</code>, and number/boolean values instead of concatenating
+ JSON by hand.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>body</code> - the response object; values must be JSON-serialisable JDK types</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if <code>body</code> cannot be serialised to JSON</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="json(int,java.util.Map)">
+<h3>json</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></span>&nbsp;<span class="element-name">json</span><wbr><span class="parameters">(int&nbsp;status,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr>?&gt;&nbsp;body)</span></div>
+<div class="block">A JSON response with an explicit status, serialised from a JDK map/list/value tree (see
+ <a href="#json(java.util.Map)"><code>json(Map)</code></a>). Use for AWS JSON-protocol error responses, e.g. a <code>400</code> carrying
+ <code>__type</code> and <code>Message</code>.</div>
+<dl class="notes">
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if <code>body</code> cannot be serialised to JSON</dd>
+</dl>
 </section>
 </li>
 <li>
