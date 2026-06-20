@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.Message;
 
@@ -34,6 +35,7 @@ class StatefulCrossSurfaceTest {
     private LocalServer localServer;
     private int apiPort;
     private SqsClient sqs;
+    private SecretsManagerClient secrets;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -54,10 +56,17 @@ class StatefulCrossSurfaceTest {
                         .credentialsProvider(AnonymousCredentialsProvider.create())
                         .region(Region.US_EAST_1)
                         .build();
+        secrets =
+                SecretsManagerClient.builder()
+                        .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+                        .credentialsProvider(AnonymousCredentialsProvider.create())
+                        .region(Region.US_EAST_1)
+                        .build();
     }
 
     @AfterEach
     void tearDown() {
+        secrets.close();
         sqs.close();
         localServer.stop();
         cloudMock.stop();
@@ -96,6 +105,37 @@ class StatefulCrossSurfaceTest {
             }
         }
         assertEquals(true, found, "a queue created via the SDK must appear in REST list-queues");
+    }
+
+    @Test
+    void secretCreatedViaAwsSdkIsVisibleOnTheRestApi() throws Exception {
+        secrets.createSecret(b -> b.name("api-key").secretString("from-the-sdk"));
+
+        JsonNode body = getJson("/api/secretsmanager/get?name=api-key");
+        assertEquals(
+                "from-the-sdk",
+                body.get("secretString").asText(),
+                "REST surface must see the SDK-created secret");
+    }
+
+    @Test
+    void secretPutViaRestApiIsVisibleToTheAwsSdk() throws Exception {
+        // The Secrets Manager put route is registered as PUT (the query string carries the params).
+        http.send(
+                HttpRequest.newBuilder()
+                        .uri(
+                                URI.create(
+                                        "http://localhost:"
+                                                + apiPort
+                                                + "/api/secretsmanager/put?name=db-password&value=from-rest"))
+                        .PUT(HttpRequest.BodyPublishers.noBody())
+                        .build(),
+                HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(
+                "from-rest",
+                secrets.getSecretValue(b -> b.secretId("db-password")).secretString(),
+                "AWS SDK must see the REST-created secret");
     }
 
     // send-message is registered as POST; the API server reads params from the query string, so the
