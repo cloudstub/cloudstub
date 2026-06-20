@@ -94,7 +94,7 @@ public class CloudStubSecretsManagerApiService implements CloudStubApiService {
             Map<String, String> secret = read(SecretsManagerKeys.secretKey(name));
             if (secret == null) {
                 secret = new LinkedHashMap<>();
-                secret.put("arn", SecretsManagerJson.arn(name));
+                secret.put("arn", SecretsManagerArns.arn(name));
                 secret.put("name", name);
                 secret.put("description", "");
                 secret.put("createdDate", String.valueOf(Instant.now().getEpochSecond()));

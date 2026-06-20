@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.cloudstub.core.CloudStub;
 import java.net.URI;
+import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -86,6 +87,25 @@ class CloudStubSecretsManagerServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void putSecretValueDoesNotMutateThePublishedMapInPlace() {
+        client.createSecret(b -> b.name("cow").secretString("v1"));
+        // The instance the store published — a concurrent reader would hold this same reference.
+        Map<String, String> published =
+                (Map<String, String>)
+                        cloudMock.stateStore().get(SecretsManagerKeys.secretKey("cow"));
+        String versionBefore = published.get("versionId");
+
+        client.putSecretValue(b -> b.secretId("cow").secretString("v2"));
+
+        // Copy-on-write: the previously-published map must be untouched by the update.
+        assertEquals("v1", published.get("secretString"));
+        assertEquals(versionBefore, published.get("versionId"));
+        // …while the store now serves the new value from a fresh instance.
+        assertEquals("v2", client.getSecretValue(b -> b.secretId("cow")).secretString());
+    }
+
+    @Test
     void updateSecretChangesDescription() {
         client.createSecret(b -> b.name("with-desc").secretString("x").description("old"));
         client.updateSecret(b -> b.secretId("with-desc").description("new"));
@@ -143,6 +163,16 @@ class CloudStubSecretsManagerServiceTest {
         DescribeSecretResponse afterUntag = client.describeSecret(b -> b.secretId("tagged"));
         assertEquals(1, afterUntag.tags().size());
         assertEquals("team", afterUntag.tags().get(0).key());
+    }
+
+    @Test
+    void recreatingSecretClearsStaleTags() {
+        client.createSecret(b -> b.name("reused").secretString("x"));
+        client.tagResource(b -> b.secretId("reused").tags(t -> t.key("env").value("prod")));
+
+        client.createSecret(b -> b.name("reused").secretString("y"));
+
+        assertTrue(client.describeSecret(b -> b.secretId("reused")).tags().isEmpty());
     }
 
     @Test

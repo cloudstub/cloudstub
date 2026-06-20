@@ -1,5 +1,7 @@
 package io.cloudstub.core.spi;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -9,9 +11,11 @@ import java.util.Objects;
  * body string, and any additional response headers the networking driver should send back. No
  * WireMock type is exposed.
  *
- * <p>Use the {@link #json(String)} / {@link #xml(String)} factories for the common AWS wire
- * formats, or {@link #of(int, String, String)} for full control over status and content type. Add
- * protocol-specific headers (e.g. an S3 {@code ETag}) with {@link #withHeader(String, String)}.
+ * <p>Use {@link #json(Map)} to serialise a response body from plain JDK collections (the engine
+ * does the JSON encoding and escaping, so handlers never hand-write JSON), {@link #json(String)} /
+ * {@link #xml(String)} when a handler already holds a body string, or {@link #of(int, String,
+ * String)} for full control over status and content type. Add protocol-specific headers (e.g. an S3
+ * {@code ETag}) with {@link #withHeader(String, String)}.
  */
 public final class StubResponse {
 
@@ -20,6 +24,13 @@ public final class StubResponse {
 
     /** Content type for AWS query/XML-protocol services (SNS, legacy SQS). */
     public static final String CONTENT_TYPE_XML = "text/xml;charset=UTF-8";
+
+    /**
+     * Plain mapper for response bodies — no default typing, so a {@code Map}/{@code List} tree
+     * serialises to ordinary JSON. Shaded into {@code io.cloudstub.shaded.jackson}, so no jackson
+     * type ever reaches a module.
+     */
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final int status;
     private final String contentType;
@@ -36,6 +47,30 @@ public final class StubResponse {
     /** A {@code 200 OK} JSON response with the AWS JSON content type. */
     public static StubResponse json(String body) {
         return new StubResponse(200, CONTENT_TYPE_JSON, body, Map.of());
+    }
+
+    /**
+     * A {@code 200 OK} JSON response whose body is serialised from a JDK map/list/value tree. The
+     * engine performs the JSON encoding and string escaping, so handlers build the response from
+     * {@code Map}, {@code List}, {@code String}, and number/boolean values instead of concatenating
+     * JSON by hand.
+     *
+     * @param body the response object; values must be JSON-serialisable JDK types
+     * @throws IllegalArgumentException if {@code body} cannot be serialised to JSON
+     */
+    public static StubResponse json(Map<String, ?> body) {
+        return json(200, body);
+    }
+
+    /**
+     * A JSON response with an explicit status, serialised from a JDK map/list/value tree (see
+     * {@link #json(Map)}). Use for AWS JSON-protocol error responses, e.g. a {@code 400} carrying
+     * {@code __type} and {@code Message}.
+     *
+     * @throws IllegalArgumentException if {@code body} cannot be serialised to JSON
+     */
+    public static StubResponse json(int status, Map<String, ?> body) {
+        return new StubResponse(status, CONTENT_TYPE_JSON, serialize(body), Map.of());
     }
 
     /** A {@code 200 OK} XML response with the AWS query/XML content type. */
@@ -73,5 +108,13 @@ public final class StubResponse {
     /** Additional response headers beyond {@code Content-Type}; never null, possibly empty. */
     public Map<String, String> headers() {
         return headers;
+    }
+
+    private static String serialize(Map<String, ?> body) {
+        try {
+            return MAPPER.writeValueAsString(body);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("response body is not JSON-serialisable", e);
+        }
     }
 }

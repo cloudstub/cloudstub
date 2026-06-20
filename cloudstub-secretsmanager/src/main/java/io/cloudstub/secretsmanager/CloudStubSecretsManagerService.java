@@ -8,7 +8,9 @@ import io.cloudstub.core.spi.StubRequest;
 import io.cloudstub.core.spi.StubResponse;
 import io.cloudstub.core.spi.StubTemplates;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,6 +50,9 @@ public class CloudStubSecretsManagerService implements CloudStubService {
 
     private static final String SERVICE_ID = "secretsmanager";
     private static final String TARGET_PREFIX = "secretsmanager.";
+
+    /** Every secret CloudStub stores has a single current version staged {@code AWSCURRENT}. */
+    private static final List<String> CURRENT_STAGES = List.of("AWSCURRENT");
 
     @Override
     public String serviceId() {
@@ -99,7 +104,7 @@ public class CloudStubSecretsManagerService implements CloudStubService {
         }
         String versionId = UUID.randomUUID().toString();
         Map<String, String> secret = new LinkedHashMap<>();
-        secret.put("arn", SecretsManagerJson.arn(name));
+        secret.put("arn", SecretsManagerArns.arn(name));
         secret.put("name", name);
         secret.put("secretString", nullToEmpty(req.jsonField("SecretString")));
         secret.put("description", nullToEmpty(req.jsonField("Description")));
@@ -107,15 +112,10 @@ public class CloudStubSecretsManagerService implements CloudStubService {
         secret.put("createdDate", String.valueOf(Instant.now().getEpochSecond()));
         synchronized (store) {
             store.put(SecretsManagerKeys.secretKey(name), secret);
+            store.delete(SecretsManagerKeys.tagsKey(name));
         }
         return StubResponse.json(
-                "{\"ARN\":\""
-                        + SecretsManagerJson.escape(SecretsManagerJson.arn(name))
-                        + "\",\"Name\":\""
-                        + SecretsManagerJson.escape(name)
-                        + "\",\"VersionId\":\""
-                        + versionId
-                        + "\"}");
+                obj("ARN", secret.get("arn"), "Name", name, "VersionId", versionId));
     }
 
     private StubResponse getSecretValue(StubRequest req, StateStore store) {
@@ -123,38 +123,33 @@ public class CloudStubSecretsManagerService implements CloudStubService {
         if (secret == null) {
             return notFound();
         }
-        return StubResponse.json(
-                "{\"ARN\":\""
-                        + SecretsManagerJson.escape(secret.get("arn"))
-                        + "\",\"Name\":\""
-                        + SecretsManagerJson.escape(secret.get("name"))
-                        + "\",\"VersionId\":\""
-                        + secret.get("versionId")
-                        + "\",\"SecretString\":\""
-                        + SecretsManagerJson.escape(secret.get("secretString"))
-                        + "\",\"VersionStages\":[\"AWSCURRENT\"],\"CreatedDate\":"
-                        + secret.get("createdDate")
-                        + "}");
+        return StubResponse.json(secretValue(secret));
     }
 
     private StubResponse putSecretValue(StubRequest req, StateStore store) {
         synchronized (store) {
-            Map<String, String> secret = lookup(req, store);
-            if (secret == null) {
+            Map<String, String> existing = lookup(req, store);
+            if (existing == null) {
                 return notFound();
             }
+            // Copy-on-write: never mutate the published map in place — a lock-free reader
+            // (getSecretValue/describeSecret/…) holds that same instance and would see a torn
+            // update.
+            Map<String, String> secret = new LinkedHashMap<>(existing);
             String versionId = UUID.randomUUID().toString();
             secret.put("secretString", nullToEmpty(req.jsonField("SecretString")));
             secret.put("versionId", versionId);
             store.put(SecretsManagerKeys.secretKey(secret.get("name")), secret);
             return StubResponse.json(
-                    "{\"ARN\":\""
-                            + SecretsManagerJson.escape(secret.get("arn"))
-                            + "\",\"Name\":\""
-                            + SecretsManagerJson.escape(secret.get("name"))
-                            + "\",\"VersionId\":\""
-                            + versionId
-                            + "\",\"VersionStages\":[\"AWSCURRENT\"]}");
+                    obj(
+                            "ARN",
+                            secret.get("arn"),
+                            "Name",
+                            secret.get("name"),
+                            "VersionId",
+                            versionId,
+                            "VersionStages",
+                            CURRENT_STAGES));
         }
     }
 
@@ -164,27 +159,23 @@ public class CloudStubSecretsManagerService implements CloudStubService {
             return notFound();
         }
         return StubResponse.json(
-                "{\"ARN\":\""
-                        + SecretsManagerJson.escape(secret.get("arn"))
-                        + "\",\"Name\":\""
-                        + SecretsManagerJson.escape(secret.get("name"))
-                        + "\",\"Description\":\""
-                        + SecretsManagerJson.escape(secret.get("description"))
-                        + "\",\"CreatedDate\":"
-                        + secret.get("createdDate")
-                        + ",\"Tags\":"
-                        + tagsJson(store, secret.get("name"))
-                        + ",\"VersionIdsToStages\":{\""
-                        + secret.get("versionId")
-                        + "\":[\"AWSCURRENT\"]}}");
+                obj(
+                        "ARN", secret.get("arn"),
+                        "Name", secret.get("name"),
+                        "Description", secret.get("description"),
+                        "CreatedDate", createdDate(secret),
+                        "Tags", tagsList(store, secret.get("name")),
+                        "VersionIdsToStages", Map.of(secret.get("versionId"), CURRENT_STAGES)));
     }
 
     private StubResponse updateSecret(StubRequest req, StateStore store) {
         synchronized (store) {
-            Map<String, String> secret = lookup(req, store);
-            if (secret == null) {
+            Map<String, String> existing = lookup(req, store);
+            if (existing == null) {
                 return notFound();
             }
+            // Copy-on-write — see putSecretValue.
+            Map<String, String> secret = new LinkedHashMap<>(existing);
             String secretString = req.jsonField("SecretString");
             if (secretString != null) {
                 secret.put("secretString", secretString);
@@ -197,13 +188,13 @@ public class CloudStubSecretsManagerService implements CloudStubService {
             secret.put("versionId", versionId);
             store.put(SecretsManagerKeys.secretKey(secret.get("name")), secret);
             return StubResponse.json(
-                    "{\"ARN\":\""
-                            + SecretsManagerJson.escape(secret.get("arn"))
-                            + "\",\"Name\":\""
-                            + SecretsManagerJson.escape(secret.get("name"))
-                            + "\",\"VersionId\":\""
-                            + versionId
-                            + "\"}");
+                    obj(
+                            "ARN",
+                            secret.get("arn"),
+                            "Name",
+                            secret.get("name"),
+                            "VersionId",
+                            versionId));
         }
     }
 
@@ -216,81 +207,51 @@ public class CloudStubSecretsManagerService implements CloudStubService {
             store.delete(SecretsManagerKeys.secretKey(secret.get("name")));
             store.delete(SecretsManagerKeys.tagsKey(secret.get("name")));
             return StubResponse.json(
-                    "{\"ARN\":\""
-                            + SecretsManagerJson.escape(secret.get("arn"))
-                            + "\",\"Name\":\""
-                            + SecretsManagerJson.escape(secret.get("name"))
-                            + "\",\"DeletionDate\":"
-                            + Instant.now().getEpochSecond()
-                            + "}");
+                    obj(
+                            "ARN", secret.get("arn"),
+                            "Name", secret.get("name"),
+                            "DeletionDate", Instant.now().getEpochSecond()));
         }
     }
 
     private StubResponse listSecrets(StubRequest req, StateStore store) {
-        StringBuilder list = new StringBuilder();
-        int count = 0;
+        List<Map<String, Object>> list = new ArrayList<>();
         for (String key : store.list(SecretsManagerKeys.SECRETS_PREFIX)) {
             Map<String, String> secret = read(store, key);
             if (secret == null) {
                 continue;
             }
-            if (count > 0) {
-                list.append(',');
-            }
-            list.append("{\"ARN\":\"")
-                    .append(SecretsManagerJson.escape(secret.get("arn")))
-                    .append("\",\"Name\":\"")
-                    .append(SecretsManagerJson.escape(secret.get("name")))
-                    .append("\",\"Description\":\"")
-                    .append(SecretsManagerJson.escape(secret.get("description")))
-                    .append("\",\"CreatedDate\":")
-                    .append(secret.get("createdDate"))
-                    .append('}');
-            count++;
+            list.add(
+                    obj(
+                            "ARN", secret.get("arn"),
+                            "Name", secret.get("name"),
+                            "Description", secret.get("description"),
+                            "CreatedDate", createdDate(secret)));
         }
-        return StubResponse.json("{\"SecretList\":[" + list + "]}");
+        return StubResponse.json(obj("SecretList", list));
     }
 
     private StubResponse batchGetSecretValue(StubRequest req, StateStore store) {
-        StringBuilder values = new StringBuilder();
-        StringBuilder errors = new StringBuilder();
-        int valueCount = 0;
-        int errorCount = 0;
+        List<Map<String, Object>> values = new ArrayList<>();
+        List<Map<String, Object>> errors = new ArrayList<>();
         for (int i = 0; ; i++) {
             String secretId = req.jsonField("SecretIdList." + i);
             if (secretId == null) {
                 break;
             }
-            String name = SecretsManagerJson.resolveName(secretId);
+            String name = SecretsManagerArns.resolveName(secretId);
             Map<String, String> secret = read(store, SecretsManagerKeys.secretKey(name));
             if (secret == null) {
-                if (errorCount > 0) {
-                    errors.append(',');
-                }
-                errors.append("{\"SecretId\":\"")
-                        .append(SecretsManagerJson.escape(secretId))
-                        .append("\",\"ErrorCode\":\"ResourceNotFoundException\",\"Message\":\"")
-                        .append("Secrets Manager can't find the specified secret.\"}");
-                errorCount++;
+                errors.add(
+                        obj(
+                                "SecretId", secretId,
+                                "ErrorCode", "ResourceNotFoundException",
+                                "Message", "Secrets Manager can't find the specified secret."));
                 continue;
             }
-            if (valueCount > 0) {
-                values.append(',');
-            }
-            values.append("{\"ARN\":\"")
-                    .append(SecretsManagerJson.escape(secret.get("arn")))
-                    .append("\",\"Name\":\"")
-                    .append(SecretsManagerJson.escape(secret.get("name")))
-                    .append("\",\"VersionId\":\"")
-                    .append(secret.get("versionId"))
-                    .append("\",\"SecretString\":\"")
-                    .append(SecretsManagerJson.escape(secret.get("secretString")))
-                    .append("\",\"VersionStages\":[\"AWSCURRENT\"],\"CreatedDate\":")
-                    .append(secret.get("createdDate"))
-                    .append('}');
-            valueCount++;
+            values.add(secretValue(secret));
         }
-        return StubResponse.json("{\"SecretValues\":[" + values + "],\"Errors\":[" + errors + "]}");
+        return StubResponse.json(obj("SecretValues", values, "Errors", errors));
     }
 
     private StubResponse tagResource(StubRequest req, StateStore store) {
@@ -339,45 +300,60 @@ public class CloudStubSecretsManagerService implements CloudStubService {
 
     /** Reads the secret addressed by the request's {@code SecretId}, or {@code null} if absent. */
     private static Map<String, String> lookup(StubRequest req, StateStore store) {
-        String name = SecretsManagerJson.resolveName(req.jsonField("SecretId"));
+        String name = SecretsManagerArns.resolveName(req.jsonField("SecretId"));
         if (name == null) {
             return null;
         }
         return read(store, SecretsManagerKeys.secretKey(name));
     }
 
+    /**
+     * The stored map for {@code key}, or {@code null}. The returned instance is the published one —
+     * read it, but do not mutate it (a concurrent lock-free reader holds the same reference). A
+     * writer copies it first; see {@code putSecretValue} and {@code readTags}.
+     */
     @SuppressWarnings("unchecked")
     private static Map<String, String> read(StateStore store, String key) {
         Object value = store.get(key);
         return value instanceof Map ? (Map<String, String>) value : null;
     }
 
-    /** The secret's tags, or a fresh empty map if it has none. Never null. */
+    /**
+     * A mutable copy of the secret's tags for a writer to modify, or a fresh empty map if it has
+     * none. A copy (not the stored instance) so {@code tagResource}/{@code untagResource} never
+     * mutate the published map a lock-free reader holds. Never null.
+     */
     private static Map<String, String> readTags(StateStore store, String name) {
         Map<String, String> tags = read(store, SecretsManagerKeys.tagsKey(name));
-        return tags != null ? tags : new LinkedHashMap<>();
+        return tags != null ? new LinkedHashMap<>(tags) : new LinkedHashMap<>();
     }
 
-    /** Renders a secret's tags as a JSON array of {@code {"Key":..,"Value":..}} objects. */
-    private static String tagsJson(StateStore store, String name) {
+    /** The {@code GetSecretValue}/{@code BatchGetSecretValue} shape for a stored secret. */
+    private static Map<String, Object> secretValue(Map<String, String> secret) {
+        return obj(
+                "ARN", secret.get("arn"),
+                "Name", secret.get("name"),
+                "VersionId", secret.get("versionId"),
+                "SecretString", secret.get("secretString"),
+                "VersionStages", CURRENT_STAGES,
+                "CreatedDate", createdDate(secret));
+    }
+
+    /** A secret's tags as a list of {@code {"Key":..,"Value":..}} objects; empty if it has none. */
+    private static List<Map<String, Object>> tagsList(StateStore store, String name) {
         Map<String, String> tags = read(store, SecretsManagerKeys.tagsKey(name));
-        if (tags == null || tags.isEmpty()) {
-            return "[]";
-        }
-        StringBuilder sb = new StringBuilder("[");
-        boolean first = true;
-        for (Map.Entry<String, String> tag : tags.entrySet()) {
-            if (!first) {
-                sb.append(',');
+        List<Map<String, Object>> out = new ArrayList<>();
+        if (tags != null) {
+            for (Map.Entry<String, String> tag : tags.entrySet()) {
+                out.add(obj("Key", tag.getKey(), "Value", tag.getValue()));
             }
-            sb.append("{\"Key\":\"")
-                    .append(SecretsManagerJson.escape(tag.getKey()))
-                    .append("\",\"Value\":\"")
-                    .append(SecretsManagerJson.escape(tag.getValue()))
-                    .append("\"}");
-            first = false;
         }
-        return sb.append(']').toString();
+        return out;
+    }
+
+    /** The stored {@code createdDate} as a numeric epoch-seconds value for the JSON response. */
+    private static Object createdDate(Map<String, String> secret) {
+        return Long.parseLong(secret.get("createdDate"));
     }
 
     private static StubResponse notFound() {
@@ -391,17 +367,19 @@ public class CloudStubSecretsManagerService implements CloudStubService {
 
     /** An AWS JSON-protocol error response (HTTP 400) the SDK maps to the named exception type. */
     private static StubResponse error(String type, String message) {
-        return StubResponse.of(
-                400,
-                StubResponse.CONTENT_TYPE_JSON,
-                "{\"__type\":\""
-                        + type
-                        + "\",\"Message\":\""
-                        + SecretsManagerJson.escape(message)
-                        + "\"}");
+        return StubResponse.json(400, obj("__type", type, "Message", message));
     }
 
     private static String nullToEmpty(String value) {
         return value == null ? "" : value;
+    }
+
+    /** Builds an ordered JSON object from alternating key/value arguments. */
+    private static Map<String, Object> obj(Object... keyValues) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        for (int i = 0; i < keyValues.length; i += 2) {
+            m.put((String) keyValues[i], keyValues[i + 1]);
+        }
+        return m;
     }
 }
