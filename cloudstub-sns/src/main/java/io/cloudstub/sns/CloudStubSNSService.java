@@ -7,6 +7,7 @@ import io.cloudstub.core.spi.StubRegistrar;
 import io.cloudstub.core.spi.StubRequest;
 import io.cloudstub.core.spi.StubResponse;
 import io.cloudstub.core.spi.StubTemplates;
+import io.cloudstub.core.spi.XmlElement;
 import java.util.Map;
 import java.util.UUID;
 
@@ -150,8 +151,7 @@ public class CloudStubSNSService implements CloudStubService {
         }
         String arn = SnsKeys.topicArn(name);
         store.put(SnsKeys.topicKey(name), arn);
-        return StubResponse.xml(
-                SnsXml.result("CreateTopic", "<TopicArn>" + SnsXml.escape(arn) + "</TopicArn>"));
+        return SnsXml.result("CreateTopic", XmlElement.of("TopicArn").text(arn));
     }
 
     private StubResponse deleteTopic(StubRequest req, StateStore store) {
@@ -162,11 +162,11 @@ public class CloudStubSNSService implements CloudStubService {
         String name = SnsKeys.topicNameFromArn(topicArn);
         store.delete(SnsKeys.topicKey(name));
         store.clear(SnsKeys.subscriptionPrefix(name));
-        return StubResponse.xml(SnsXml.empty("DeleteTopic"));
+        return SnsXml.empty("DeleteTopic");
     }
 
     private StubResponse listTopics(StubRequest req, StateStore store) {
-        StringBuilder members = new StringBuilder();
+        XmlElement topics = XmlElement.of("Topics");
         for (String key : store.list(SnsKeys.TOPICS_PREFIX)) {
             if (!SnsKeys.isTopicMarkerKey(key)) {
                 continue;
@@ -175,11 +175,9 @@ public class CloudStubSNSService implements CloudStubService {
             if (arn == null) {
                 continue;
             }
-            members.append("<member><TopicArn>")
-                    .append(SnsXml.escape(arn.toString()))
-                    .append("</TopicArn></member>");
+            topics.child(XmlElement.of("member").child("TopicArn", arn.toString()));
         }
-        return StubResponse.xml(SnsXml.result("ListTopics", "<Topics>" + members + "</Topics>"));
+        return SnsXml.result("ListTopics", topics);
     }
 
     private StubResponse getTopicAttributes(StubRequest req, StateStore store) {
@@ -189,15 +187,15 @@ public class CloudStubSNSService implements CloudStubService {
         }
         String name = SnsKeys.topicNameFromArn(arn);
         int subscriptions = store.list(SnsKeys.subscriptionPrefix(name)).size();
-        String attributes =
-                entry("TopicArn", arn)
-                        + entry("Owner", SnsKeys.ACCOUNT)
-                        + entry("SubscriptionsConfirmed", Integer.toString(subscriptions))
-                        + entry("SubscriptionsPending", "0")
-                        + entry("SubscriptionsDeleted", "0")
-                        + entry("DisplayName", "");
-        return StubResponse.xml(
-                SnsXml.result("GetTopicAttributes", "<Attributes>" + attributes + "</Attributes>"));
+        XmlElement attributes =
+                XmlElement.of("Attributes")
+                        .child(entry("TopicArn", arn))
+                        .child(entry("Owner", SnsKeys.ACCOUNT))
+                        .child(entry("SubscriptionsConfirmed", Integer.toString(subscriptions)))
+                        .child(entry("SubscriptionsPending", "0"))
+                        .child(entry("SubscriptionsDeleted", "0"))
+                        .child(entry("DisplayName", ""));
+        return SnsXml.result("GetTopicAttributes", attributes);
     }
 
     private StubResponse subscribe(StubRequest req, StateStore store) {
@@ -220,12 +218,7 @@ public class CloudStubSNSService implements CloudStubService {
                         orEmpty(form.get("Endpoint")),
                         "topicArn",
                         topicArn));
-        return StubResponse.xml(
-                SnsXml.result(
-                        "Subscribe",
-                        "<SubscriptionArn>"
-                                + SnsXml.escape(subscriptionArn)
-                                + "</SubscriptionArn>"));
+        return SnsXml.result("Subscribe", XmlElement.of("SubscriptionArn").text(subscriptionArn));
     }
 
     private StubResponse unsubscribe(StubRequest req, StateStore store) {
@@ -240,21 +233,19 @@ public class CloudStubSNSService implements CloudStubService {
         String id = subscriptionArn.substring(lastColon + 1);
         String name = SnsKeys.topicNameFromArn(subscriptionArn.substring(0, lastColon));
         store.delete(SnsKeys.subscriptionKey(name, id));
-        return StubResponse.xml(SnsXml.empty("Unsubscribe"));
+        return SnsXml.empty("Unsubscribe");
     }
 
     private StubResponse listSubscriptions(StubRequest req, StateStore store) {
-        StringBuilder members = new StringBuilder();
+        XmlElement subscriptions = XmlElement.of("Subscriptions");
         for (String topicKey : store.list(SnsKeys.TOPICS_PREFIX)) {
             if (!SnsKeys.isTopicMarkerKey(topicKey)) {
                 continue;
             }
             String name = topicKey.substring(SnsKeys.TOPICS_PREFIX.length());
-            appendSubscriptions(members, store, name);
+            appendSubscriptions(subscriptions, store, name);
         }
-        return StubResponse.xml(
-                SnsXml.result(
-                        "ListSubscriptions", "<Subscriptions>" + members + "</Subscriptions>"));
+        return SnsXml.result("ListSubscriptions", subscriptions);
     }
 
     private StubResponse listSubscriptionsByTopic(StubRequest req, StateStore store) {
@@ -263,12 +254,9 @@ public class CloudStubSNSService implements CloudStubService {
             return missing("TopicArn");
         }
         String name = SnsKeys.topicNameFromArn(topicArn);
-        StringBuilder members = new StringBuilder();
-        appendSubscriptions(members, store, name);
-        return StubResponse.xml(
-                SnsXml.result(
-                        "ListSubscriptionsByTopic",
-                        "<Subscriptions>" + members + "</Subscriptions>"));
+        XmlElement subscriptions = XmlElement.of("Subscriptions");
+        appendSubscriptions(subscriptions, store, name);
+        return SnsXml.result("ListSubscriptionsByTopic", subscriptions);
     }
 
     private StubResponse getSubscriptionAttributes(StubRequest req, StateStore store) {
@@ -284,48 +272,38 @@ public class CloudStubSNSService implements CloudStubService {
         String topicArn = subscriptionArn.substring(0, lastColon);
         String name = SnsKeys.topicNameFromArn(topicArn);
         Map<?, ?> record = asMap(store.get(SnsKeys.subscriptionKey(name, id)));
-        String attributes =
-                entry("SubscriptionArn", subscriptionArn)
-                        + entry("TopicArn", topicArn)
-                        + entry("Owner", SnsKeys.ACCOUNT)
-                        + entry("Protocol", recordValue(record, "protocol"))
-                        + entry("Endpoint", recordValue(record, "endpoint"))
-                        + entry("ConfirmationWasAuthenticated", "true")
-                        + entry("RawMessageDelivery", "false");
-        return StubResponse.xml(
-                SnsXml.result(
-                        "GetSubscriptionAttributes",
-                        "<Attributes>" + attributes + "</Attributes>"));
+        XmlElement attributes =
+                XmlElement.of("Attributes")
+                        .child(entry("SubscriptionArn", subscriptionArn))
+                        .child(entry("TopicArn", topicArn))
+                        .child(entry("Owner", SnsKeys.ACCOUNT))
+                        .child(entry("Protocol", recordValue(record, "protocol")))
+                        .child(entry("Endpoint", recordValue(record, "endpoint")))
+                        .child(entry("ConfirmationWasAuthenticated", "true"))
+                        .child(entry("RawMessageDelivery", "false"));
+        return SnsXml.result("GetSubscriptionAttributes", attributes);
     }
 
-    private void appendSubscriptions(StringBuilder members, StateStore store, String name) {
+    private void appendSubscriptions(XmlElement subscriptions, StateStore store, String name) {
         String topicArn = SnsKeys.topicArn(name);
         for (String key : store.list(SnsKeys.subscriptionPrefix(name))) {
             Map<?, ?> record = asMap(store.get(key));
             if (record == null) {
                 continue;
             }
-            members.append("<member>")
-                    .append(tag("SubscriptionArn", recordValue(record, "subscriptionArn")))
-                    .append(tag("Owner", SnsKeys.ACCOUNT))
-                    .append(tag("Protocol", recordValue(record, "protocol")))
-                    .append(tag("Endpoint", recordValue(record, "endpoint")))
-                    .append(tag("TopicArn", topicArn))
-                    .append("</member>");
+            subscriptions.child(
+                    XmlElement.of("member")
+                            .child("SubscriptionArn", recordValue(record, "subscriptionArn"))
+                            .child("Owner", SnsKeys.ACCOUNT)
+                            .child("Protocol", recordValue(record, "protocol"))
+                            .child("Endpoint", recordValue(record, "endpoint"))
+                            .child("TopicArn", topicArn));
         }
     }
 
-    /** An SNS attribute map {@code <entry><key>..</key><value>..</value></entry>}. */
-    private static String entry(String key, String value) {
-        return "<entry><key>"
-                + SnsXml.escape(key)
-                + "</key><value>"
-                + SnsXml.escape(value)
-                + "</value></entry>";
-    }
-
-    private static String tag(String name, String value) {
-        return "<" + name + ">" + SnsXml.escape(value) + "</" + name + ">";
+    /** An SNS attribute entry {@code <entry><key>..</key><value>..</value></entry>}. */
+    private static XmlElement entry(String key, String value) {
+        return XmlElement.of("entry").child("key", key).child("value", value);
     }
 
     private static Map<?, ?> asMap(Object value) {
@@ -359,7 +337,6 @@ public class CloudStubSNSService implements CloudStubService {
     }
 
     private static StubResponse badRequest(String message) {
-        return StubResponse.of(
-                400, StubResponse.CONTENT_TYPE_XML, SnsXml.error("InvalidParameter", message));
+        return SnsXml.error("InvalidParameter", message);
     }
 }

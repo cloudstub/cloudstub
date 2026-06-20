@@ -78,6 +78,15 @@ public final class StubResponse {
         return new StubResponse(200, CONTENT_TYPE_XML, body, Map.of());
     }
 
+    /**
+     * A {@code 200 OK} XML response whose body is rendered from an {@link XmlElement} tree. The
+     * engine performs the XML encoding and escaping, so handlers describe the element structure
+     * instead of concatenating XML by hand.
+     */
+    public static StubResponse xml(XmlElement root) {
+        return new StubResponse(200, CONTENT_TYPE_XML, root.render(), Map.of());
+    }
+
     /** A response with an explicit status, content type, and body. */
     public static StubResponse of(int status, String contentType, String body) {
         return new StubResponse(status, contentType, body, Map.of());

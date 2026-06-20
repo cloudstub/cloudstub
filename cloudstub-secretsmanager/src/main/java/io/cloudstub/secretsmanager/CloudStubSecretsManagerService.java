@@ -2,6 +2,7 @@ package io.cloudstub.secretsmanager;
 
 import io.cloudstub.core.spi.CloudStubContext;
 import io.cloudstub.core.spi.CloudStubService;
+import io.cloudstub.core.spi.Json;
 import io.cloudstub.core.spi.StateStore;
 import io.cloudstub.core.spi.StubRegistrar;
 import io.cloudstub.core.spi.StubRequest;
@@ -115,7 +116,7 @@ public class CloudStubSecretsManagerService implements CloudStubService {
             store.delete(SecretsManagerKeys.tagsKey(name));
         }
         return StubResponse.json(
-                obj("ARN", secret.get("arn"), "Name", name, "VersionId", versionId));
+                Json.object("ARN", secret.get("arn"), "Name", name, "VersionId", versionId));
     }
 
     private StubResponse getSecretValue(StubRequest req, StateStore store) {
@@ -141,7 +142,7 @@ public class CloudStubSecretsManagerService implements CloudStubService {
             secret.put("versionId", versionId);
             store.put(SecretsManagerKeys.secretKey(secret.get("name")), secret);
             return StubResponse.json(
-                    obj(
+                    Json.object(
                             "ARN",
                             secret.get("arn"),
                             "Name",
@@ -159,7 +160,7 @@ public class CloudStubSecretsManagerService implements CloudStubService {
             return notFound();
         }
         return StubResponse.json(
-                obj(
+                Json.object(
                         "ARN", secret.get("arn"),
                         "Name", secret.get("name"),
                         "Description", secret.get("description"),
@@ -188,7 +189,7 @@ public class CloudStubSecretsManagerService implements CloudStubService {
             secret.put("versionId", versionId);
             store.put(SecretsManagerKeys.secretKey(secret.get("name")), secret);
             return StubResponse.json(
-                    obj(
+                    Json.object(
                             "ARN",
                             secret.get("arn"),
                             "Name",
@@ -207,7 +208,7 @@ public class CloudStubSecretsManagerService implements CloudStubService {
             store.delete(SecretsManagerKeys.secretKey(secret.get("name")));
             store.delete(SecretsManagerKeys.tagsKey(secret.get("name")));
             return StubResponse.json(
-                    obj(
+                    Json.object(
                             "ARN", secret.get("arn"),
                             "Name", secret.get("name"),
                             "DeletionDate", Instant.now().getEpochSecond()));
@@ -222,13 +223,13 @@ public class CloudStubSecretsManagerService implements CloudStubService {
                 continue;
             }
             list.add(
-                    obj(
+                    Json.object(
                             "ARN", secret.get("arn"),
                             "Name", secret.get("name"),
                             "Description", secret.get("description"),
                             "CreatedDate", createdDate(secret)));
         }
-        return StubResponse.json(obj("SecretList", list));
+        return StubResponse.json(Json.object("SecretList", list));
     }
 
     private StubResponse batchGetSecretValue(StubRequest req, StateStore store) {
@@ -243,7 +244,7 @@ public class CloudStubSecretsManagerService implements CloudStubService {
             Map<String, String> secret = read(store, SecretsManagerKeys.secretKey(name));
             if (secret == null) {
                 errors.add(
-                        obj(
+                        Json.object(
                                 "SecretId", secretId,
                                 "ErrorCode", "ResourceNotFoundException",
                                 "Message", "Secrets Manager can't find the specified secret."));
@@ -251,7 +252,7 @@ public class CloudStubSecretsManagerService implements CloudStubService {
             }
             values.add(secretValue(secret));
         }
-        return StubResponse.json(obj("SecretValues", values, "Errors", errors));
+        return StubResponse.json(Json.object("SecretValues", values, "Errors", errors));
     }
 
     private StubResponse tagResource(StubRequest req, StateStore store) {
@@ -330,7 +331,7 @@ public class CloudStubSecretsManagerService implements CloudStubService {
 
     /** The {@code GetSecretValue}/{@code BatchGetSecretValue} shape for a stored secret. */
     private static Map<String, Object> secretValue(Map<String, String> secret) {
-        return obj(
+        return Json.object(
                 "ARN", secret.get("arn"),
                 "Name", secret.get("name"),
                 "VersionId", secret.get("versionId"),
@@ -345,7 +346,7 @@ public class CloudStubSecretsManagerService implements CloudStubService {
         List<Map<String, Object>> out = new ArrayList<>();
         if (tags != null) {
             for (Map.Entry<String, String> tag : tags.entrySet()) {
-                out.add(obj("Key", tag.getKey(), "Value", tag.getValue()));
+                out.add(Json.object("Key", tag.getKey(), "Value", tag.getValue()));
             }
         }
         return out;
@@ -375,23 +376,10 @@ public class CloudStubSecretsManagerService implements CloudStubService {
 
     /** An AWS JSON-protocol error response (HTTP 400) the SDK maps to the named exception type. */
     private static StubResponse error(String type, String message) {
-        return StubResponse.json(400, obj("__type", type, "Message", message));
+        return StubResponse.json(400, Json.object("__type", type, "Message", message));
     }
 
     private static String nullToEmpty(String value) {
         return value == null ? "" : value;
-    }
-
-    /** Builds an ordered JSON object from alternating key/value arguments. */
-    private static Map<String, Object> obj(Object... keyValues) {
-        if (keyValues.length % 2 != 0) {
-            throw new IllegalArgumentException(
-                    "obj() requires an even number of key/value arguments");
-        }
-        Map<String, Object> m = new LinkedHashMap<>();
-        for (int i = 0; i < keyValues.length; i += 2) {
-            m.put((String) keyValues[i], keyValues[i + 1]);
-        }
-        return m;
     }
 }
