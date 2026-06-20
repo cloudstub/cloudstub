@@ -7,7 +7,10 @@ import io.cloudstub.core.spi.StubRegistrar;
 import io.cloudstub.core.spi.StubRequest;
 import io.cloudstub.core.spi.StubResponse;
 import io.cloudstub.core.spi.StubTemplates;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -90,39 +93,33 @@ public class CloudStubSqsService implements CloudStubService {
         String name = req.jsonField("QueueName");
         String url = ACCOUNT_URL + name;
         store.put(SqsKeys.queueKey(name), url);
-        return StubResponse.json("{\"QueueUrl\":\"" + SqsJson.escape(url) + "\"}");
+        return StubResponse.json(obj("QueueUrl", url));
     }
 
     private StubResponse getQueueUrl(StubRequest req, StateStore store) {
         String name = req.jsonField("QueueName");
-        return StubResponse.json("{\"QueueUrl\":\"" + SqsJson.escape(ACCOUNT_URL + name) + "\"}");
+        return StubResponse.json(obj("QueueUrl", ACCOUNT_URL + name));
     }
 
     private StubResponse sendMessage(StubRequest req, StateStore store) {
-        String name = SqsJson.queueName(req.jsonField("QueueUrl"));
+        String name = SqsHelpers.queueName(req.jsonField("QueueUrl"));
         String body = req.jsonField("MessageBody");
         if (body == null) {
             body = "";
         }
         String id = UUID.randomUUID().toString();
         store.put(SqsKeys.messageKey(name, id), body);
-        return StubResponse.json(
-                "{\"MessageId\":\""
-                        + id
-                        + "\",\"MD5OfMessageBody\":\""
-                        + SqsJson.md5(body)
-                        + "\"}");
+        return StubResponse.json(obj("MessageId", id, "MD5OfMessageBody", SqsHelpers.md5(body)));
     }
 
     private StubResponse receiveMessage(StubRequest req, StateStore store) {
-        String name = SqsJson.queueName(req.jsonField("QueueUrl"));
+        String name = SqsHelpers.queueName(req.jsonField("QueueUrl"));
         int max = maxMessages(req.jsonField("MaxNumberOfMessages"));
         List<String> keys = store.list(SqsKeys.messagePrefix(name));
 
-        StringBuilder messages = new StringBuilder();
-        int count = 0;
+        List<Map<String, Object>> messages = new ArrayList<>();
         for (String key : keys) {
-            if (count >= max) {
+            if (messages.size() >= max) {
                 break;
             }
             Object stored = store.get(key);
@@ -132,45 +129,38 @@ public class CloudStubSqsService implements CloudStubService {
             }
             String id = key.substring(key.lastIndexOf('/') + 1);
             String body = stored.toString();
-            if (count > 0) {
-                messages.append(',');
-            }
-            messages.append("{\"MessageId\":\"")
-                    .append(id)
-                    .append("\",\"ReceiptHandle\":\"")
-                    .append(id)
-                    .append("\",\"Body\":\"")
-                    .append(SqsJson.escape(body))
-                    .append("\",\"MD5OfBody\":\"")
-                    .append(SqsJson.md5(body))
-                    .append("\"}");
-            count++;
+            messages.add(
+                    obj(
+                            "MessageId", id,
+                            "ReceiptHandle", id,
+                            "Body", body,
+                            "MD5OfBody", SqsHelpers.md5(body)));
         }
-        if (count == 0) {
-            return StubResponse.json("{}");
+        // AWS returns an empty object (no Messages field) when the queue is empty.
+        if (messages.isEmpty()) {
+            return StubResponse.json(Map.of());
         }
-        return StubResponse.json("{\"Messages\":[" + messages + "]}");
+        return StubResponse.json(obj("Messages", messages));
     }
 
     private StubResponse deleteMessage(StubRequest req, StateStore store) {
-        String name = SqsJson.queueName(req.jsonField("QueueUrl"));
+        String name = SqsHelpers.queueName(req.jsonField("QueueUrl"));
         String receiptHandle = req.jsonField("ReceiptHandle");
         if (name != null && receiptHandle != null) {
             store.delete(SqsKeys.messageKey(name, receiptHandle));
         }
-        return StubResponse.json("{}");
+        return StubResponse.json(Map.of());
     }
 
     private StubResponse deleteQueue(StubRequest req, StateStore store) {
-        String name = SqsJson.queueName(req.jsonField("QueueUrl"));
+        String name = SqsHelpers.queueName(req.jsonField("QueueUrl"));
         store.delete(SqsKeys.queueKey(name));
         store.clear(SqsKeys.messagePrefix(name));
-        return StubResponse.json("{}");
+        return StubResponse.json(Map.of());
     }
 
     private StubResponse listQueues(StubRequest req, StateStore store) {
-        StringBuilder urls = new StringBuilder();
-        int count = 0;
+        List<String> urls = new ArrayList<>();
         for (String key : store.list(SqsKeys.QUEUES_PREFIX)) {
             if (!SqsKeys.isQueueMarkerKey(key)) {
                 continue;
@@ -179,28 +169,24 @@ public class CloudStubSqsService implements CloudStubService {
             if (url == null) {
                 continue;
             }
-            if (count > 0) {
-                urls.append(',');
-            }
-            urls.append('"').append(SqsJson.escape(url.toString())).append('"');
-            count++;
+            urls.add(url.toString());
         }
-        return StubResponse.json("{\"QueueUrls\":[" + urls + "]}");
+        return StubResponse.json(obj("QueueUrls", urls));
     }
 
     private StubResponse getQueueAttributes(StubRequest req, StateStore store) {
-        String name = SqsJson.queueName(req.jsonField("QueueUrl"));
+        String name = SqsHelpers.queueName(req.jsonField("QueueUrl"));
         int messageCount = store.list(SqsKeys.messagePrefix(name)).size();
-        return StubResponse.json(
-                "{\"Attributes\":{"
-                        + "\"VisibilityTimeout\":\"30\","
-                        + "\"ApproximateNumberOfMessages\":\""
-                        + messageCount
-                        + "\","
-                        + "\"ApproximateNumberOfMessagesNotVisible\":\"0\","
-                        + "\"MaximumMessageSize\":\"262144\","
-                        + "\"MessageRetentionPeriod\":\"345600\","
-                        + "\"ReceiveMessageWaitTimeSeconds\":\"0\"}}");
+        // SQS reports queue attributes as strings.
+        Map<String, Object> attributes =
+                obj(
+                        "VisibilityTimeout", "30",
+                        "ApproximateNumberOfMessages", String.valueOf(messageCount),
+                        "ApproximateNumberOfMessagesNotVisible", "0",
+                        "MaximumMessageSize", "262144",
+                        "MessageRetentionPeriod", "345600",
+                        "ReceiveMessageWaitTimeSeconds", "0");
+        return StubResponse.json(obj("Attributes", attributes));
     }
 
     /**
@@ -216,5 +202,18 @@ public class CloudStubSqsService implements CloudStubService {
         } catch (NumberFormatException e) {
             return 1;
         }
+    }
+
+    /** Builds an ordered JSON object from alternating key/value arguments. */
+    private static Map<String, Object> obj(Object... keyValues) {
+        if (keyValues.length % 2 != 0) {
+            throw new IllegalArgumentException(
+                    "obj() requires an even number of key/value arguments");
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        for (int i = 0; i < keyValues.length; i += 2) {
+            m.put((String) keyValues[i], keyValues[i + 1]);
+        }
+        return m;
     }
 }

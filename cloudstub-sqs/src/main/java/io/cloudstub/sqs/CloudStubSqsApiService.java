@@ -90,7 +90,7 @@ public class CloudStubSqsApiService implements CloudStubApiService {
         String body = req.queryParams().getOrDefault("body", "");
         String id = UUID.randomUUID().toString();
         store.put(SqsKeys.messageKey(queue, id), body);
-        return new ApiResponse(200, Map.of("messageId", id, "md5OfBody", SqsJson.md5(body)));
+        return new ApiResponse(200, Map.of("messageId", id, "md5OfBody", SqsHelpers.md5(body)));
     }
 
     private ApiResponse receiveMessage(ApiRequest req) {
