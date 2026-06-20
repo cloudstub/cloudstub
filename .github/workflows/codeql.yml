@@ -6,8 +6,6 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    # Weekly scan (Mondays 03:27 UTC) catches vulnerabilities introduced by dependency
-    # updates even when no code changed.
     - cron: "27 3 * * 1"
 
 jobs:
@@ -31,8 +29,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6.0.2
-
-      # Match the CI pipeline's JDK so CodeQL's autobuild compiles the project the same way.
       - uses: actions/setup-java@v5.2.0
         with:
           distribution: temurin

@@ -24,7 +24,6 @@ subprojects {
     spotless {
         java {
             target 'src/**/*.java'
-            // Excluded: formatting may alter codegen/generated template-driven structure.
             targetExclude '**/build/**', '**/generated/**'
             googleJavaFormat('1.22.0').aosp()
             importOrder()
@@ -34,7 +33,6 @@ subprojects {
         }
     }
 
-    // Publication wiring (module classification, POM, sources/javadoc) lives in its own script.
     apply from: rootProject.file('gradle/publishing.gradle')
 
     java {
