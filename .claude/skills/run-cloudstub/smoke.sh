@@ -103,6 +103,21 @@ SM=$(curl -sf -X POST "http://localhost:$PORT" \
 echo "$SM" | python3 -c "import sys,json; d=json.load(sys.stdin); assert 'ARN' in d" || fail "Secrets Manager CreateSecret bad response: $SM"
 pass "Secrets Manager CreateSecret  → $(echo "$SM" | python3 -c "import sys,json; print(json.load(sys.stdin)['ARN'])")"
 
+# State-backed: the secret created over the AWS protocol returns its stored value over the protocol.
+SM_GET=$(curl -sf -X POST "http://localhost:$PORT" \
+  -H "X-Amz-Target: secretsmanager.GetSecretValue" \
+  -H "Content-Type: application/x-amz-json-1.1" \
+  -d '{"SecretId":"smoke-secret"}')
+echo "$SM_GET" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['SecretString']=='val'" \
+  || fail "Secrets Manager secret not state-backed: $SM_GET"
+pass "Secrets Manager GetSecretValue (state-backed)"
+
+# The same secret is visible through the REST API on the API port.
+SM_REST=$(curl -sf "http://localhost:$API_PORT/api/secretsmanager/get?name=smoke-secret")
+echo "$SM_REST" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['secretString']=='val'" \
+  || fail "Secrets Manager secret not state-backed across surfaces: $SM_REST"
+pass "Secrets Manager /api/secretsmanager/get (state-backed)  → $SM_REST"
+
 echo ""
 echo "==> SNS (XML / form-URL)"
 SNS=$(curl -sf -X POST "http://localhost:$PORT" \

@@ -26,8 +26,8 @@ class SecretLoaderIntegrationTest {
     }
 
     @Test
-    void loadReturnsNonBlankValue() {
-        String value = loader.load("api-key");
-        assertFalse(value.isBlank());
+    void storeThenLoadReturnsStoredValue() {
+        loader.store("db-password", "s3cr3t");
+        assertEquals("s3cr3t", loader.load("db-password"));
     }
 }

@@ -1,10 +1,7 @@
 name: Release Tools
 
 # The runnable tool JARs (cloudstub-local, cloudstub-codegen) are not published to Maven Central — they
-# are distributed via GitHub Releases. They change only when core/local/codegen change, so they are
-# released on demand here rather than on every Maven Central release. Run this against an existing
-# release tag to build the fat JARs (stamped with that version, so the embedded core version is
-# correct) and attach them to that tag's GitHub Release.
+# are distributed via GitHub Releases. This workflow builds and publishes them when triggered manually, using an existing v<version> tag.
 
 on:
   workflow_dispatch:
@@ -14,7 +11,7 @@ on:
         required: true
 
 permissions:
-  contents: write # create/update the GitHub Release and upload assets
+  contents: write
 
 jobs:
   publish-tools:

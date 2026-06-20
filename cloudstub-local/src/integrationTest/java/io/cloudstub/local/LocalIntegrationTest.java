@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.ListTopicsResponse;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -22,8 +23,8 @@ class LocalIntegrationTest {
 
     @BeforeAll
     static void startServer() throws Exception {
-        // Services are opt-in: declare sqs and sns so ListQueues and ListTopics are served.
-        process = LocalProcess.start(PORT, "--services=sqs,sns");
+        // Services are opt-in: declare the services the tests below exercise.
+        process = LocalProcess.start(PORT, "--services=sqs,sns,secretsmanager");
     }
 
     @AfterAll
@@ -69,6 +70,31 @@ class LocalIntegrationTest {
             assertTrue(
                     response.topics().stream().anyMatch(t -> t.topicArn().equals(topicArn)),
                     "topic created over the AWS protocol must be returned by the standalone server");
+        }
+    }
+
+    @Test
+    void secretIsStateBackedByLocalProcess() {
+        try (SecretsManagerClient secrets =
+                SecretsManagerClient.builder()
+                        .endpointOverride(URI.create("http://localhost:" + PORT))
+                        .region(Region.US_EAST_1)
+                        .credentialsProvider(
+                                StaticCredentialsProvider.create(
+                                        AwsBasicCredentials.create("test", "test")))
+                        .build()) {
+
+            secrets.createSecret(b -> b.name("local-secret").secretString("local-value"));
+            assertTrue(
+                    secrets.getSecretValue(b -> b.secretId("local-secret"))
+                            .sdkHttpResponse()
+                            .isSuccessful());
+            assertTrue(
+                    secrets.getSecretValue(b -> b.secretId("local-secret"))
+                            .secretString()
+                            .equals("local-value"),
+                    "secret created over the AWS protocol must be returned by the standalone"
+                            + " server");
         }
     }
 }

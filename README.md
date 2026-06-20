@@ -90,61 +90,27 @@ with no further configuration. For full JUnit lifecycle management, fault inject
 ## Standalone mode
 
 Besides running embedded in tests, CloudStub ships as a long-lived standalone server for local development — start it
-once, leave it running, and point any application that reads `AWS_ENDPOINT_URL` at it. No Docker, no daemon.
-
-The standalone JAR is a thin server runtime: the launcher plus `cloudstub-core`, with **no service modules bundled**.
-Just declare the services you want — by default the launcher fetches each absent module jar from Maven Central into the
-plugin directory, verifies it, and loads it:
+once, leave it running, and point any application that reads `AWS_ENDPOINT_URL` at it. No Docker, no daemon. Declare the
+services you want and the launcher fetches each module jar from Maven Central on first use:
 
 ```
 java -jar cloudstub-local.jar --services=sqs,secretsmanager
+export AWS_ENDPOINT_URL=http://localhost:4566   # the default port
 ```
 
-The plugin directory (default `./modules`) is the cache: a jar already present is never re-downloaded. The download
-version defaults to the running core version (override with `--module-version`), every download is checksum-verified,
-and the source is Maven Central (mirror via `--maven-base-url` / `CLOUDSTUB_MAVEN_BASE_URL`). For offline / air-gapped
-runs, disable auto-download with `--no-download` (or `CLOUDSTUB_AUTO_DOWNLOAD=false`) and drop the module jars in the
-plugin directory yourself — a declared-but-missing service then fails fast instead of reaching the network.
-
-Point the launcher at a different plugin directory with `--modules-dir=<path>` (or `CLOUDSTUB_MODULES_DIR`).
-`--modules-dir` controls what is **available** (which module jars are on the classpath); `--services` narrows what is
-**enabled** among those. The server binds to port `4566` by default (override with `--port=<n>` or `CLOUDSTUB_PORT`).
-Services are opt-in: with no `--services` the server starts but serves nothing and prints a warning telling you how to
-enable services. `Ctrl-C` shuts it down cleanly.
-
-```
-export AWS_ENDPOINT_URL=http://localhost:4566
-./gradlew bootRun
-```
-
-The `cloudstub-local` fat JAR is **dual-mode**: with no arguments it starts the server, and with a command token it
-runs a companion CLI (`cloudstub` / `clb`) that drives a running instance from the terminal — inspect status, send test
-data, reset services — without the AWS CLI. It is a thin HTTP client that discovers its commands from the server at
-runtime.
+It shares the same core engine and state backend as embedded mode, so stateful modules return live data — a
+`SendMessage` is returned by a later `ReceiveMessage`. Drive a running instance from the terminal with the companion
+`cloudstub` / `clb` CLI (bundled in the same fat JAR), or open the **web console** at
+[`http://localhost:4567/console`](http://localhost:4567/console) to inspect state and send test data from the browser:
 
 ```
 clb status
 clb sqs send-message --queue orders --body "hello"
 ```
 
-> Standalone mode shares the same core engine and state backend as embedded mode: stateful modules return live data
-> (a `SendMessage` is returned by a later `ReceiveMessage`), and state is persistent by default (use `--store-dir=none`
-> for in-memory). See the [Standalone Mode guide](https://cloudstub.github.io/cloudstub/standalone/) and
-> [CLI guide](https://cloudstub.github.io/cloudstub/cli/) for full details.
-
-The `cloudstub-example` app ships profile-gated demo runners for manual end-to-end verification. Start a server with the
-service enabled, then run the matching demo against it in a second terminal:
-
-```
-# terminal 1 — start the standalone server
-./gradlew :cloudstub-local:run --args="--services=sns"
-
-# terminal 2 — run the demo (-Pdemo=<service> selects the runner)
-./gradlew :cloudstub-example:junit6:runExample -Pdemo=sns
-```
-
-The server can load several services at once (`--services=sqs,sns`), but `-Pdemo` runs one runner at a time — pick the
-service to exercise (`-Pdemo=sqs` or `-Pdemo=sns`) and rerun for each.
+See the [Standalone Mode guide](https://cloudstub.github.io/cloudstub/standalone/) and
+[CLI guide](https://cloudstub.github.io/cloudstub/cli/) for ports, the plugin directory, auto-download, offline use, and
+state persistence.
 
 ## Supported services
 
@@ -174,9 +140,8 @@ AWS SDK v2 is fully supported with automatic zero-config redirection. SDK v1 use
 
 ## Contributing
 
-If a module you need doesn't exist yet, you can build it. Each AWS service is an independent module implementing a
-simple
-two-method SPI (`CloudStubService` + `StubRegistrar`).
+If a module you need doesn't exist yet, you can build it. Each AWS service is an independent module implementing the
+`CloudStubService` SPI.
 
 - **New module:** follow the [Module Authoring Guide](https://cloudstub.github.io/cloudstub/module-authoring/) — see
   the [Roadmap](ROADMAP.md) for the targeted services and their status

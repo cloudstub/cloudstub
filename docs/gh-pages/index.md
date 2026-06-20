@@ -22,8 +22,7 @@ CloudStub answers a simpler question: what if the mock ran inside the JVM itself
 
 The **core engine** boots an embedded HTTP server on a random port, sets the `aws.endpoint-url` system property to
 redirect the AWS SDK v2, and discovers service modules via `ServiceLoader`. Each **service module** is an independently
-installable JAR that registers its stubs through the `StubRegistrar` SPI. The underlying HTTP server (WireMock) is
-completely hidden — you never interact with it directly.
+installable JAR that registers its stubs through the `StubRegistrar` SPI.
 
 First-party modules target the AWS SDK for Java **v2**. Teams still on **v1** can redirect their clients to CloudStub
 with the `cloudstub-sdk-v1` companion — see [SDK v1 Support](sdk-v1.md).
@@ -38,20 +37,18 @@ with the `cloudstub-sdk-v1` companion — see [SDK v1 Support](sdk-v1.md).
 class OrderServiceTest {
 
     @Test
-    void publishesOrderEvent() {
+    void placingAnOrderPublishesIt() {
         SqsClient sqs = SqsClient.builder()
             .endpointOverride(URI.create(System.getProperty("aws.endpoint-url")))
             .credentialsProvider(AnonymousCredentialsProvider.create())
             .region(Region.US_EAST_1)
             .build();
-
         String queueUrl = sqs.createQueue(b -> b.queueName("orders")).queueUrl();
-        String messageId = sqs.sendMessage(b -> b
-                .queueUrl(queueUrl)
-                .messageBody("order-placed"))
-            .messageId();
 
-        assertNotNull(messageId);
+        new OrderService(sqs, queueUrl).placeOrder("sku-42");
+
+        String body = sqs.receiveMessage(b -> b.queueUrl(queueUrl)).messages().get(0).body();
+        assertTrue(body.contains("sku-42"));
     }
 }
 ```
