@@ -137,6 +137,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/CloudStubResponseTransformer.html#applyGlobally()" class="member-name-link">applyGlobally()</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubResponseTransformer.html" title="class in io.cloudstub.core.internal">CloudStubResponseTransformer</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/core/spi/XmlElement.html#attr(java.lang.String,java.lang.String)" class="member-name-link">attr(String, String)</a> - Method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/XmlElement.html" title="class in io.cloudstub.core.spi">XmlElement</a></dt>
+<dd>
+<div class="block">Adds an attribute.</div>
+</dd>
 <dt><a href="io/cloudstub/local/config/resolver/AutoDownloadResolver.html" class="type-name-link" title="class in io.cloudstub.local.config.resolver">AutoDownloadResolver</a> - Class in <a href="io/cloudstub/local/config/resolver/package-summary.html">io.cloudstub.local.config.resolver</a></dt>
 <dd>
 <div class="block">Resolves whether absent service module jars are auto-downloaded from Maven Central.</div>
@@ -189,6 +193,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/cloudstub/core/download/ModuleDownloader.html#CENTRAL_BASE_URL" class="member-name-link">CENTRAL_BASE_URL</a> - Static variable in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
 <dd>
 <div class="block">Canonical Maven Central artifact base.</div>
+</dd>
+<dt><a href="io/cloudstub/core/spi/XmlElement.html#child(io.cloudstub.core.spi.XmlElement)" class="member-name-link">child(XmlElement)</a> - Method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/XmlElement.html" title="class in io.cloudstub.core.spi">XmlElement</a></dt>
+<dd>
+<div class="block">Appends a child element.</div>
+</dd>
+<dt><a href="io/cloudstub/core/spi/XmlElement.html#child(java.lang.String,java.lang.String)" class="member-name-link">child(String, String)</a> - Method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/XmlElement.html" title="class in io.cloudstub.core.spi">XmlElement</a></dt>
+<dd>
+<div class="block">Appends a child element <code>&lt;name&gt;text&lt;/name&gt;</code>.</div>
 </dd>
 <dt><a href="io/cloudstub/core/internal/AwsEndpointOverride.html#clear()" class="member-name-link">clear()</a> - Static method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/AwsEndpointOverride.html" title="class in io.cloudstub.core.internal">AwsEndpointOverride</a></dt>
 <dd>
@@ -743,6 +755,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">A <code>200 OK</code> JSON response whose body is serialised from a JDK map/list/value tree.</div>
 </dd>
+<dt><a href="io/cloudstub/core/spi/Json.html" class="type-name-link" title="class in io.cloudstub.core.spi">Json</a> - Class in <a href="io/cloudstub/core/spi/package-summary.html">io.cloudstub.core.spi</a></dt>
+<dd>
+<div class="block">Helpers for assembling JSON response bodies from plain JDK collections, to pass to <a href="io/cloudstub/core/spi/StubResponse.html#json(java.util.Map)"><code>StubResponse.json(Map)</code></a>.</div>
+</dd>
 <dt><a href="io/cloudstub/core/StatePersistence.html#JSON_FILE" class="member-name-link">JSON_FILE</a> - Enum constant in enum class io.cloudstub.core.<a href="io/cloudstub/core/StatePersistence.html" title="enum class in io.cloudstub.core">StatePersistence</a></dt>
 <dd>
 <div class="block">Single JSON document rewritten in full on every mutation.</div>
@@ -944,12 +960,20 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:O">O</h2>
 <dl class="index">
+<dt><a href="io/cloudstub/core/spi/Json.html#object(java.lang.Object...)" class="member-name-link">object(Object...)</a> - Static method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/Json.html" title="class in io.cloudstub.core.spi">Json</a></dt>
+<dd>
+<div class="block">An ordered JSON object built from alternating key/value arguments, e.g.</div>
+</dd>
 <dt><a href="io/cloudstub/core/spi/StubResponse.html#of(int,java.lang.String,java.lang.String)" class="member-name-link">of(int, String, String)</a> - Static method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></dt>
 <dd>
 <div class="block">A response with an explicit status, content type, and body.</div>
 </dd>
 <dt><a href="io/cloudstub/codegen/ModelResolver.html#of(java.lang.String)" class="member-name-link">of(String)</a> - Static method in interface io.cloudstub.codegen.<a href="io/cloudstub/codegen/ModelResolver.html" title="interface in io.cloudstub.codegen">ModelResolver</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/core/spi/XmlElement.html#of(java.lang.String)" class="member-name-link">of(String)</a> - Static method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/XmlElement.html" title="class in io.cloudstub.core.spi">XmlElement</a></dt>
+<dd>
+<div class="block">A new element with the given tag name.</div>
+</dd>
 <dt><a href="io/cloudstub/core/restapi/RequestRecord.html#operation()" class="member-name-link">operation()</a> - Method in record class io.cloudstub.core.restapi.<a href="io/cloudstub/core/restapi/RequestRecord.html" title="class in io.cloudstub.core.restapi">RequestRecord</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>operation</code> record component.</div>
@@ -1111,6 +1135,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/cloudstub/codegen/GeneratedFile.html#relativePath()" class="member-name-link">relativePath()</a> - Method in record class io.cloudstub.codegen.<a href="io/cloudstub/codegen/GeneratedFile.html" title="class in io.cloudstub.codegen">GeneratedFile</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>relativePath</code> record component.</div>
+</dd>
+<dt><a href="io/cloudstub/core/spi/XmlElement.html#render()" class="member-name-link">render()</a> - Method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/XmlElement.html" title="class in io.cloudstub.core.spi">XmlElement</a></dt>
+<dd>
+<div class="block">Serialises this element and its subtree to an XML string, escaping all text and attributes.</div>
 </dd>
 <dt><a href="io/cloudstub/core/CloudStub.html#requestHistory()" class="member-name-link">requestHistory()</a> - Method in class io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></dt>
 <dd>
@@ -1396,6 +1424,10 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:T">T</h2>
 <dl class="index">
+<dt><a href="io/cloudstub/core/spi/XmlElement.html#text(java.lang.String)" class="member-name-link">text(String)</a> - Method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/XmlElement.html" title="class in io.cloudstub.core.spi">XmlElement</a></dt>
+<dd>
+<div class="block">Sets the element's text content.</div>
+</dd>
 <dt><a href="io/cloudstub/core/restapi/RequestRecord.html#timestamp()" class="member-name-link">timestamp()</a> - Method in record class io.cloudstub.core.restapi.<a href="io/cloudstub/core/restapi/RequestRecord.html" title="class in io.cloudstub.core.restapi">RequestRecord</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>timestamp</code> record component.</div>
@@ -1526,9 +1558,18 @@ the order they are declared.</div>
 </dl>
 <h2 class="title" id="I:X">X</h2>
 <dl class="index">
+<dt><a href="io/cloudstub/core/spi/StubResponse.html#xml(io.cloudstub.core.spi.XmlElement)" class="member-name-link">xml(XmlElement)</a> - Static method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></dt>
+<dd>
+<div class="block">A <code>200 OK</code> XML response whose body is rendered from an <a href="io/cloudstub/core/spi/XmlElement.html" title="class in io.cloudstub.core.spi"><code>XmlElement</code></a> tree.</div>
+</dd>
 <dt><a href="io/cloudstub/core/spi/StubResponse.html#xml(java.lang.String)" class="member-name-link">xml(String)</a> - Static method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></dt>
 <dd>
 <div class="block">A <code>200 OK</code> XML response with the AWS query/XML content type.</div>
+</dd>
+<dt><a href="io/cloudstub/core/spi/XmlElement.html" class="type-name-link" title="class in io.cloudstub.core.spi">XmlElement</a> - Class in <a href="io/cloudstub/core/spi/package-summary.html">io.cloudstub.core.spi</a></dt>
+<dd>
+<div class="block">A builder for an XML element tree, used to assemble AWS Query (XML) response bodies without
+ hand-concatenating strings.</div>
 </dd>
 </dl>
 <a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a></main>
