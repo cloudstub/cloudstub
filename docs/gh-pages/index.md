@@ -34,10 +34,10 @@ with the `cloudstub-sdk-v1` companion — see [SDK v1 Support](sdk-v1.md).
 ```java
 
 @ExtendWith(CloudStubExtension.class)
-class OrderServiceTest {
+class SqsRoundTripTest {
 
     @Test
-    void publishesOrderEvent() {
+    void sentMessageComesBack() {
         SqsClient sqs = SqsClient.builder()
             .endpointOverride(URI.create(System.getProperty("aws.endpoint-url")))
             .credentialsProvider(AnonymousCredentialsProvider.create())
@@ -45,12 +45,10 @@ class OrderServiceTest {
             .build();
 
         String queueUrl = sqs.createQueue(b -> b.queueName("orders")).queueUrl();
-        String messageId = sqs.sendMessage(b -> b
-                .queueUrl(queueUrl)
-                .messageBody("order-placed"))
-            .messageId();
+        sqs.sendMessage(b -> b.queueUrl(queueUrl).messageBody("order-placed"));
 
-        assertNotNull(messageId);
+        String body = sqs.receiveMessage(b -> b.queueUrl(queueUrl)).messages().get(0).body();
+        assertEquals("order-placed", body);
     }
 }
 ```

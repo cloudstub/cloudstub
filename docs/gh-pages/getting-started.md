@@ -64,30 +64,28 @@ import java.net.URI;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(CloudStubExtension.class) // (1)!
-class MyFirstCloudStubTest {
+class OrderServiceTest {
 
     @Test
-    void sendMessageSucceeds() {
+    void placingAnOrderPublishesIt() {
         SqsClient sqs = SqsClient.builder()
             .endpointOverride(URI.create(System.getProperty("aws.endpoint-url"))) // (2)!
             .credentialsProvider(AnonymousCredentialsProvider.create())
             .region(Region.US_EAST_1)
             .build();
+        String queueUrl = sqs.createQueue(b -> b.queueName("orders")).queueUrl();
 
-        String queueUrl = sqs.createQueue(b -> b.queueName("my-queue")).queueUrl();
-        String messageId = sqs.sendMessage(b -> b
-                .queueUrl(queueUrl)
-                .messageBody("hello"))
-                .messageId();
+        new OrderService(sqs, queueUrl).placeOrder("sku-42");
 
-        assertNotNull(messageId); // (3)!
+        String body = sqs.receiveMessage(b -> b.queueUrl(queueUrl)).messages().get(0).body();
+        assertTrue(body.contains("sku-42")); // (3)!
     }
 }
 ```
 
 1. Starts CloudStub before the first test and stops it after the last. Service modules on the classpath are discovered automatically via `ServiceLoader` — no registration required.
 2. CloudStub sets `aws.endpoint-url` to `http://localhost:<port>` before any test runs. The SDK reads it automatically.
-3. CloudStub returns a well-formed response the SDK can parse. The assertion verifies end-to-end wiring, not AWS semantics.
+3. Send and receive are state-backed, so you assert on what your code actually did — the order reached the queue — not on the mock returning a value.
 
 ## 3. Run it
 
