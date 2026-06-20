@@ -351,9 +351,17 @@ public class CloudStubSecretsManagerService implements CloudStubService {
         return out;
     }
 
-    /** The stored {@code createdDate} as a numeric epoch-seconds value for the JSON response. */
+    /**
+     * The stored {@code createdDate} as a numeric epoch-seconds value for the JSON response, or
+     * {@code 0} if a legacy or externally-written entry holds a missing/non-numeric value (a bad
+     * timestamp must not turn a read into a 500).
+     */
     private static Object createdDate(Map<String, String> secret) {
-        return Long.parseLong(secret.get("createdDate"));
+        try {
+            return Long.parseLong(secret.get("createdDate"));
+        } catch (NumberFormatException e) {
+            return 0L;
+        }
     }
 
     private static StubResponse notFound() {
@@ -376,6 +384,10 @@ public class CloudStubSecretsManagerService implements CloudStubService {
 
     /** Builds an ordered JSON object from alternating key/value arguments. */
     private static Map<String, Object> obj(Object... keyValues) {
+        if (keyValues.length % 2 != 0) {
+            throw new IllegalArgumentException(
+                    "obj() requires an even number of key/value arguments");
+        }
         Map<String, Object> m = new LinkedHashMap<>();
         for (int i = 0; i < keyValues.length; i += 2) {
             m.put((String) keyValues[i], keyValues[i + 1]);
