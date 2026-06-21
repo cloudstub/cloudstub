@@ -1,5 +1,8 @@
 dependencies {
     compileOnly project(':cloudstub-core')
+    // The virtual-hosted-style interceptor implements an AWS SDK v2 type. The SDK is provided by the
+    // consumer's test classpath (they are testing an S3 client), so it is compile-only here.
+    compileOnly libs.aws.s3
     testImplementation project(':cloudstub-core')
     testImplementation libs.aws.s3
 }
