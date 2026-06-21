@@ -85,8 +85,24 @@ loadScripts(document, 'script');</script>
 implements <a href="../core/spi/CloudStubService.html" title="interface in io.cloudstub.core.spi">CloudStubService</a></span></div>
 <div class="block">CloudStub service module for S3.
 
- <p>Uses the REST path protocol: each operation is matched by HTTP method and a path regex and
- served from a Handlebars template in <code>src/main/resources/templates/</code>.</div>
+ <p>Uses the REST path protocol: each operation is matched by HTTP method and a path regex.
+
+ <p>The bucket and object operations are <strong>state-backed</strong>: each is a <a href="../core/spi/StubHandler.html" title="interface in io.cloudstub.core.spi"><code>StubHandler</code></a> that reads and writes the shared <a href="../core/spi/StateStore.html" title="interface in io.cloudstub.core.spi"><code>StateStore</code></a>, so an
+ object <code>PutObject</code>'d in one call is returned by a later <code>GetObject</code> and reflected in
+ <code>ListObjectsV2</code>/<code>ListObjects</code>. State is keyed under the <code>s3/</code> prefix (see
+ <code>S3Keys</code>):
+
+ <ul>
+   <li><code>s3/buckets/{bucket}</code> → bucket metadata (marks the bucket's existence)
+   <li><code>s3/buckets/{bucket}/objects/{key}</code> → the object record (body, content type, ETag)
+ </ul>
+
+ <p>The remaining sub-resource operations (ACLs, tagging, lifecycle, multipart, …) are served from
+ static Handlebars templates in <code>src/main/resources/templates/</code>: well-formed but stateless
+ placeholder responses.
+
+ <p>Not simulated: multipart upload lifecycle, versioning, object metadata beyond content type,
+ and any sub-resource configuration.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">

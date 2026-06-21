@@ -86,8 +86,13 @@ implements <a href="../core/spi/CloudStubApiService.html" title="interface in io
 <div class="block">REST API surface for S3, mounted under <code>/api/s3/…</code>.
 
  <p>Each route advertises a CLI command name and its parameters via <code>/api/status</code>, so the
- CLI can build <code>clm s3 &lt;command&gt;</code> dynamically with no compile-time knowledge of S3.
- Responses are synthetic and stateless.
+ CLI can build <code>clb s3 &lt;command&gt;</code> dynamically with no compile-time knowledge of S3.
+
+ <p>Routes are <em>state-backed</em>: they read and write the same <a href="../core/spi/StateStore.html" title="interface in io.cloudstub.core.spi"><code>StateStore</code></a> (under the
+ same <code>S3Keys</code> scheme) as the AWS-protocol stubs in <a href="CloudStubS3Service.html" title="class in io.cloudstub.s3"><code>CloudStubS3Service</code></a>. So an object
+ uploaded through the AWS SDK is returned by <code>GET /api/s3/get-object</code> and shown in the
+ console, and vice versa — one state, two representations (AWS wire protocol vs. this friendly
+ JSON).
 
  <p>Discovered via <code>META-INF/services/io.cloudstub.core.spi.CloudStubApiService</code>.</div>
 </section>

@@ -449,6 +449,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the value of the <a href="./io/cloudstub/core/spi/restapi/ApiParam.html#param-description"><code>description</code></a> record component.</div>
 </dd>
+<dt><a href="io/cloudstub/core/spi/Digest.html" class="type-name-link" title="class in io.cloudstub.core.spi">Digest</a> - Class in <a href="io/cloudstub/core/spi/package-summary.html">io.cloudstub.core.spi</a></dt>
+<dd>
+<div class="block">Checksum helpers for service modules (SQS message checksums, S3 ETags).</div>
+</dd>
 <dt><a href="io/cloudstub/core/download/ModuleDownloader.html#download(java.lang.String,java.lang.String,java.nio.file.Path)" class="member-name-link">download(String, String, Path)</a> - Method in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
 <dd>
 <div class="block">Downloads the module jar for <code>service</code> at <code>version</code> into <code>dir</code>, verifying
@@ -753,7 +757,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/core/spi/StubResponse.html#json(java.util.Map)" class="member-name-link">json(Map&lt;String, ?&gt;)</a> - Static method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></dt>
 <dd>
-<div class="block">A <code>200 OK</code> JSON response whose body is serialised from a JDK map/list/value tree.</div>
+<div class="block">A <code>200 OK</code> JSON response whose body is serialised from a JDK map/list/value tree
+ (<code>Map</code>, <code>List</code>, <code>String</code>, number/boolean).</div>
 </dd>
 <dt><a href="io/cloudstub/core/spi/Json.html" class="type-name-link" title="class in io.cloudstub.core.spi">Json</a> - Class in <a href="io/cloudstub/core/spi/package-summary.html">io.cloudstub.core.spi</a></dt>
 <dd>
@@ -875,6 +880,14 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/core/internal/Md5HandlebarsHelper.html#%3Cinit%3E()" class="member-name-link">Md5HandlebarsHelper()</a> - Constructor for class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/Md5HandlebarsHelper.html" title="class in io.cloudstub.core.internal">Md5HandlebarsHelper</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/core/spi/Digest.html#md5Hex(byte%5B%5D)" class="member-name-link">md5Hex(byte[])</a> - Static method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/Digest.html" title="class in io.cloudstub.core.spi">Digest</a></dt>
+<dd>
+<div class="block">Lowercase hex MD5 digest of <code>value</code>.</div>
+</dd>
+<dt><a href="io/cloudstub/core/spi/Digest.html#md5Hex(java.lang.String)" class="member-name-link">md5Hex(String)</a> - Static method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/Digest.html" title="class in io.cloudstub.core.spi">Digest</a></dt>
+<dd>
+<div class="block">Lowercase hex MD5 digest of <code>value</code>'s UTF-8 bytes.</div>
+</dd>
 <dt><a href="io/cloudstub/core/restapi/RequestRecord.html#method()" class="member-name-link">method()</a> - Method in record class io.cloudstub.core.restapi.<a href="io/cloudstub/core/restapi/RequestRecord.html" title="class in io.cloudstub.core.restapi">RequestRecord</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>method</code> record component.</div>
@@ -1560,7 +1573,8 @@ the order they are declared.</div>
 <dl class="index">
 <dt><a href="io/cloudstub/core/spi/StubResponse.html#xml(io.cloudstub.core.spi.XmlElement)" class="member-name-link">xml(XmlElement)</a> - Static method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></dt>
 <dd>
-<div class="block">A <code>200 OK</code> XML response whose body is rendered from an <a href="io/cloudstub/core/spi/XmlElement.html" title="class in io.cloudstub.core.spi"><code>XmlElement</code></a> tree.</div>
+<div class="block">A <code>200 OK</code> XML response whose body is rendered from an <a href="io/cloudstub/core/spi/XmlElement.html" title="class in io.cloudstub.core.spi"><code>XmlElement</code></a> tree, which
+ performs the XML encoding and escaping.</div>
 </dd>
 <dt><a href="io/cloudstub/core/spi/StubResponse.html#xml(java.lang.String)" class="member-name-link">xml(String)</a> - Static method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></dt>
 <dd>
@@ -1568,8 +1582,7 @@ the order they are declared.</div>
 </dd>
 <dt><a href="io/cloudstub/core/spi/XmlElement.html" class="type-name-link" title="class in io.cloudstub.core.spi">XmlElement</a> - Class in <a href="io/cloudstub/core/spi/package-summary.html">io.cloudstub.core.spi</a></dt>
 <dd>
-<div class="block">A builder for an XML element tree, used to assemble AWS Query (XML) response bodies without
- hand-concatenating strings.</div>
+<div class="block">A builder for an XML element tree for AWS Query (XML) response bodies.</div>
 </dd>
 </dl>
 <a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a></main>

@@ -107,43 +107,46 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Entry point that every CloudStub service module must implement.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab3"><a href="HttpMethod.html" title="enum class in io.cloudstub.core.spi">HttpMethod</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab3">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="Digest.html" title="class in io.cloudstub.core.spi">Digest</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Checksum helpers for service modules (SQS message checksums, S3 ETags).</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab3"><a href="HttpMethod.html" title="enum class in io.cloudstub.core.spi">HttpMethod</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab3">
 <div class="block">HTTP methods used to match REST-style stubs via <a href="StubRegistrar.html#registerRestStub(io.cloudstub.core.spi.HttpMethod,java.lang.String,java.lang.String)"><code>StubRegistrar.registerRestStub(io.cloudstub.core.spi.HttpMethod, java.lang.String, java.lang.String)</code></a>.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="Json.html" title="class in io.cloudstub.core.spi">Json</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="Json.html" title="class in io.cloudstub.core.spi">Json</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Helpers for assembling JSON response bodies from plain JDK collections, to pass to <a href="StubResponse.html#json(java.util.Map)"><code>StubResponse.json(Map)</code></a>.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="StateStore.html" title="interface in io.cloudstub.core.spi">StateStore</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="StateStore.html" title="interface in io.cloudstub.core.spi">StateStore</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Shared key-value backend owned and lifecycle-managed by the core engine.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab1"><a href="StubHandler.html" title="interface in io.cloudstub.core.spi">StubHandler</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="StubHandler.html" title="interface in io.cloudstub.core.spi">StubHandler</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
 <div class="block">A request-time handler for a stateful stub.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="StubRegistrar.html" title="interface in io.cloudstub.core.spi">StubRegistrar</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="StubRegistrar.html" title="interface in io.cloudstub.core.spi">StubRegistrar</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Facade through which service modules register HTTP stubs without any direct dependency on the
  underlying networking driver (WireMock).</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab1"><a href="StubRequest.html" title="interface in io.cloudstub.core.spi">StubRequest</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="StubRequest.html" title="interface in io.cloudstub.core.spi">StubRequest</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
 <div class="block">Read-only view of an incoming HTTP request, handed to a <a href="StubHandler.html" title="interface in io.cloudstub.core.spi"><code>StubHandler</code></a> at request time.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Immutable HTTP response returned by a <a href="StubHandler.html" title="interface in io.cloudstub.core.spi"><code>StubHandler</code></a>.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="StubTemplates.html" title="class in io.cloudstub.core.spi">StubTemplates</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="StubTemplates.html" title="class in io.cloudstub.core.spi">StubTemplates</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Loads Handlebars response templates bundled as classpath resources in a module's JAR.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="XmlElement.html" title="class in io.cloudstub.core.spi">XmlElement</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">
-<div class="block">A builder for an XML element tree, used to assemble AWS Query (XML) response bodies without
- hand-concatenating strings.</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="XmlElement.html" title="class in io.cloudstub.core.spi">XmlElement</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">A builder for an XML element tree for AWS Query (XML) response bodies.</div>
 </div>
 </div>
 </div>

@@ -78,9 +78,8 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">XmlElement</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">A builder for an XML element tree, used to assemble AWS Query (XML) response bodies without
- hand-concatenating strings. The engine performs all XML escaping of text and attribute values, so
- a handler describes the structure and never escapes by hand.
+<div class="block">A builder for an XML element tree for AWS Query (XML) response bodies. All text and attribute
+ values are XML-escaped on render.
 
  <p>Pass the root element to <a href="StubResponse.html#xml(io.cloudstub.core.spi.XmlElement)"><code>StubResponse.xml(XmlElement)</code></a> to produce a response. Elements
  render as <code>&lt;name attr="v"&gt;...&lt;/name&gt;</code>; an element with neither text nor children renders as

@@ -148,7 +148,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#json(java.util.Map)" class="member-name-link">json</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr>?&gt;&nbsp;body)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">A <code>200 OK</code> JSON response whose body is serialised from a JDK map/list/value tree.</div>
+<div class="block">A <code>200 OK</code> JSON response whose body is serialised from a JDK map/list/value tree
+ (<code>Map</code>, <code>List</code>, <code>String</code>, number/boolean).</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#of(int,java.lang.String,java.lang.String)" class="member-name-link">of</a><wbr>(int&nbsp;status,
@@ -169,7 +170,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#xml(io.cloudstub.core.spi.XmlElement)" class="member-name-link">xml</a><wbr>(<a href="XmlElement.html" title="class in io.cloudstub.core.spi">XmlElement</a>&nbsp;root)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">A <code>200 OK</code> XML response whose body is rendered from an <a href="XmlElement.html" title="class in io.cloudstub.core.spi"><code>XmlElement</code></a> tree.</div>
+<div class="block">A <code>200 OK</code> XML response whose body is rendered from an <a href="XmlElement.html" title="class in io.cloudstub.core.spi"><code>XmlElement</code></a> tree, which
+ performs the XML encoding and escaping.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#xml(java.lang.String)" class="member-name-link">xml</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;body)</code></div>
@@ -242,10 +244,9 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="json(java.util.Map)">
 <h3>json</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></span>&nbsp;<span class="element-name">json</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr>?&gt;&nbsp;body)</span></div>
-<div class="block">A <code>200 OK</code> JSON response whose body is serialised from a JDK map/list/value tree. The
- engine performs the JSON encoding and string escaping, so handlers build the response from
- <code>Map</code>, <code>List</code>, <code>String</code>, and number/boolean values instead of concatenating
- JSON by hand.</div>
+<div class="block">A <code>200 OK</code> JSON response whose body is serialised from a JDK map/list/value tree
+ (<code>Map</code>, <code>List</code>, <code>String</code>, number/boolean). The engine performs the JSON
+ encoding and string escaping.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>body</code> - the response object; values must be JSON-serialisable JDK types</dd>
@@ -279,9 +280,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="xml(io.cloudstub.core.spi.XmlElement)">
 <h3>xml</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></span>&nbsp;<span class="element-name">xml</span><wbr><span class="parameters">(<a href="XmlElement.html" title="class in io.cloudstub.core.spi">XmlElement</a>&nbsp;root)</span></div>
-<div class="block">A <code>200 OK</code> XML response whose body is rendered from an <a href="XmlElement.html" title="class in io.cloudstub.core.spi"><code>XmlElement</code></a> tree. The
- engine performs the XML encoding and escaping, so handlers describe the element structure
- instead of concatenating XML by hand.</div>
+<div class="block">A <code>200 OK</code> XML response whose body is rendered from an <a href="XmlElement.html" title="class in io.cloudstub.core.spi"><code>XmlElement</code></a> tree, which
+ performs the XML encoding and escaping.</div>
 </section>
 </li>
 <li>
