@@ -43,6 +43,7 @@ Standard commands:
 ./gradlew checkCompatibility         # run cloudstub-junit against both JUnit 5 and JUnit 6 (example suites)
 ./gradlew generateDocs               # aggregated Javadoc for public modules → docs/javadoc/
 ./gradlew publishToMavenLocal        # publish for local smoke testing
+./gradlew release -PreleaseVersion=0.1.0-beta.4 [-Ppush]   # set version in gradle.properties, commit it, create the v<version> tag (-Ppush pushes commit + tag)
 ./gradlew :cloudstub-codegen:run --args="--model <path-or-url> --output <dir>"   # in-repo stub generation (no fat JAR build)
 ./gradlew :cloudstub-codegen:validate --args="--model <path>"          # validate a Smithy model without generating output
 ./gradlew :cloudstub-codegen:shadowJar                                 # build the codegen fat JAR (distribution / CI)
@@ -53,6 +54,23 @@ java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs   # star
 java -jar cloudstub-local/build/libs/cloudstub-local.jar --modules-dir=/path/to/modules --services=sqs   # explicit plugin directory
 CLOUDSTUB_PORT=4566 CLOUDSTUB_API_PORT=4567 java -jar cloudstub-local/build/libs/cloudstub-local.jar  # ports via env vars
 ```
+
+### Versioning and releases
+
+`version` in `gradle.properties` is the literal application version (like a `package.json` version):
+the build stamps exactly that value into the published coordinates, the `version.properties` resource
+read by `CoreVersion.current()`, the `--version` output, and the module auto-download default. It is
+not a `-SNAPSHOT` placeholder, so a local build produces the same version that was last released and
+the standalone fat JAR auto-downloads a matching, published module from Maven Central.
+
+Cut a release with the `release` task: `./gradlew release -PreleaseVersion=<x.y.z[-pre]>` rewrites the
+`version=` line, commits **only** `gradle.properties` (safe to run with other unstaged changes
+present), and creates the `v<version>` tag. It rejects a blank version, a `-SNAPSHOT` version, a value
+not matching `MAJOR.MINOR.PATCH[-prerelease]`, or an already-existing tag, all before touching the
+file. Without `-Ppush` the commit and tag stay local for inspection; `-Ppush` pushes them. Pushing the
+`v*` tag triggers `release.yml` (Central publish), which passes `-Pversion` from the tag name (now a
+consistency check, since the committed file already matches). `release-tools.yml` builds and attaches
+the runnable tool JARs for an existing tag.
 
 ### Code formatting
 
