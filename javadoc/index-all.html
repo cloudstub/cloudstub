@@ -902,6 +902,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/codegen/ModelResolver.html" class="type-name-link" title="interface in io.cloudstub.codegen">ModelResolver</a> - Interface in <a href="io/cloudstub/codegen/package-summary.html">io.cloudstub.codegen</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/s3/S3VirtualHostStyleInterceptor.html#modifyHttpRequest(software.amazon.awssdk.core.interceptor.Context.ModifyHttpRequest,software.amazon.awssdk.core.interceptor.ExecutionAttributes)" class="member-name-link">modifyHttpRequest(Context.ModifyHttpRequest, ExecutionAttributes)</a> - Method in class io.cloudstub.s3.<a href="io/cloudstub/s3/S3VirtualHostStyleInterceptor.html" title="class in io.cloudstub.s3">S3VirtualHostStyleInterceptor</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/download/ModuleDownloader.html" class="type-name-link" title="class in io.cloudstub.core.download">ModuleDownloader</a> - Class in <a href="io/cloudstub/core/download/package-summary.html">io.cloudstub.core.download</a></dt>
 <dd>
 <div class="block">Provisions a CloudStub service module jar from Maven Central into a plugin directory: fetch,
@@ -1216,6 +1218,15 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:S">S</h2>
 <dl class="index">
+<dt><a href="io/cloudstub/s3/S3VirtualHostStyleInterceptor.html" class="type-name-link" title="class in io.cloudstub.s3">S3VirtualHostStyleInterceptor</a> - Class in <a href="io/cloudstub/s3/package-summary.html">io.cloudstub.s3</a></dt>
+<dd>
+<div class="block">AWS SDK v2 <code>ExecutionInterceptor</code> that prepends the bucket to the request path when a
+ default-configured (virtual-hosted-style) <code>S3Client</code> talks to a CloudStub endpoint, so
+ CloudStub's path-style (<code>/{bucket}/{key}</code>) stubs match without <code>
+ pathStyleAccessEnabled</code>.</div>
+</dd>
+<dt><a href="io/cloudstub/s3/S3VirtualHostStyleInterceptor.html#%3Cinit%3E()" class="member-name-link">S3VirtualHostStyleInterceptor()</a> - Constructor for class io.cloudstub.s3.<a href="io/cloudstub/s3/S3VirtualHostStyleInterceptor.html" title="class in io.cloudstub.s3">S3VirtualHostStyleInterceptor</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/junit/SimulateNetworkBrownout.html#service()" class="member-name-link">service()</a> - Element in annotation interface io.cloudstub.junit.<a href="io/cloudstub/junit/SimulateNetworkBrownout.html" title="annotation interface in io.cloudstub.junit">SimulateNetworkBrownout</a></dt>
 <dd>
 <div class="block">Service ID to affect, e.g.</div>
