@@ -40,9 +40,10 @@ import java.util.regex.Pattern;
  * Handlebars templates in {@code src/main/resources/templates/}: well-formed but stateless
  * placeholder responses.
  *
- * <p>Not simulated: multipart upload lifecycle, object versioning, tag validation (the max-10-tags
- * and key/value length limits real S3 enforces), object metadata beyond content type, and any
- * sub-resource configuration.
+ * <p>Not simulated: multipart upload lifecycle, object versioning, tags supplied at put time via
+ * the {@code x-amz-tagging} header (a plain {@code PutObject} clears the object's tags, matching
+ * real S3), tag validation (the max-10-tags and key/value length limits real S3 enforces), object
+ * metadata beyond content type, and any sub-resource configuration.
  */
 public class CloudStubS3Service implements CloudStubService {
 
@@ -546,6 +547,9 @@ public class CloudStubS3Service implements CloudStubService {
                         "etag", etag,
                         "size", size,
                         "lastModified", Instant.now().toString()));
+        // A fresh PutObject replaces the object; real S3 drops its prior tag set (the x-amz-tagging
+        // header that would re-set tags at put time is not simulated).
+        store.delete(S3Keys.objectTagsKey(bucket, key));
         return StubResponse.of(200, "application/xml", "").withHeader("ETag", quote(etag));
     }
 
@@ -643,6 +647,9 @@ public class CloudStubS3Service implements CloudStubService {
     private StubResponse putObjectTagging(StubRequest req, StateStore store) {
         String bucket = S3Helpers.bucket(req.path());
         String key = S3Helpers.objectKey(req.path());
+        if (!objectExists(store, bucket, key)) {
+            return noSuchKey(key);
+        }
         store.put(S3Keys.objectTagsKey(bucket, key), parseTagSet(req.body()));
         return StubResponse.of(200, "application/xml", "");
     }
@@ -650,27 +657,39 @@ public class CloudStubS3Service implements CloudStubService {
     private StubResponse getObjectTagging(StubRequest req, StateStore store) {
         String bucket = S3Helpers.bucket(req.path());
         String key = S3Helpers.objectKey(req.path());
+        if (!objectExists(store, bucket, key)) {
+            return noSuchKey(key);
+        }
         return tagSetResponse(store.get(S3Keys.objectTagsKey(bucket, key)));
     }
 
     private StubResponse deleteObjectTagging(StubRequest req, StateStore store) {
         String bucket = S3Helpers.bucket(req.path());
         String key = S3Helpers.objectKey(req.path());
+        if (!objectExists(store, bucket, key)) {
+            return noSuchKey(key);
+        }
         store.delete(S3Keys.objectTagsKey(bucket, key));
         return StubResponse.of(204, "application/xml", "");
     }
 
     private StubResponse putBucketTagging(StubRequest req, StateStore store) {
         String bucket = S3Helpers.bucket(req.path());
+        if (!bucketExists(store, bucket)) {
+            return noSuchBucket(bucket);
+        }
         store.put(S3Keys.bucketTagsKey(bucket), parseTagSet(req.body()));
         return StubResponse.of(204, "application/xml", "");
     }
 
     private StubResponse getBucketTagging(StubRequest req, StateStore store) {
         String bucket = S3Helpers.bucket(req.path());
+        if (!bucketExists(store, bucket)) {
+            return noSuchBucket(bucket);
+        }
         Object record = store.get(S3Keys.bucketTagsKey(bucket));
-        // Real S3 returns 404 NoSuchTagSet for a bucket with no tags (unlike an untagged object,
-        // which returns an empty 200).
+        // An existing bucket with no tags returns 404 NoSuchTagSet, unlike an untagged object,
+        // which returns an empty 200.
         if (record == null) {
             return noSuchTagSet();
         }
@@ -679,8 +698,19 @@ public class CloudStubS3Service implements CloudStubService {
 
     private StubResponse deleteBucketTagging(StubRequest req, StateStore store) {
         String bucket = S3Helpers.bucket(req.path());
+        if (!bucketExists(store, bucket)) {
+            return noSuchBucket(bucket);
+        }
         store.delete(S3Keys.bucketTagsKey(bucket));
         return StubResponse.of(204, "application/xml", "");
+    }
+
+    private static boolean bucketExists(StateStore store, String bucket) {
+        return store.get(S3Keys.bucketKey(bucket)) != null;
+    }
+
+    private static boolean objectExists(StateStore store, String bucket, String key) {
+        return store.get(S3Keys.objectKey(bucket, key)) != null;
     }
 
     /**
@@ -710,19 +740,27 @@ public class CloudStubS3Service implements CloudStubService {
     }
 
     private static StubResponse noSuchTagSet() {
-        XmlElement error =
-                XmlElement.of("Error")
-                        .child("Code", "NoSuchTagSet")
-                        .child("Message", "The TagSet does not exist");
-        return StubResponse.of(404, "application/xml", error.render());
+        return errorResponse(errorBody("NoSuchTagSet", "The TagSet does not exist"));
     }
 
     private static StubResponse noSuchKey(String key) {
-        XmlElement error =
-                XmlElement.of("Error")
-                        .child("Code", "NoSuchKey")
-                        .child("Message", "The specified key does not exist.")
-                        .child("Key", key);
+        return errorResponse(
+                errorBody("NoSuchKey", "The specified key does not exist.").child("Key", key));
+    }
+
+    private static StubResponse noSuchBucket(String bucket) {
+        return errorResponse(
+                errorBody("NoSuchBucket", "The specified bucket does not exist")
+                        .child("BucketName", bucket));
+    }
+
+    /** An {@code <Error>} element with the AWS S3 {@code Code}/{@code Message} pair. */
+    private static XmlElement errorBody(String code, String message) {
+        return XmlElement.of("Error").child("Code", code).child("Message", message);
+    }
+
+    /** A {@code 404} XML error response from an {@link #errorBody} tree. */
+    private static StubResponse errorResponse(XmlElement error) {
         return StubResponse.of(404, "application/xml", error.render());
     }
 

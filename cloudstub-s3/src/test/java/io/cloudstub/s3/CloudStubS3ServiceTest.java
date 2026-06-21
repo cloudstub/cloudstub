@@ -282,6 +282,54 @@ class CloudStubS3ServiceTest {
                 "a re-created object must not inherit the deleted object's tags");
     }
 
+    @Test
+    void putObjectOverwriteClearsTags() {
+        String bucket = "objoverwrite-bucket";
+        String key = "k.txt";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("v1"));
+        s3.putObjectTagging(
+                b ->
+                        b.bucket(bucket)
+                                .key(key)
+                                .tagging(t -> t.tagSet(Tag.builder().key("a").value("1").build())));
+
+        // Overwrite the object without deleting it first; real S3 drops the prior tag set.
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("v2"));
+        assertTrue(s3.getObjectTagging(b -> b.bucket(bucket).key(key)).tagSet().isEmpty());
+    }
+
+    @Test
+    void taggingMissingObjectThrowsNoSuchKey() {
+        String bucket = "objtagmissing-bucket";
+        s3.createBucket(b -> b.bucket(bucket));
+
+        assertThrows(
+                NoSuchKeyException.class,
+                () -> s3.getObjectTagging(b -> b.bucket(bucket).key("nope")));
+        assertThrows(
+                NoSuchKeyException.class,
+                () ->
+                        s3.putObjectTagging(
+                                b ->
+                                        b.bucket(bucket)
+                                                .key("nope")
+                                                .tagging(
+                                                        t ->
+                                                                t.tagSet(
+                                                                        Tag.builder()
+                                                                                .key("a")
+                                                                                .value("1")
+                                                                                .build()))));
+    }
+
+    @Test
+    void bucketTaggingOnMissingBucketThrowsNoSuchBucket() {
+        assertThrows(
+                NoSuchBucketException.class,
+                () -> s3.getBucketTagging(b -> b.bucket("never-created-tag-bucket")));
+    }
+
     private static void assertNoSuchTagSet(org.junit.jupiter.api.function.Executable call) {
         S3Exception e = assertThrows(S3Exception.class, call);
         assertEquals(404, e.statusCode());
