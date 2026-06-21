@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -19,14 +20,14 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 class CloudStubS3ServiceTest {
 
     static CloudStub cloudMock;
     static S3Client s3;
-
-    static final String BUCKET = "test-bucket";
-    static final String KEY = "test-key";
 
     @BeforeAll
     static void start() {
@@ -52,124 +53,189 @@ class CloudStubS3ServiceTest {
         cloudMock.stop();
     }
 
+    /**
+     * The core round-trip: an object's body survives put → get, the listing reflects the real key
+     * and count, and a delete removes it. This is the behaviour issue #142 makes state-backed.
+     */
     @Test
-    void createBucketCompletesWithoutException() {
-        assertDoesNotThrow(() -> s3.createBucket(b -> b.bucket(BUCKET)));
+    void putObjectBodyIsReturnedByGetObject() {
+        String bucket = "roundtrip-bucket";
+        String key = "hello.txt";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("hi there"));
+
+        ResponseBytes<GetObjectResponse> got =
+                s3.getObject(b -> b.bucket(bucket).key(key), ResponseTransformer.toBytes());
+        assertEquals("hi there", new String(got.asByteArray(), StandardCharsets.UTF_8));
     }
 
     @Test
-    void putObjectCompletesWithoutException() {
-        assertDoesNotThrow(
+    void listObjectsV2ReflectsRealKeysAndCount() {
+        String bucket = "listv2-bucket";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key("a.txt"), RequestBody.fromString("a"));
+        s3.putObject(b -> b.bucket(bucket).key("b.txt"), RequestBody.fromString("bb"));
+
+        ListObjectsV2Response response = s3.listObjectsV2(b -> b.bucket(bucket));
+        assertEquals(bucket, response.name());
+        assertEquals(2, response.keyCount());
+        assertEquals(
+                java.util.List.of("a.txt", "b.txt"),
+                response.contents().stream().map(o -> o.key()).sorted().toList());
+    }
+
+    @Test
+    void listObjectsV2HonoursPrefix() {
+        String bucket = "prefix-bucket";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key("logs/x"), RequestBody.fromString("1"));
+        s3.putObject(b -> b.bucket(bucket).key("data/y"), RequestBody.fromString("2"));
+
+        ListObjectsV2Response response = s3.listObjectsV2(b -> b.bucket(bucket).prefix("logs/"));
+        assertEquals(1, response.keyCount());
+        assertEquals("logs/x", response.contents().get(0).key());
+    }
+
+    @Test
+    void deleteObjectRemovesState() {
+        String bucket = "delete-bucket";
+        String key = "gone.txt";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("bye"));
+        s3.deleteObject(b -> b.bucket(bucket).key(key));
+
+        assertThrows(
+                NoSuchKeyException.class,
+                () -> s3.getObject(b -> b.bucket(bucket).key(key), ResponseTransformer.toBytes()));
+    }
+
+    @Test
+    void getMissingObjectThrowsNoSuchKey() {
+        String bucket = "missing-bucket";
+        s3.createBucket(b -> b.bucket(bucket));
+        assertThrows(
+                NoSuchKeyException.class,
                 () ->
-                        s3.putObject(
-                                b -> b.bucket(BUCKET).key(KEY),
-                                RequestBody.fromString("hello from cloudstub")));
+                        s3.getObject(
+                                b -> b.bucket(bucket).key("nope"), ResponseTransformer.toBytes()));
     }
 
     @Test
-    void getObjectReturnsNonEmptyBody() {
-        ResponseBytes<GetObjectResponse> response =
-                s3.getObject(b -> b.bucket(BUCKET).key(KEY), ResponseTransformer.toBytes());
-        assertNotNull(response);
-        assertTrue(response.asByteArray().length > 0);
+    void listBucketsReflectsCreatedBuckets() {
+        s3.createBucket(b -> b.bucket("listbuckets-one"));
+        s3.createBucket(b -> b.bucket("listbuckets-two"));
+
+        var names = s3.listBuckets().buckets().stream().map(x -> x.name()).toList();
+        assertTrue(names.contains("listbuckets-one"));
+        assertTrue(names.contains("listbuckets-two"));
     }
 
     @Test
-    void deleteObjectCompletesWithoutException() {
-        assertDoesNotThrow(() -> s3.deleteObject(b -> b.bucket(BUCKET).key(KEY)));
+    void headBucketReflectsExistence() {
+        String bucket = "head-bucket";
+        s3.createBucket(b -> b.bucket(bucket));
+        assertDoesNotThrow(() -> s3.headBucket(b -> b.bucket(bucket)));
+
+        assertThrows(
+                NoSuchBucketException.class, () -> s3.headBucket(b -> b.bucket("never-created")));
     }
 
     @Test
-    void headObjectCompletesWithoutException() {
-        assertDoesNotThrow(() -> s3.headObject(b -> b.bucket(BUCKET).key(KEY)));
-    }
+    void headObjectReflectsExistence() {
+        String bucket = "headobj-bucket";
+        String key = "present.txt";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("data"));
+        assertEquals(4L, s3.headObject(b -> b.bucket(bucket).key(key)).contentLength());
 
-    @Test
-    void listObjectsV2ReturnsValidResponse() {
-        ListObjectsV2Response response = s3.listObjectsV2(b -> b.bucket(BUCKET));
-        assertNotNull(response);
-        assertFalse(response.isTruncated());
-        assertNotNull(response.contents());
+        assertThrows(
+                S3Exception.class, () -> s3.headObject(b -> b.bucket(bucket).key("absent.txt")));
     }
 
     /**
-     * Regression for issue #0019 review (finding #1): a ListObjectsV2 call carrying a prefix sends
-     * {@code ?list-type=2&prefix=...}, which the old end-anchored pattern did not match — the
-     * request fell through to the ListObjects (v1) catch-all and returned the wrong response shape.
+     * Keys requiring URL-encoding (spaces, {@code &}) must round-trip: the wire path is
+     * percent-encoded and the DeleteObjects body is XML-escaped, but get/list/delete address the
+     * object by its real decoded key.
      */
     @Test
-    void listObjectsV2WithPrefixReturnsValidResponse() {
-        ListObjectsV2Response response = s3.listObjectsV2(b -> b.bucket(BUCKET).prefix("logs/"));
-        assertNotNull(response);
-        assertFalse(response.isTruncated());
-        assertNotNull(response.contents());
+    void encodedKeyRoundTrips() {
+        String bucket = "encoded-bucket";
+        String key = "my report & notes.txt";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("payload"));
+
+        ResponseBytes<GetObjectResponse> got =
+                s3.getObject(b -> b.bucket(bucket).key(key), ResponseTransformer.toBytes());
+        assertEquals("payload", new String(got.asByteArray(), StandardCharsets.UTF_8));
+        assertEquals(
+                java.util.List.of(key),
+                s3.listObjectsV2(b -> b.bucket(bucket)).contents().stream()
+                        .map(o -> o.key())
+                        .toList());
+
+        s3.deleteObjects(b -> b.bucket(bucket).delete(d -> d.objects(o -> o.key(key))));
+        assertEquals(0, s3.listObjectsV2(b -> b.bucket(bucket)).keyCount());
     }
 
-    /** Finding #1, broader: multiple extra query params must still route to ListObjectsV2. */
     @Test
-    void listObjectsV2WithMultipleParamsReturnsValidResponse() {
-        ListObjectsV2Response response =
-                s3.listObjectsV2(
-                        b -> b.bucket(BUCKET).prefix("logs/").maxKeys(10).startAfter("logs/a"));
-        assertNotNull(response);
-        assertFalse(response.isTruncated());
-        assertNotNull(response.contents());
+    void deleteBucketClearsObjects() {
+        String bucket = "deletebucket-bucket";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key("k"), RequestBody.fromString("v"));
+        s3.deleteBucket(b -> b.bucket(bucket));
+
+        assertThrows(NoSuchBucketException.class, () -> s3.headBucket(b -> b.bucket(bucket)));
     }
 
     /**
      * Regression for issue #0019 review (finding #2): the {@code GET /<bucket>} ListObjects
      * catch-all must not shadow bucket-level GET sub-resources. A {@code GET /bucket?acl} must be
-     * served by the GetBucketAcl stub, not the ListObjects (v1) stub. Asserted at the routing level
-     * (raw HTTP), since the sub-resource templates are placeholders the SDK cannot deserialize.
+     * served by the GetBucketAcl stub, not the list stub. Asserted at the routing level (raw HTTP),
+     * since the sub-resource templates are placeholders the SDK cannot deserialize.
      */
     @Test
     void bucketSubResourceGetDoesNotLeakToListObjects() throws Exception {
-        HttpResponse<String> response =
-                HttpClient.newHttpClient()
-                        .send(
-                                HttpRequest.newBuilder()
-                                        .uri(
-                                                URI.create(
-                                                        "http://localhost:"
-                                                                + cloudMock.port()
-                                                                + "/"
-                                                                + BUCKET
-                                                                + "?acl"))
-                                        .GET()
-                                        .build(),
-                                HttpResponse.BodyHandlers.ofString());
+        s3.createBucket(b -> b.bucket("routing-bucket"));
+        HttpResponse<String> response = rawGet("/routing-bucket?acl");
 
         assertEquals(200, response.statusCode());
         assertTrue(
                 response.body().contains("GetBucketAclOutput"),
                 "GET /bucket?acl should be served by the GetBucketAcl stub");
         assertFalse(
-                response.body().contains("ListObjectsOutput"),
+                response.body().contains("ListBucketResult"),
                 "GET /bucket?acl must not fall through to the ListObjects catch-all");
     }
 
     /**
-     * Plain {@code GET /bucket} (no list-type=2, no sub-resource) still routes to ListObjects (v1).
+     * Plain {@code GET /bucket} (no list-type=2, no sub-resource) still routes to ListObjects (v1),
+     * which now returns a real {@code ListBucketResult} naming the bucket.
      */
     @Test
     void plainBucketGetRoutesToListObjects() throws Exception {
-        HttpResponse<String> response =
-                HttpClient.newHttpClient()
-                        .send(
-                                HttpRequest.newBuilder()
-                                        .uri(
-                                                URI.create(
-                                                        "http://localhost:"
-                                                                + cloudMock.port()
-                                                                + "/"
-                                                                + BUCKET))
-                                        .GET()
-                                        .build(),
-                                HttpResponse.BodyHandlers.ofString());
+        s3.createBucket(b -> b.bucket("plainget-bucket"));
+        HttpResponse<String> response = rawGet("/plainget-bucket");
 
         assertEquals(200, response.statusCode());
         assertTrue(
-                response.body().contains("ListObjectsOutput"),
-                "plain GET /bucket should be served by the ListObjects (v1) catch-all");
+                response.body().contains("<ListBucketResult"),
+                "plain GET /bucket should be served by the ListObjects (v1) stub");
+        assertTrue(
+                response.body().contains("<Name>plainget-bucket</Name>"),
+                "ListObjects (v1) should name the requested bucket");
+    }
+
+    private static HttpResponse<String> rawGet(String pathAndQuery) throws Exception {
+        return HttpClient.newHttpClient()
+                .send(
+                        HttpRequest.newBuilder()
+                                .uri(
+                                        URI.create(
+                                                "http://localhost:"
+                                                        + cloudMock.port()
+                                                        + pathAndQuery))
+                                .GET()
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString());
     }
 }

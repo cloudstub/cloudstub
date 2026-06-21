@@ -50,10 +50,9 @@ public final class StubResponse {
     }
 
     /**
-     * A {@code 200 OK} JSON response whose body is serialised from a JDK map/list/value tree. The
-     * engine performs the JSON encoding and string escaping, so handlers build the response from
-     * {@code Map}, {@code List}, {@code String}, and number/boolean values instead of concatenating
-     * JSON by hand.
+     * A {@code 200 OK} JSON response whose body is serialised from a JDK map/list/value tree
+     * ({@code Map}, {@code List}, {@code String}, number/boolean). The engine performs the JSON
+     * encoding and string escaping.
      *
      * @param body the response object; values must be JSON-serialisable JDK types
      * @throws IllegalArgumentException if {@code body} cannot be serialised to JSON
@@ -79,9 +78,8 @@ public final class StubResponse {
     }
 
     /**
-     * A {@code 200 OK} XML response whose body is rendered from an {@link XmlElement} tree. The
-     * engine performs the XML encoding and escaping, so handlers describe the element structure
-     * instead of concatenating XML by hand.
+     * A {@code 200 OK} XML response whose body is rendered from an {@link XmlElement} tree, which
+     * performs the XML encoding and escaping.
      */
     public static StubResponse xml(XmlElement root) {
         return new StubResponse(200, CONTENT_TYPE_XML, root.render(), Map.of());

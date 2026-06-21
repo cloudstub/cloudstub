@@ -23,10 +23,12 @@ dependencies {
     testImplementation libs.aws.sqs
     testImplementation libs.aws.sns
     testImplementation libs.aws.secretsmanager
+    testImplementation libs.aws.s3
     testImplementation libs.slf4j.simple
     // StatefulCrossSurfaceTest / ApiServerIntegrationTest need these discoverable via ServiceLoader.
     testRuntimeOnly project(':cloudstub-sqs')
     testRuntimeOnly project(':cloudstub-secretsmanager')
+    testRuntimeOnly project(':cloudstub-s3')
 
     integrationTestModuleJars project(':cloudstub-sqs')
     integrationTestModuleJars project(':cloudstub-sns')

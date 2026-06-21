@@ -2,6 +2,7 @@ package io.cloudstub.sqs;
 
 import io.cloudstub.core.spi.CloudStubContext;
 import io.cloudstub.core.spi.CloudStubService;
+import io.cloudstub.core.spi.Digest;
 import io.cloudstub.core.spi.Json;
 import io.cloudstub.core.spi.StateStore;
 import io.cloudstub.core.spi.StubRegistrar;
@@ -110,7 +111,7 @@ public class CloudStubSqsService implements CloudStubService {
         String id = UUID.randomUUID().toString();
         store.put(SqsKeys.messageKey(name, id), body);
         return StubResponse.json(
-                Json.object("MessageId", id, "MD5OfMessageBody", SqsHelpers.md5(body)));
+                Json.object("MessageId", id, "MD5OfMessageBody", Digest.md5Hex(body)));
     }
 
     private StubResponse receiveMessage(StubRequest req, StateStore store) {
@@ -135,7 +136,7 @@ public class CloudStubSqsService implements CloudStubService {
                             "MessageId", id,
                             "ReceiptHandle", id,
                             "Body", body,
-                            "MD5OfBody", SqsHelpers.md5(body)));
+                            "MD5OfBody", Digest.md5Hex(body)));
         }
         // AWS returns an empty object (no Messages field) when the queue is empty.
         if (messages.isEmpty()) {

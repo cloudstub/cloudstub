@@ -5,8 +5,7 @@ import java.util.Map;
 
 /**
  * Helpers for assembling JSON response bodies from plain JDK collections, to pass to {@link
- * StubResponse#json(Map)}. Lets JSON-protocol modules build a response object without hand-writing
- * JSON or each carrying a private map-builder. JDK-only; exposes no serialisation type.
+ * StubResponse#json(Map)}. JDK-only; exposes no serialisation type.
  */
 public final class Json {
 

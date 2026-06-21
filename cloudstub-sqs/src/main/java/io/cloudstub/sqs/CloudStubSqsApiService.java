@@ -1,6 +1,7 @@
 package io.cloudstub.sqs;
 
 import io.cloudstub.core.spi.CloudStubApiService;
+import io.cloudstub.core.spi.Digest;
 import io.cloudstub.core.spi.HttpMethod;
 import io.cloudstub.core.spi.StateStore;
 import io.cloudstub.core.spi.restapi.ApiParam;
@@ -90,7 +91,7 @@ public class CloudStubSqsApiService implements CloudStubApiService {
         String body = req.queryParams().getOrDefault("body", "");
         String id = UUID.randomUUID().toString();
         store.put(SqsKeys.messageKey(queue, id), body);
-        return new ApiResponse(200, Map.of("messageId", id, "md5OfBody", SqsHelpers.md5(body)));
+        return new ApiResponse(200, Map.of("messageId", id, "md5OfBody", Digest.md5Hex(body)));
     }
 
     private ApiResponse receiveMessage(ApiRequest req) {
