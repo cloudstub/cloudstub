@@ -8,8 +8,7 @@ import java.util.UUID;
  * Builds SNS AWS Query (XML) responses from {@link XmlElement} trees. Every response carries the
  * SNS namespace and a {@code ResponseMetadata/RequestId}; operations with output wrap their result
  * in an {@code <Action>Result} element, those without (e.g. {@code DeleteTopic}) carry only the
- * metadata. XML escaping is performed by the engine ({@code XmlElement}), so this class never
- * escapes by hand.
+ * metadata. {@link XmlElement} performs all XML escaping.
  */
 final class SnsXml {
 

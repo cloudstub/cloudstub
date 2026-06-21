@@ -16,7 +16,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.Message;
@@ -36,6 +42,7 @@ class StatefulCrossSurfaceTest {
     private int apiPort;
     private SqsClient sqs;
     private SecretsManagerClient secrets;
+    private S3Client s3;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -62,10 +69,22 @@ class StatefulCrossSurfaceTest {
                         .credentialsProvider(AnonymousCredentialsProvider.create())
                         .region(Region.US_EAST_1)
                         .build();
+        s3 =
+                S3Client.builder()
+                        .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+                        .serviceConfiguration(
+                                S3Configuration.builder()
+                                        .pathStyleAccessEnabled(true)
+                                        .checksumValidationEnabled(false)
+                                        .build())
+                        .credentialsProvider(AnonymousCredentialsProvider.create())
+                        .region(Region.US_EAST_1)
+                        .build();
     }
 
     @AfterEach
     void tearDown() {
+        s3.close();
         secrets.close();
         sqs.close();
         localServer.stop();
@@ -136,6 +155,36 @@ class StatefulCrossSurfaceTest {
                 "from-rest",
                 secrets.getSecretValue(b -> b.secretId("db-password")).secretString(),
                 "AWS SDK must see the REST-created secret");
+    }
+
+    @Test
+    void objectPutViaAwsSdkIsVisibleOnTheRestApi() throws Exception {
+        s3.createBucket(b -> b.bucket("assets"));
+        s3.putObject(b -> b.bucket("assets").key("readme.txt"), RequestBody.fromString("from-sdk"));
+
+        JsonNode body = getJson("/api/s3/get-object?bucket=assets&key=readme.txt");
+        assertEquals(
+                "from-sdk",
+                body.get("body").asText(),
+                "REST surface must see the SDK-uploaded object");
+    }
+
+    @Test
+    void objectPutViaRestApiIsVisibleToTheAwsSdk() throws Exception {
+        http.send(
+                HttpRequest.newBuilder()
+                        .uri(
+                                URI.create(
+                                        "http://localhost:"
+                                                + apiPort
+                                                + "/api/s3/put-object?bucket=docs&key=note.txt&body=from-rest"))
+                        .PUT(HttpRequest.BodyPublishers.noBody())
+                        .build(),
+                HttpResponse.BodyHandlers.ofString());
+
+        ResponseBytes<GetObjectResponse> got =
+                s3.getObject(b -> b.bucket("docs").key("note.txt"), ResponseTransformer.toBytes());
+        assertEquals("from-rest", got.asUtf8String(), "AWS SDK must see the REST-uploaded object");
     }
 
     // send-message is registered as POST; the API server reads params from the query string, so the

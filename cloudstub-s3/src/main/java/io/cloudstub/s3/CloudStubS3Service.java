@@ -2,19 +2,50 @@ package io.cloudstub.s3;
 
 import io.cloudstub.core.spi.CloudStubContext;
 import io.cloudstub.core.spi.CloudStubService;
+import io.cloudstub.core.spi.Digest;
 import io.cloudstub.core.spi.HttpMethod;
+import io.cloudstub.core.spi.Json;
+import io.cloudstub.core.spi.StateStore;
 import io.cloudstub.core.spi.StubRegistrar;
+import io.cloudstub.core.spi.StubRequest;
+import io.cloudstub.core.spi.StubResponse;
 import io.cloudstub.core.spi.StubTemplates;
+import io.cloudstub.core.spi.XmlElement;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * CloudStub service module for S3.
  *
- * <p>Uses the REST path protocol: each operation is matched by HTTP method and a path regex and
- * served from a Handlebars template in {@code src/main/resources/templates/}.
+ * <p>Uses the REST path protocol: each operation is matched by HTTP method and a path regex.
+ *
+ * <p>The bucket and object operations are <strong>state-backed</strong>: each is a {@link
+ * io.cloudstub.core.spi.StubHandler} that reads and writes the shared {@link StateStore}, so an
+ * object {@code PutObject}'d in one call is returned by a later {@code GetObject} and reflected in
+ * {@code ListObjectsV2}/{@code ListObjects}. State is keyed under the {@code s3/} prefix (see
+ * {@link S3Keys}):
+ *
+ * <ul>
+ *   <li>{@code s3/buckets/{bucket}} → bucket metadata (marks the bucket's existence)
+ *   <li>{@code s3/buckets/{bucket}/objects/{key}} → the object record (body, content type, ETag)
+ * </ul>
+ *
+ * <p>The remaining sub-resource operations (ACLs, tagging, lifecycle, multipart, …) are served from
+ * static Handlebars templates in {@code src/main/resources/templates/}: well-formed but stateless
+ * placeholder responses.
+ *
+ * <p>Not simulated: multipart upload lifecycle, versioning, object metadata beyond content type,
+ * and any sub-resource configuration.
  */
 public class CloudStubS3Service implements CloudStubService {
 
     private static final String SERVICE_ID = "s3";
+    private static final String XMLNS = "http://s3.amazonaws.com/doc/2006-03-01/";
+    private static final String OWNER_ID = "000000000000000000000000000000cloudstub";
+    private static final Pattern KEY_ELEMENT = Pattern.compile("<Key>(.*?)</Key>");
 
     @Override
     public String serviceId() {
@@ -31,10 +62,7 @@ public class CloudStubS3Service implements CloudStubService {
         // this
         // catch-all would shadow them. Same ordering rationale as the CreateBucket/DeleteBucket
         // catch-alls.
-        registrar.registerRestStub(
-                HttpMethod.GET,
-                "/[^/]+",
-                StubTemplates.load(CloudStubS3Service.class, "ListObjects"));
+        registrar.registerRestStub(HttpMethod.GET, "/[^/]+", this::listObjects);
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+/.+?x-id=AbortMultipartUpload",
@@ -47,10 +75,7 @@ public class CloudStubS3Service implements CloudStubService {
                 HttpMethod.PUT,
                 "/[^/]+/.+?x-id=CopyObject",
                 StubTemplates.load(CloudStubS3Service.class, "CopyObject"));
-        registrar.registerRestStub(
-                HttpMethod.PUT,
-                "/[^/]+",
-                StubTemplates.load(CloudStubS3Service.class, "CreateBucket"));
+        registrar.registerRestStub(HttpMethod.PUT, "/[^/]+", this::createBucket);
         registrar.registerRestStub(
                 HttpMethod.POST,
                 "/[^/]+?metadataConfiguration",
@@ -68,10 +93,7 @@ public class CloudStubS3Service implements CloudStubService {
                 HttpMethod.GET,
                 "/[^/]+?session",
                 StubTemplates.load(CloudStubS3Service.class, "CreateSession"));
-        registrar.registerRestStub(
-                HttpMethod.DELETE,
-                "/[^/]+",
-                StubTemplates.load(CloudStubS3Service.class, "DeleteBucket"));
+        registrar.registerRestStub(HttpMethod.DELETE, "/[^/]+", this::deleteBucket);
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?analytics",
@@ -132,18 +154,12 @@ public class CloudStubS3Service implements CloudStubService {
                 StubTemplates.load(CloudStubS3Service.class, "DeleteBucketWebsite"));
         // AWS SDK v2 omits ?x-id=DeleteObject when endpointOverride is set; use a plain catch-all.
         // Sub-resource stubs (DeleteObjectTagging etc.) are registered later and win via LIFO.
-        registrar.registerRestStub(
-                HttpMethod.DELETE,
-                "/[^/]+/.+",
-                StubTemplates.load(CloudStubS3Service.class, "DeleteObject"));
+        registrar.registerRestStub(HttpMethod.DELETE, "/[^/]+/.+", this::deleteObject);
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+/.+?tagging",
                 StubTemplates.load(CloudStubS3Service.class, "DeleteObjectTagging"));
-        registrar.registerRestStub(
-                HttpMethod.POST,
-                "/[^/]+?delete",
-                StubTemplates.load(CloudStubS3Service.class, "DeleteObjects"));
+        registrar.registerRestStub(HttpMethod.POST, "/[^/]+?delete", this::deleteObjects);
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?publicAccessBlock",
@@ -245,10 +261,7 @@ public class CloudStubS3Service implements CloudStubService {
         // AWS SDK v2 omits ?x-id=GetObject when endpointOverride is set; use a plain catch-all.
         // Sub-resource stubs (GetObjectAcl, GetObjectTagging etc.) are registered later and win via
         // LIFO.
-        registrar.registerRestStub(
-                HttpMethod.GET,
-                "/[^/]+/.+",
-                StubTemplates.load(CloudStubS3Service.class, "GetObject"));
+        registrar.registerRestStub(HttpMethod.GET, "/[^/]+/.+", this::getObject);
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+/.+?acl",
@@ -281,14 +294,8 @@ public class CloudStubS3Service implements CloudStubService {
                 HttpMethod.GET,
                 "/[^/]+?publicAccessBlock",
                 StubTemplates.load(CloudStubS3Service.class, "GetPublicAccessBlock"));
-        registrar.registerRestStub(
-                HttpMethod.HEAD,
-                "/[^/]+",
-                StubTemplates.load(CloudStubS3Service.class, "HeadBucket"));
-        registrar.registerRestStub(
-                HttpMethod.HEAD,
-                "/[^/]+/.+",
-                StubTemplates.load(CloudStubS3Service.class, "HeadObject"));
+        registrar.registerRestStub(HttpMethod.HEAD, "/[^/]+", this::headBucket);
+        registrar.registerRestStub(HttpMethod.HEAD, "/[^/]+/.+", this::headObject);
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?analytics&x-id=ListBucketAnalyticsConfigurations",
@@ -306,10 +313,9 @@ public class CloudStubS3Service implements CloudStubService {
                 HttpMethod.GET,
                 "/[^/]+?metrics&x-id=ListBucketMetricsConfigurations",
                 StubTemplates.load(CloudStubS3Service.class, "ListBucketMetricsConfigurations"));
-        registrar.registerRestStub(
-                HttpMethod.GET,
-                "/?x-id=ListBuckets",
-                StubTemplates.load(CloudStubS3Service.class, "ListBuckets"));
+        // The AWS SDK sends ListBuckets as GET / (it omits ?x-id=ListBuckets when the endpoint is
+        // overridden), so match the root path with any or no query string.
+        registrar.registerRestStub(HttpMethod.GET, "/(\\?.*)?", this::listBuckets);
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/?x-id=ListDirectoryBuckets",
@@ -327,9 +333,7 @@ public class CloudStubS3Service implements CloudStubService {
         // max-keys,
         // continuation-token, etc. still route here instead of falling through to the v1 catch-all.
         registrar.registerRestStub(
-                HttpMethod.GET,
-                "/[^/]+\\?(.*&)?list-type=2(&.*)?",
-                StubTemplates.load(CloudStubS3Service.class, "ListObjectsV2"));
+                HttpMethod.GET, "/[^/]+\\?(.*&)?list-type=2(&.*)?", this::listObjectsV2);
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+/.+?x-id=ListParts",
@@ -414,10 +418,7 @@ public class CloudStubS3Service implements CloudStubService {
         // AWS SDK v2 omits ?x-id=PutObject when endpointOverride is set; use a plain catch-all.
         // Sub-resource stubs (PutObjectAcl, PutObjectTagging etc.) are registered later and win via
         // LIFO.
-        registrar.registerRestStub(
-                HttpMethod.PUT,
-                "/[^/]+/.+",
-                StubTemplates.load(CloudStubS3Service.class, "PutObject"));
+        registrar.registerRestStub(HttpMethod.PUT, "/[^/]+/.+", this::putObject);
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+/.+?acl",
@@ -481,5 +482,201 @@ public class CloudStubS3Service implements CloudStubService {
                 HttpMethod.POST,
                 "/WriteGetObjectResponse",
                 StubTemplates.load(CloudStubS3Service.class, "WriteGetObjectResponse"));
+    }
+
+    // --- Bucket operations -------------------------------------------------------------------
+
+    private StubResponse createBucket(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        store.put(S3Keys.bucketKey(bucket), Json.object("createdAt", Instant.now().toString()));
+        return StubResponse.of(200, "application/xml", "").withHeader("Location", "/" + bucket);
+    }
+
+    private StubResponse deleteBucket(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        store.delete(S3Keys.bucketKey(bucket));
+        store.clear(S3Keys.objectPrefix(bucket));
+        return StubResponse.of(204, "application/xml", "");
+    }
+
+    private StubResponse headBucket(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        if (store.get(S3Keys.bucketKey(bucket)) == null) {
+            return StubResponse.of(404, "application/xml", "");
+        }
+        return StubResponse.of(200, "application/xml", "")
+                .withHeader("x-amz-bucket-region", "us-east-1");
+    }
+
+    private StubResponse listBuckets(StubRequest req, StateStore store) {
+        XmlElement buckets = XmlElement.of("Buckets");
+        for (String key : store.list(S3Keys.BUCKETS_PREFIX)) {
+            if (!S3Keys.isBucketMarkerKey(key)) {
+                continue;
+            }
+            Object record = store.get(key);
+            if (record == null) {
+                continue;
+            }
+            String name = key.substring(S3Keys.BUCKETS_PREFIX.length());
+            buckets.child(
+                    XmlElement.of("Bucket")
+                            .child("Name", name)
+                            .child("CreationDate", field(record, "createdAt")));
+        }
+        XmlElement root =
+                XmlElement.of("ListAllMyBucketsResult")
+                        .attr("xmlns", XMLNS)
+                        .child(
+                                XmlElement.of("Owner")
+                                        .child("ID", OWNER_ID)
+                                        .child("DisplayName", "cloudstub"))
+                        .child(buckets);
+        return StubResponse.xml(root);
+    }
+
+    // --- Object operations -------------------------------------------------------------------
+
+    private StubResponse putObject(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        String key = S3Helpers.objectKey(req.path());
+        String body = req.body();
+        String contentType = req.header("Content-Type");
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+        String etag = Digest.md5Hex(body);
+        int size = body.getBytes(StandardCharsets.UTF_8).length;
+        store.put(
+                S3Keys.objectKey(bucket, key),
+                Json.object(
+                        "body", body,
+                        "contentType", contentType,
+                        "etag", etag,
+                        "size", size,
+                        "lastModified", Instant.now().toString()));
+        return StubResponse.of(200, "application/xml", "").withHeader("ETag", quote(etag));
+    }
+
+    private StubResponse getObject(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        String key = S3Helpers.objectKey(req.path());
+        Object record = store.get(S3Keys.objectKey(bucket, key));
+        if (record == null) {
+            return noSuchKey(key);
+        }
+        return StubResponse.of(200, field(record, "contentType"), field(record, "body"))
+                .withHeader("ETag", quote(field(record, "etag")));
+    }
+
+    private StubResponse headObject(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        String key = S3Helpers.objectKey(req.path());
+        Object record = store.get(S3Keys.objectKey(bucket, key));
+        if (record == null) {
+            return StubResponse.of(404, "application/xml", "");
+        }
+        return StubResponse.of(200, field(record, "contentType"), "")
+                .withHeader("ETag", quote(field(record, "etag")))
+                .withHeader("Content-Length", field(record, "size"));
+    }
+
+    private StubResponse deleteObject(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        String key = S3Helpers.objectKey(req.path());
+        store.delete(S3Keys.objectKey(bucket, key));
+        return StubResponse.of(204, "application/xml", "");
+    }
+
+    private StubResponse deleteObjects(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        XmlElement result = XmlElement.of("DeleteResult").attr("xmlns", XMLNS);
+        Matcher m = KEY_ELEMENT.matcher(req.body());
+        while (m.find()) {
+            // The <Key> text is XML-escaped in the request body; unescape it so it matches the key
+            // PutObject stored (object records are keyed by the decoded, unescaped key).
+            String key = unescapeXml(m.group(1));
+            store.delete(S3Keys.objectKey(bucket, key));
+            result.child(XmlElement.of("Deleted").child("Key", key));
+        }
+        return StubResponse.xml(result);
+    }
+
+    private StubResponse listObjects(StubRequest req, StateStore store) {
+        return listResult(req, store, false);
+    }
+
+    private StubResponse listObjectsV2(StubRequest req, StateStore store) {
+        return listResult(req, store, true);
+    }
+
+    private StubResponse listResult(StubRequest req, StateStore store, boolean v2) {
+        String bucket = S3Helpers.bucket(req.path());
+        String prefix = req.queryParam("prefix");
+        XmlElement root =
+                XmlElement.of("ListBucketResult")
+                        .attr("xmlns", XMLNS)
+                        .child("Name", bucket)
+                        .child("Prefix", prefix == null ? "" : prefix)
+                        .child("MaxKeys", "1000")
+                        .child("IsTruncated", "false");
+        int count = 0;
+        for (String stateKey : store.list(S3Keys.objectPrefix(bucket))) {
+            String key = S3Keys.objectKeyFromStateKey(bucket, stateKey);
+            if (prefix != null && !prefix.isEmpty() && !key.startsWith(prefix)) {
+                continue;
+            }
+            Object record = store.get(stateKey);
+            if (record == null) {
+                continue;
+            }
+            root.child(
+                    XmlElement.of("Contents")
+                            .child("Key", key)
+                            .child("LastModified", field(record, "lastModified"))
+                            .child("ETag", quote(field(record, "etag")))
+                            .child("Size", field(record, "size"))
+                            .child("StorageClass", "STANDARD"));
+            count++;
+        }
+        if (v2) {
+            root.child("KeyCount", String.valueOf(count));
+        }
+        return StubResponse.xml(root);
+    }
+
+    private static StubResponse noSuchKey(String key) {
+        XmlElement error =
+                XmlElement.of("Error")
+                        .child("Code", "NoSuchKey")
+                        .child("Message", "The specified key does not exist.")
+                        .child("Key", key);
+        return StubResponse.of(404, "application/xml", error.render());
+    }
+
+    /** Reads a field from a stored object/bucket record as a string, or {@code ""} if absent. */
+    private static String field(Object record, String name) {
+        if (record instanceof Map<?, ?> map) {
+            Object value = map.get(name);
+            if (value != null) {
+                return value.toString();
+            }
+        }
+        return "";
+    }
+
+    private static String quote(String etag) {
+        return "\"" + etag + "\"";
+    }
+
+    private static String unescapeXml(String s) {
+        if (s.indexOf('&') < 0) {
+            return s;
+        }
+        return s.replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"")
+                .replace("&apos;", "'")
+                .replace("&amp;", "&");
     }
 }

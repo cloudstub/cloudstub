@@ -3,9 +3,7 @@ package io.cloudstub.core.internal;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
 import com.github.tomakehurst.wiremock.extension.TemplateHelperProviderExtension;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import io.cloudstub.core.spi.Digest;
 import java.util.Map;
 
 /**
@@ -32,16 +30,6 @@ public class Md5HandlebarsHelper implements TemplateHelperProviderExtension, Hel
         if (context == null) {
             return "";
         }
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] hash = md.digest(context.toString().getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder(32);
-            for (byte b : hash) {
-                hex.append(String.format("%02x", b));
-            }
-            return hex.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        return Digest.md5Hex(context.toString());
     }
 }

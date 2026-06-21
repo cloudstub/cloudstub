@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A builder for an XML element tree, used to assemble AWS Query (XML) response bodies without
- * hand-concatenating strings. The engine performs all XML escaping of text and attribute values, so
- * a handler describes the structure and never escapes by hand.
+ * A builder for an XML element tree for AWS Query (XML) response bodies. All text and attribute
+ * values are XML-escaped on render.
  *
  * <p>Pass the root element to {@link StubResponse#xml(XmlElement)} to produce a response. Elements
  * render as {@code <name attr="v">...</name>}; an element with neither text nor children renders as

@@ -293,7 +293,8 @@ stubs, so a message sent through the AWS SDK is returned by `GET /api/sqs/receiv
 and vice versa. This is one state with two representations — the AWS wire protocol on the mock port, a friendly JSON
 view on the API port. Modules share the key scheme between their stub and API surfaces (e.g. `SqsKeys`) so the two
 cannot drift. Reference impls: `CloudStubSqsApiService`, `CloudStubS3ApiService`, `CloudStubSecretsManagerApiService`
-(S3 and Secrets Manager API surfaces are still synthetic pending their own state-backing).
+(the Secrets Manager API surface is still synthetic pending its own state-backing; SQS and S3 are state-backed via
+`SqsKeys` / `S3Keys`).
 
 ## SPI contract
 
