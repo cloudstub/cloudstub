@@ -23,6 +23,7 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.Tag;
 
 class CloudStubS3ServiceTest {
 
@@ -185,6 +186,154 @@ class CloudStubS3ServiceTest {
         s3.deleteBucket(b -> b.bucket(bucket));
 
         assertThrows(NoSuchBucketException.class, () -> s3.headBucket(b -> b.bucket(bucket)));
+    }
+
+    @Test
+    void objectTaggingRoundTrips() {
+        String bucket = "objtag-bucket";
+        String key = "tagged.txt";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("x"));
+
+        s3.putObjectTagging(
+                b ->
+                        b.bucket(bucket)
+                                .key(key)
+                                .tagging(
+                                        t ->
+                                                t.tagSet(
+                                                        Tag.builder()
+                                                                .key("env")
+                                                                .value("prod")
+                                                                .build(),
+                                                        Tag.builder()
+                                                                .key("team")
+                                                                .value("a&b")
+                                                                .build())));
+
+        assertEquals(
+                java.util.Map.of("env", "prod", "team", "a&b"),
+                s3.getObjectTagging(b -> b.bucket(bucket).key(key)).tagSet().stream()
+                        .collect(java.util.stream.Collectors.toMap(Tag::key, Tag::value)));
+
+        s3.deleteObjectTagging(b -> b.bucket(bucket).key(key));
+        assertTrue(s3.getObjectTagging(b -> b.bucket(bucket).key(key)).tagSet().isEmpty());
+    }
+
+    @Test
+    void untaggedObjectReturnsEmptyTagSet() {
+        String bucket = "objnotag-bucket";
+        String key = "plain.txt";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("x"));
+
+        assertTrue(s3.getObjectTagging(b -> b.bucket(bucket).key(key)).tagSet().isEmpty());
+    }
+
+    @Test
+    void bucketTaggingRoundTrips() {
+        String bucket = "buckettag-bucket";
+        s3.createBucket(b -> b.bucket(bucket));
+
+        s3.putBucketTagging(
+                b ->
+                        b.bucket(bucket)
+                                .tagging(
+                                        t ->
+                                                t.tagSet(
+                                                        Tag.builder()
+                                                                .key("owner")
+                                                                .value("ops")
+                                                                .build())));
+
+        assertEquals(
+                java.util.Map.of("owner", "ops"),
+                s3.getBucketTagging(b -> b.bucket(bucket)).tagSet().stream()
+                        .collect(java.util.stream.Collectors.toMap(Tag::key, Tag::value)));
+
+        s3.deleteBucketTagging(b -> b.bucket(bucket));
+        assertNoSuchTagSet(() -> s3.getBucketTagging(b -> b.bucket(bucket)));
+    }
+
+    @Test
+    void untaggedBucketReturns404NoSuchTagSet() {
+        String bucket = "bucketnotag-bucket";
+        s3.createBucket(b -> b.bucket(bucket));
+
+        assertNoSuchTagSet(() -> s3.getBucketTagging(b -> b.bucket(bucket)));
+    }
+
+    @Test
+    void deletingObjectClearsItsTags() {
+        String bucket = "objtagclear-bucket";
+        String key = "k.txt";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("x"));
+        s3.putObjectTagging(
+                b ->
+                        b.bucket(bucket)
+                                .key(key)
+                                .tagging(t -> t.tagSet(Tag.builder().key("a").value("1").build())));
+        s3.deleteObject(b -> b.bucket(bucket).key(key));
+
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("y"));
+        assertTrue(
+                s3.getObjectTagging(b -> b.bucket(bucket).key(key)).tagSet().isEmpty(),
+                "a re-created object must not inherit the deleted object's tags");
+    }
+
+    @Test
+    void putObjectOverwriteClearsTags() {
+        String bucket = "objoverwrite-bucket";
+        String key = "k.txt";
+        s3.createBucket(b -> b.bucket(bucket));
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("v1"));
+        s3.putObjectTagging(
+                b ->
+                        b.bucket(bucket)
+                                .key(key)
+                                .tagging(t -> t.tagSet(Tag.builder().key("a").value("1").build())));
+
+        // Overwrite the object without deleting it first; real S3 drops the prior tag set.
+        s3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString("v2"));
+        assertTrue(s3.getObjectTagging(b -> b.bucket(bucket).key(key)).tagSet().isEmpty());
+    }
+
+    @Test
+    void taggingMissingObjectThrowsNoSuchKey() {
+        String bucket = "objtagmissing-bucket";
+        s3.createBucket(b -> b.bucket(bucket));
+
+        assertThrows(
+                NoSuchKeyException.class,
+                () -> s3.getObjectTagging(b -> b.bucket(bucket).key("nope")));
+        assertThrows(
+                NoSuchKeyException.class,
+                () ->
+                        s3.putObjectTagging(
+                                b ->
+                                        b.bucket(bucket)
+                                                .key("nope")
+                                                .tagging(
+                                                        t ->
+                                                                t.tagSet(
+                                                                        Tag.builder()
+                                                                                .key("a")
+                                                                                .value("1")
+                                                                                .build()))));
+    }
+
+    @Test
+    void bucketTaggingOnMissingBucketThrowsNoSuchBucket() {
+        assertThrows(
+                NoSuchBucketException.class,
+                () -> s3.getBucketTagging(b -> b.bucket("never-created-tag-bucket")));
+    }
+
+    private static void assertNoSuchTagSet(org.junit.jupiter.api.function.Executable call) {
+        S3Exception e = assertThrows(S3Exception.class, call);
+        assertEquals(404, e.statusCode());
+        assertEquals("NoSuchTagSet", e.awsErrorDetails().errorCode());
     }
 
     /**

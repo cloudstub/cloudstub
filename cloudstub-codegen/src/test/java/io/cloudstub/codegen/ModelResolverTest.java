@@ -29,16 +29,12 @@ class ModelResolverTest {
                 HttpModelResolver.class, ModelResolver.of("http://example.com/model.json"));
     }
 
-    // --- HttpModelResolver ---
-
     @Test
     void httpResolverAlwaysThrows() {
         assertThrows(
                 IllegalArgumentException.class,
                 ModelResolver.of("http://example.com/model.json")::resolve);
     }
-
-    // --- LocalModelResolver ---
 
     @Test
     void localResolverRejectsWrongExtension() throws Exception {

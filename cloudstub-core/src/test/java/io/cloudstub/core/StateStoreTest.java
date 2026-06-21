@@ -16,8 +16,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 class StateStoreTest {
 
-    // --- InMemoryStateStore ---
-
     @Test
     void putAndGet() {
         StateStore store = new InMemoryStateStore();
@@ -106,8 +104,6 @@ class StateStoreTest {
         assertTrue(store.list("s3/").isEmpty());
     }
 
-    // --- JsonFileStateStore ---
-
     @Test
     void jsonStoreRoundTripsData(@TempDir Path tmp) {
         StateStore store = new JsonFileStateStore(tmp);
@@ -184,8 +180,6 @@ class StateStoreTest {
         StateStore store = new InMemoryStateStore();
         assertThrows(NullPointerException.class, () -> store.put(null, "v"));
     }
-
-    // --- AppendLogStateStore (issue 0047) ---
 
     @Test
     void appendLogRoundTripsData(@TempDir Path tmp) {
@@ -426,8 +420,6 @@ class StateStoreTest {
             this.receiptHandle = receiptHandle;
         }
     }
-
-    // --- CloudStub integration ---
 
     @Test
     void cloudMockExposesStateStoreAfterStart() {
