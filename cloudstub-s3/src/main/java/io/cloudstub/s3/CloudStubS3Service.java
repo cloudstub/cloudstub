@@ -13,6 +13,7 @@ import io.cloudstub.core.spi.StubTemplates;
 import io.cloudstub.core.spi.XmlElement;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,23 +23,26 @@ import java.util.regex.Pattern;
  *
  * <p>Uses the REST path protocol: each operation is matched by HTTP method and a path regex.
  *
- * <p>The bucket and object operations are <strong>state-backed</strong>: each is a {@link
- * io.cloudstub.core.spi.StubHandler} that reads and writes the shared {@link StateStore}, so an
- * object {@code PutObject}'d in one call is returned by a later {@code GetObject} and reflected in
- * {@code ListObjectsV2}/{@code ListObjects}. State is keyed under the {@code s3/} prefix (see
- * {@link S3Keys}):
+ * <p>The bucket and object operations, and object/bucket tagging, are
+ * <strong>state-backed</strong>: each is a {@link io.cloudstub.core.spi.StubHandler} that reads and
+ * writes the shared {@link StateStore}, so an object {@code PutObject}'d in one call is returned by
+ * a later {@code GetObject} and reflected in {@code ListObjectsV2}/{@code ListObjects}, and tags
+ * set by {@code PutObjectTagging} are returned by {@code GetObjectTagging}. State is keyed under
+ * the {@code s3/} prefix (see {@link S3Keys}):
  *
  * <ul>
  *   <li>{@code s3/buckets/{bucket}} → bucket metadata (marks the bucket's existence)
  *   <li>{@code s3/buckets/{bucket}/objects/{key}} → the object record (body, content type, ETag)
+ *   <li>{@code s3/tags/objects/{bucket}/{key}} and {@code s3/tags/buckets/{bucket}} → tag sets
  * </ul>
  *
- * <p>The remaining sub-resource operations (ACLs, tagging, lifecycle, multipart, …) are served from
- * static Handlebars templates in {@code src/main/resources/templates/}: well-formed but stateless
+ * <p>The remaining sub-resource operations (ACLs, lifecycle, multipart, …) are served from static
+ * Handlebars templates in {@code src/main/resources/templates/}: well-formed but stateless
  * placeholder responses.
  *
- * <p>Not simulated: multipart upload lifecycle, versioning, object metadata beyond content type,
- * and any sub-resource configuration.
+ * <p>Not simulated: multipart upload lifecycle, object versioning, tag validation (the max-10-tags
+ * and key/value length limits real S3 enforces), object metadata beyond content type, and any
+ * sub-resource configuration.
  */
 public class CloudStubS3Service implements CloudStubService {
 
@@ -46,6 +50,8 @@ public class CloudStubS3Service implements CloudStubService {
     private static final String XMLNS = "http://s3.amazonaws.com/doc/2006-03-01/";
     private static final String OWNER_ID = "000000000000000000000000000000cloudstub";
     private static final Pattern KEY_ELEMENT = Pattern.compile("<Key>(.*?)</Key>");
+    private static final Pattern TAG_ELEMENT =
+            Pattern.compile("<Tag>\\s*<Key>(.*?)</Key>\\s*<Value>(.*?)</Value>\\s*</Tag>");
 
     @Override
     public String serviceId() {
@@ -144,10 +150,7 @@ public class CloudStubS3Service implements CloudStubService {
                 HttpMethod.DELETE,
                 "/[^/]+?replication",
                 StubTemplates.load(CloudStubS3Service.class, "DeleteBucketReplication"));
-        registrar.registerRestStub(
-                HttpMethod.DELETE,
-                "/[^/]+?tagging",
-                StubTemplates.load(CloudStubS3Service.class, "DeleteBucketTagging"));
+        registrar.registerRestStub(HttpMethod.DELETE, "/[^/]+?tagging", this::deleteBucketTagging);
         registrar.registerRestStub(
                 HttpMethod.DELETE,
                 "/[^/]+?website",
@@ -156,9 +159,7 @@ public class CloudStubS3Service implements CloudStubService {
         // Sub-resource stubs (DeleteObjectTagging etc.) are registered later and win via LIFO.
         registrar.registerRestStub(HttpMethod.DELETE, "/[^/]+/.+", this::deleteObject);
         registrar.registerRestStub(
-                HttpMethod.DELETE,
-                "/[^/]+/.+?tagging",
-                StubTemplates.load(CloudStubS3Service.class, "DeleteObjectTagging"));
+                HttpMethod.DELETE, "/[^/]+/.+?tagging", this::deleteObjectTagging);
         registrar.registerRestStub(HttpMethod.POST, "/[^/]+?delete", this::deleteObjects);
         registrar.registerRestStub(
                 HttpMethod.DELETE,
@@ -246,10 +247,7 @@ public class CloudStubS3Service implements CloudStubService {
                 HttpMethod.GET,
                 "/[^/]+?requestPayment",
                 StubTemplates.load(CloudStubS3Service.class, "GetBucketRequestPayment"));
-        registrar.registerRestStub(
-                HttpMethod.GET,
-                "/[^/]+?tagging",
-                StubTemplates.load(CloudStubS3Service.class, "GetBucketTagging"));
+        registrar.registerRestStub(HttpMethod.GET, "/[^/]+?tagging", this::getBucketTagging);
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+?versioning",
@@ -282,10 +280,7 @@ public class CloudStubS3Service implements CloudStubService {
                 HttpMethod.GET,
                 "/[^/]+/.+?retention",
                 StubTemplates.load(CloudStubS3Service.class, "GetObjectRetention"));
-        registrar.registerRestStub(
-                HttpMethod.GET,
-                "/[^/]+/.+?tagging",
-                StubTemplates.load(CloudStubS3Service.class, "GetObjectTagging"));
+        registrar.registerRestStub(HttpMethod.GET, "/[^/]+/.+?tagging", this::getObjectTagging);
         registrar.registerRestStub(
                 HttpMethod.GET,
                 "/[^/]+/.+?torrent",
@@ -403,10 +398,7 @@ public class CloudStubS3Service implements CloudStubService {
                 HttpMethod.PUT,
                 "/[^/]+?requestPayment",
                 StubTemplates.load(CloudStubS3Service.class, "PutBucketRequestPayment"));
-        registrar.registerRestStub(
-                HttpMethod.PUT,
-                "/[^/]+?tagging",
-                StubTemplates.load(CloudStubS3Service.class, "PutBucketTagging"));
+        registrar.registerRestStub(HttpMethod.PUT, "/[^/]+?tagging", this::putBucketTagging);
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?versioning",
@@ -435,10 +427,7 @@ public class CloudStubS3Service implements CloudStubService {
                 HttpMethod.PUT,
                 "/[^/]+/.+?retention",
                 StubTemplates.load(CloudStubS3Service.class, "PutObjectRetention"));
-        registrar.registerRestStub(
-                HttpMethod.PUT,
-                "/[^/]+/.+?tagging",
-                StubTemplates.load(CloudStubS3Service.class, "PutObjectTagging"));
+        registrar.registerRestStub(HttpMethod.PUT, "/[^/]+/.+?tagging", this::putObjectTagging);
         registrar.registerRestStub(
                 HttpMethod.PUT,
                 "/[^/]+?publicAccessBlock",
@@ -496,6 +485,8 @@ public class CloudStubS3Service implements CloudStubService {
         String bucket = S3Helpers.bucket(req.path());
         store.delete(S3Keys.bucketKey(bucket));
         store.clear(S3Keys.objectPrefix(bucket));
+        store.clear(S3Keys.objectTagsPrefix(bucket));
+        store.delete(S3Keys.bucketTagsKey(bucket));
         return StubResponse.of(204, "application/xml", "");
     }
 
@@ -585,6 +576,7 @@ public class CloudStubS3Service implements CloudStubService {
         String bucket = S3Helpers.bucket(req.path());
         String key = S3Helpers.objectKey(req.path());
         store.delete(S3Keys.objectKey(bucket, key));
+        store.delete(S3Keys.objectTagsKey(bucket, key));
         return StubResponse.of(204, "application/xml", "");
     }
 
@@ -597,6 +589,7 @@ public class CloudStubS3Service implements CloudStubService {
             // PutObject stored (object records are keyed by the decoded, unescaped key).
             String key = unescapeXml(m.group(1));
             store.delete(S3Keys.objectKey(bucket, key));
+            store.delete(S3Keys.objectTagsKey(bucket, key));
             result.child(XmlElement.of("Deleted").child("Key", key));
         }
         return StubResponse.xml(result);
@@ -643,6 +636,85 @@ public class CloudStubS3Service implements CloudStubService {
             root.child("KeyCount", String.valueOf(count));
         }
         return StubResponse.xml(root);
+    }
+
+    // --- Tagging -----------------------------------------------------------------------------
+
+    private StubResponse putObjectTagging(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        String key = S3Helpers.objectKey(req.path());
+        store.put(S3Keys.objectTagsKey(bucket, key), parseTagSet(req.body()));
+        return StubResponse.of(200, "application/xml", "");
+    }
+
+    private StubResponse getObjectTagging(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        String key = S3Helpers.objectKey(req.path());
+        return tagSetResponse(store.get(S3Keys.objectTagsKey(bucket, key)));
+    }
+
+    private StubResponse deleteObjectTagging(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        String key = S3Helpers.objectKey(req.path());
+        store.delete(S3Keys.objectTagsKey(bucket, key));
+        return StubResponse.of(204, "application/xml", "");
+    }
+
+    private StubResponse putBucketTagging(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        store.put(S3Keys.bucketTagsKey(bucket), parseTagSet(req.body()));
+        return StubResponse.of(204, "application/xml", "");
+    }
+
+    private StubResponse getBucketTagging(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        Object record = store.get(S3Keys.bucketTagsKey(bucket));
+        // Real S3 returns 404 NoSuchTagSet for a bucket with no tags (unlike an untagged object,
+        // which returns an empty 200).
+        if (record == null) {
+            return noSuchTagSet();
+        }
+        return tagSetResponse(record);
+    }
+
+    private StubResponse deleteBucketTagging(StubRequest req, StateStore store) {
+        String bucket = S3Helpers.bucket(req.path());
+        store.delete(S3Keys.bucketTagsKey(bucket));
+        return StubResponse.of(204, "application/xml", "");
+    }
+
+    /**
+     * Parses a {@code <Tagging><TagSet><Tag><Key/><Value/></Tag>…} request body into an ordered
+     * map.
+     */
+    private static Map<String, String> parseTagSet(String body) {
+        Map<String, String> tags = new LinkedHashMap<>();
+        Matcher m = TAG_ELEMENT.matcher(body);
+        while (m.find()) {
+            tags.put(unescapeXml(m.group(1)), unescapeXml(m.group(2)));
+        }
+        return tags;
+    }
+
+    private static StubResponse tagSetResponse(Object record) {
+        XmlElement tagSet = XmlElement.of("TagSet");
+        if (record instanceof Map<?, ?> map) {
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                tagSet.child(
+                        XmlElement.of("Tag")
+                                .child("Key", String.valueOf(entry.getKey()))
+                                .child("Value", String.valueOf(entry.getValue())));
+            }
+        }
+        return StubResponse.xml(XmlElement.of("Tagging").attr("xmlns", XMLNS).child(tagSet));
+    }
+
+    private static StubResponse noSuchTagSet() {
+        XmlElement error =
+                XmlElement.of("Error")
+                        .child("Code", "NoSuchTagSet")
+                        .child("Message", "The TagSet does not exist");
+        return StubResponse.of(404, "application/xml", error.render());
     }
 
     private static StubResponse noSuchKey(String key) {
