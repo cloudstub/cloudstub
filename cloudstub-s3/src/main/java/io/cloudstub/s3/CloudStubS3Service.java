@@ -474,8 +474,6 @@ public class CloudStubS3Service implements CloudStubService {
                 StubTemplates.load(CloudStubS3Service.class, "WriteGetObjectResponse"));
     }
 
-    // --- Bucket operations -------------------------------------------------------------------
-
     private StubResponse createBucket(StubRequest req, StateStore store) {
         String bucket = S3Helpers.bucket(req.path());
         store.put(S3Keys.bucketKey(bucket), Json.object("createdAt", Instant.now().toString()));
@@ -526,8 +524,6 @@ public class CloudStubS3Service implements CloudStubService {
                         .child(buckets);
         return StubResponse.xml(root);
     }
-
-    // --- Object operations -------------------------------------------------------------------
 
     private StubResponse putObject(StubRequest req, StateStore store) {
         String bucket = S3Helpers.bucket(req.path());
@@ -641,8 +637,6 @@ public class CloudStubS3Service implements CloudStubService {
         }
         return StubResponse.xml(root);
     }
-
-    // --- Tagging -----------------------------------------------------------------------------
 
     private StubResponse putObjectTagging(StubRequest req, StateStore store) {
         String bucket = S3Helpers.bucket(req.path());
