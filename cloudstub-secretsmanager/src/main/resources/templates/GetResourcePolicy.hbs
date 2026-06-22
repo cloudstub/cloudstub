@@ -1,1 +1,4 @@
-{"ARN":"arn:aws:secretsmanager:us-east-1:000000000000:secret:{{jsonPath request.body '$.SecretId'}}","Name":"{{jsonPath request.body '$.SecretId'}}","ResourcePolicy":null}
+{"ARN":"arn:aws:secretsmanager:us-east-1:000000000000:secret:{{jsonPath
+  request.body
+  "$.SecretId"
+}}","Name":"{{jsonPath request.body "$.SecretId"}}","ResourcePolicy":null}
