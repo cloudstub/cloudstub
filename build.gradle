@@ -118,6 +118,62 @@ tasks.register('checkCompatibility') {
     dependsOn ':cloudstub-example:junit5:test', ':cloudstub-example:junit6:test'
 }
 
+// Cuts a release the way `npm version` does: rewrite the literal `version` in gradle.properties, commit
+// it, and create the matching v<version> git tag. Pushing that tag triggers the Central publish
+// (release.yml). The commit touches only gradle.properties, so it is safe to run with other unstaged
+// changes present. Usage: ./gradlew release -PreleaseVersion=0.1.0-beta.4 [-Ppush]
+tasks.register('release') {
+    group = 'release'
+    description = 'Set the version in gradle.properties, commit it, and create the v<version> tag ' +
+        '(-PreleaseVersion=<x.y.z[-pre]>; add -Ppush to push the commit and tag).'
+    doLast {
+        def v = (providers.gradleProperty('releaseVersion').orNull ?: '').trim()
+        if (v.isEmpty()) {
+            throw new GradleException(
+                'Provide the version: ./gradlew release -PreleaseVersion=<MAJOR.MINOR.PATCH[-prerelease]>')
+        }
+        if (!(v ==~ /^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$/) || v.contains('SNAPSHOT')) {
+            throw new GradleException(
+                "'${v}' is not a release version (expected MAJOR.MINOR.PATCH[-prerelease], no -SNAPSHOT).")
+        }
+        def tag = "v${v}"
+
+        def git = { String... args ->
+            def out = providers.exec {
+                commandLine(['git'] + (args as List))
+                ignoreExitValue = true
+            }
+            if (out.result.get().exitValue != 0) {
+                throw new GradleException(
+                    "git ${args.join(' ')} failed:\n${out.standardError.asText.get().trim()}")
+            }
+            out.standardOutput.asText.get().trim()
+        }
+
+        if (git('tag', '-l', tag)) {
+            throw new GradleException("Tag ${tag} already exists.")
+        }
+
+        def props = rootProject.file('gradle.properties')
+        def updated = props.text.replaceFirst(/(?m)^version=.*$/, "version=${v}")
+        if (updated == props.text) {
+            throw new GradleException("No 'version=' line found in gradle.properties.")
+        }
+        props.text = updated
+
+        git('commit', 'gradle.properties', '-m', "release ${tag}")
+        git('tag', tag)
+
+        if (project.hasProperty('push')) {
+            git('push', 'origin', 'HEAD', tag)
+            logger.lifecycle("Released ${tag}: gradle.properties set to ${v}, committed, tagged, and pushed.")
+        } else {
+            logger.lifecycle("Prepared ${tag}: gradle.properties set to ${v}, committed, and tagged locally.")
+            logger.lifecycle("Push to publish:  git push origin HEAD ${tag}")
+        }
+    }
+}
+
 tasks.register('generateDocs', Javadoc) {
     group = 'documentation'
     description = 'Generates aggregated Javadoc for the public modules into docs/javadoc/.'
