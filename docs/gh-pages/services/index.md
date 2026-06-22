@@ -14,6 +14,14 @@ CloudStub mocks one AWS service per module. Type to filter, or pick a service be
 
     [Open the Secrets Manager guide →](secretsmanager.md)
 
+- **Amazon S3**
+
+    ---
+
+    Stateful object storage — an object put is returned by a later get and listed in the bucket.
+
+    [Open the S3 guide →](s3.md)
+
 - **Amazon SNS**
 
     ---
