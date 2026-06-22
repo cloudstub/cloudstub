@@ -94,9 +94,14 @@ once, leave it running, and point any application that reads `AWS_ENDPOINT_URL` 
 services you want and the launcher fetches each module jar from Maven Central on first use:
 
 ```
+curl -L -o cloudstub-local.jar \
+  https://github.com/cloudstub/cloudstub/releases/latest/download/cloudstub-local.jar
 java -jar cloudstub-local.jar --services=sqs,secretsmanager
 export AWS_ENDPOINT_URL=http://localhost:4566   # the default port
 ```
+
+The server jar is distributed via [GitHub Releases](https://github.com/cloudstub/cloudstub/releases); the
+`releases/latest/download/` URL above always resolves to the newest release.
 
 It shares the same core engine and state backend as embedded mode, so stateful modules return live data: a
 `SendMessage` is returned by a later `ReceiveMessage`. Drive a running instance from the terminal with the companion
