@@ -1,4 +1,4 @@
-    def springBootVersion = '4.0.6'
+def springBootVersion = '4.0.6'
 
 dependencies {
     implementation "org.springframework.boot:spring-boot-starter:${springBootVersion}"
