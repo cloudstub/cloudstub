@@ -65,6 +65,10 @@
          <lastmod>2026-06-22</lastmod>
     </url>
     <url>
+         <loc>https://cloudstub.github.io/cloudstub/services/s3/</loc>
+         <lastmod>2026-06-22</lastmod>
+    </url>
+    <url>
          <loc>https://cloudstub.github.io/cloudstub/services/secretsmanager/</loc>
          <lastmod>2026-06-22</lastmod>
     </url>
