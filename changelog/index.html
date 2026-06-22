@@ -1094,6 +1094,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#010-beta4-2026-06-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1.0-beta.4 - 2026-06-22
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.0-beta.4 - 2026-06-22">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#010-beta3-2026-06-17" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1134,7 +1162,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#added_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -1173,7 +1201,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added_1" class="md-nav__link">
+  <a href="#added_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -1250,6 +1278,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#010-beta4-2026-06-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1.0-beta.4 - 2026-06-22
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.0-beta.4 - 2026-06-22">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#010-beta3-2026-06-17" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1290,7 +1346,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#added_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -1329,7 +1385,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added_1" class="md-nav__link">
+  <a href="#added_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -1368,6 +1424,21 @@
 <p>All notable changes to CloudStub are recorded here. The format is based on
 <a href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>. All published modules share a single
 lockstep version.</p>
+<h2 id="010-beta4-2026-06-22"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.3...v0.1.0-beta.4">0.1.0-beta.4</a> - 2026-06-22</h2>
+<p>Publishes three additional service modules.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Published <code>cloudstub-s3</code>, <code>cloudstub-sns</code>, and <code>cloudstub-secretsmanager</code> to Maven Central
+  (previously only <code>cloudstub-sqs</code> shipped among the service modules).</li>
+<li><code>cloudstub-s3</code>: Amazon S3 over the REST path protocol. Bucket and object operations
+    (<code>PutObject</code>, <code>GetObject</code>, <code>ListObjectsV2</code>/<code>ListObjects</code>, <code>DeleteObject</code>) and object/bucket
+    tagging are state-backed: an object put is returned by a later get and listed in the bucket. A
+    bundled AWS SDK v2 interceptor rewrites virtual-hosted-style requests aimed at the CloudStub
+    endpoint to path-style, so a vanilla <code>S3Client</code> works with no <code>pathStyleAccessEnabled</code>.</li>
+<li><code>cloudstub-sns</code>: Amazon SNS topics and subscriptions over the AWS Query (XML/form) protocol.</li>
+<li><code>cloudstub-secretsmanager</code>: AWS Secrets Manager over the AWS JSON protocol with state-backed
+    secret storage: a secret created is returned by a later get.</li>
+</ul>
 <h2 id="010-beta3-2026-06-17"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.2...v0.1.0-beta.3">0.1.0-beta.3</a> - 2026-06-17</h2>
 <p>Publishes the refactored <code>cloudstub-sqs</code> module.</p>
 <h3 id="changed">Changed</h3>
@@ -1380,7 +1451,7 @@ lockstep version.</p>
 <h2 id="010-beta2-2026-06-17"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.1...v0.1.0-beta.2">0.1.0-beta.2</a> - 2026-06-17</h2>
 <p>Republished the non-service modules. <code>cloudstub-sqs</code> was held at <code>0.1.0-beta.1</code> and is unchanged in
 this release.</p>
-<h3 id="added">Added</h3>
+<h3 id="added_1">Added</h3>
 <ul>
 <li><code>cloudstub-local</code>: automatic download of declared service modules from Maven Central, verified
   against the strongest published checksum, with the plugin directory acting as the cache.</li>
@@ -1396,7 +1467,7 @@ this release.</p>
 <h2 id="010-beta1-2026-06-13"><a href="https://github.com/cloudstub/cloudstub/releases/tag/v0.1.0-beta.1">0.1.0-beta.1</a> - 2026-06-13</h2>
 <p>First publication to Maven Central under the <code>io.github.cloudstub</code> namespace. The <code>-beta</code> qualifier
 signals that the SPI and public API may still change.</p>
-<h3 id="added_1">Added</h3>
+<h3 id="added_2">Added</h3>
 <ul>
 <li>Published artifacts: <code>cloudstub-core</code>, <code>cloudstub-testing</code>, <code>cloudstub-junit</code>, <code>cloudstub-sqs</code>,
   <code>cloudstub-sdk-v1</code>, <code>cloudstub-local</code>, <code>cloudstub-codegen</code>.</li>
