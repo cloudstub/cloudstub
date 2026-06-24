@@ -529,6 +529,11 @@ public class CloudStubS3Service implements CloudStubService {
         String bucket = S3Helpers.bucket(req.path());
         String key = S3Helpers.objectKey(req.path());
         String body = req.body();
+        // A signed payload arrives aws-chunked framed; store and checksum the decoded content.
+        if (S3Helpers.isAwsChunked(
+                req.header("x-amz-content-sha256"), req.header("Content-Encoding"))) {
+            body = S3Helpers.decodeAwsChunked(body);
+        }
         String contentType = req.header("Content-Type");
         if (contentType == null) {
             contentType = "application/octet-stream";

@@ -12,6 +12,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
@@ -29,6 +31,7 @@ class CloudStubS3ServiceTest {
 
     static CloudStub cloudMock;
     static S3Client s3;
+    static S3Client credentialedS3;
 
     @BeforeAll
     static void start() {
@@ -46,11 +49,25 @@ class CloudStubS3ServiceTest {
                         .credentialsProvider(AnonymousCredentialsProvider.create())
                         .region(Region.US_EAST_1)
                         .build();
+
+        // Credentialed client: the SDK signs the payload, frames the body aws-chunked, and
+        // validates the returned ETag. Checksum validation left at its default (enabled).
+        credentialedS3 =
+                S3Client.builder()
+                        .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+                        .serviceConfiguration(
+                                S3Configuration.builder().pathStyleAccessEnabled(true).build())
+                        .credentialsProvider(
+                                StaticCredentialsProvider.create(
+                                        AwsBasicCredentials.create("test-key", "test-secret")))
+                        .region(Region.US_EAST_1)
+                        .build();
     }
 
     @AfterAll
     static void stop() {
         s3.close();
+        credentialedS3.close();
         cloudMock.stop();
     }
 
@@ -68,6 +85,21 @@ class CloudStubS3ServiceTest {
         ResponseBytes<GetObjectResponse> got =
                 s3.getObject(b -> b.bucket(bucket).key(key), ResponseTransformer.toBytes());
         assertEquals("hi there", new String(got.asByteArray(), StandardCharsets.UTF_8));
+    }
+
+    /** A credentialed (payload-signing, aws-chunked) PutObject passes checksum validation. */
+    @Test
+    void credentialedPutObjectPassesChecksumAndRoundTrips() {
+        String bucket = "credentialed-bucket";
+        String key = "signed.txt";
+        String content = "content uploaded by a signing client";
+        credentialedS3.createBucket(b -> b.bucket(bucket));
+        credentialedS3.putObject(b -> b.bucket(bucket).key(key), RequestBody.fromString(content));
+
+        ResponseBytes<GetObjectResponse> got =
+                credentialedS3.getObject(
+                        b -> b.bucket(bucket).key(key), ResponseTransformer.toBytes());
+        assertEquals(content, new String(got.asByteArray(), StandardCharsets.UTF_8));
     }
 
     @Test
