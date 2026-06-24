@@ -62,11 +62,15 @@ def configurePom = { pom, info ->
     }
 }
 
-// Both paths sign via vanniktech's signAllPublications(), which reads the in-memory PGP key from the
-// signingInMemoryKey / -KeyId / -KeyPassword properties (supply via env/Gradle properties, never
-// committed) and only requires a signature for a remote, non-snapshot publish — so publishToMavenLocal
-// works without a key. The Sonatype Central Portal upload (publishToMavenCentral) authenticates with
-// the mavenCentralUsername / mavenCentralPassword properties (a Central user token).
+// Signing reads the in-memory PGP key from the signingInMemoryKey / -KeyId / -KeyPassword properties
+// (supply via env/Gradle properties, never committed). signAllPublications() is applied only when a
+// key is configured: the Maven Central upload (publishToMavenCentral) requires signatures and runs
+// with the key present, while publishToMavenLocal and the GitHub Packages publish (which do not
+// require signatures) run without one. The Central upload authenticates separately with the
+// mavenCentralUsername / mavenCentralPassword properties (a Central user token).
+def hasSigningKey =
+    providers.gradleProperty('signingInMemoryKey').isPresent() ||
+        providers.environmentVariable('ORG_GRADLE_PROJECT_signingInMemoryKey').isPresent()
 if (publishable) {
     def info = pomInfo[project.name]
     if (info == null) {
@@ -82,7 +86,9 @@ if (publishable) {
 
         mavenPublishing {
             publishToMavenCentral("CENTRAL_PORTAL")
-            signAllPublications()
+            if (hasSigningKey) {
+                signAllPublications()
+            }
             pom { configurePom(delegate, info) }
         }
     } else {
@@ -93,7 +99,9 @@ if (publishable) {
 
         mavenPublishing {
             publishToMavenCentral("CENTRAL_PORTAL")
-            signAllPublications()
+            if (hasSigningKey) {
+                signAllPublications()
+            }
         }
 
         // withSourcesJar/withJavadocJar add the -sources/-javadoc JARs to the shadow component
