@@ -42,7 +42,7 @@ jobs:
         with:
           gradle-version: "8.8"
 
-      - name: Validate tag and version
+      - name: Derive version from tag
         run: |
           if [[ "$GITHUB_REF_TYPE" != "tag" ]]; then
             echo "::error::Run this workflow from a release tag (set 'Use workflow from' to a v* tag), not a branch."
@@ -53,19 +53,13 @@ jobs:
             echo "::error::Tag '$GITHUB_REF_NAME' is not a release version (expected vMAJOR.MINOR.PATCH[-prerelease], no -SNAPSHOT)."
             exit 1
           fi
-          # The release task commits gradle.properties before tagging, so a checkout of the tag
-          # already carries the right version; verify they match instead of overriding with -Pversion.
-          COMMITTED="$(grep -E '^version=' gradle.properties | cut -d= -f2)"
-          if [[ "$COMMITTED" != "$VERSION" ]]; then
-            echo "::error::Tag '$GITHUB_REF_NAME' does not match gradle.properties version '$COMMITTED'."
-            exit 1
-          fi
+          echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Build and test
         run: gradle build
 
       - name: Publish to GitHub Packages
-        run: gradle publishAllPublicationsToGitHubPackagesRepository
+        run: gradle publishAllPublicationsToGitHubPackagesRepository -Pversion="$RELEASE_VERSION"
 
   maven:
     if: ${{ inputs.target == 'maven' || inputs.target == 'both' }}
@@ -90,7 +84,7 @@ jobs:
         with:
           gradle-version: "8.8"
 
-      - name: Validate tag and version
+      - name: Derive version from tag
         run: |
           if [[ "$GITHUB_REF_TYPE" != "tag" ]]; then
             echo "::error::Run this workflow from a release tag (set 'Use workflow from' to a v* tag), not a branch."
@@ -101,11 +95,7 @@ jobs:
             echo "::error::Tag '$GITHUB_REF_NAME' is not a release version (expected vMAJOR.MINOR.PATCH[-prerelease], no -SNAPSHOT)."
             exit 1
           fi
-          COMMITTED="$(grep -E '^version=' gradle.properties | cut -d= -f2)"
-          if [[ "$COMMITTED" != "$VERSION" ]]; then
-            echo "::error::Tag '$GITHUB_REF_NAME' does not match gradle.properties version '$COMMITTED'."
-            exit 1
-          fi
+          echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Check formatting
         run: gradle spotlessCheck
@@ -114,4 +104,4 @@ jobs:
         run: gradle build
 
       - name: Publish and release to Maven Central
-        run: gradle publishAndReleaseToMavenCentral
+        run: gradle publishAndReleaseToMavenCentral -Pversion="$RELEASE_VERSION"
