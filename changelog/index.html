@@ -1094,6 +1094,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#010-beta5-2026-06-24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1.0-beta.5 - 2026-06-24
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.0-beta.5 - 2026-06-24">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#010-beta4-2026-06-22" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1278,6 +1306,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#010-beta5-2026-06-24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1.0-beta.5 - 2026-06-24
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.0-beta.5 - 2026-06-24">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#010-beta4-2026-06-22" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1424,6 +1480,16 @@
 <p>All notable changes to CloudStub are recorded here. The format is based on
 <a href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>. All published modules share a single
 lockstep version.</p>
+<h2 id="010-beta5-2026-06-24"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.4...v0.1.0-beta.5">0.1.0-beta.5</a> - 2026-06-24</h2>
+<p>Fixes S3 uploads from a credentialed client.</p>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li><code>cloudstub-s3</code>: <code>PutObject</code> from a credentialed <code>S3Client</code> (any non-anonymous credentials
+  provider) now passes the SDK's checksum validation. A signed client frames the request body as
+  <code>aws-chunked</code>; the module now strips that chunk framing before storing the object and computing the
+  ETag, so the ETag is the MD5 of the actual content. Previously only an <code>AnonymousCredentialsProvider</code>
+  client (which sends an unframed body) succeeded.</li>
+</ul>
 <h2 id="010-beta4-2026-06-22"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.3...v0.1.0-beta.4">0.1.0-beta.4</a> - 2026-06-22</h2>
 <p>Publishes three additional service modules.</p>
 <h3 id="added">Added</h3>
