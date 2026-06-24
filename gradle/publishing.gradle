@@ -116,4 +116,19 @@ if (publishable) {
             }
         }
     }
+
+    // GitHub Packages as an interim Maven registry. The publish*ToGitHubPackagesRepository tasks
+    // only run when invoked, and only then need the GITHUB_ACTOR/GITHUB_TOKEN credentials.
+    publishing {
+        repositories {
+            maven {
+                name = 'GitHubPackages'
+                url = uri('https://maven.pkg.github.com/cloudstub/cloudstub')
+                credentials {
+                    username = System.getenv('GITHUB_ACTOR')
+                    password = System.getenv('GITHUB_TOKEN')
+                }
+            }
+        }
+    }
 }
