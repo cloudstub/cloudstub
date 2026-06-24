@@ -4,6 +4,18 @@ All notable changes to CloudStub are recorded here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). All published modules share a single
 lockstep version.
 
+## [0.1.0-beta.5] - 2026-06-24
+
+Fixes S3 uploads from a credentialed client.
+
+### Fixed
+
+- `cloudstub-s3`: `PutObject` from a credentialed `S3Client` (any non-anonymous credentials
+  provider) now passes the SDK's checksum validation. A signed client frames the request body as
+  `aws-chunked`; the module now strips that chunk framing before storing the object and computing the
+  ETag, so the ETag is the MD5 of the actual content. Previously only an `AnonymousCredentialsProvider`
+  client (which sends an unframed body) succeeded.
+
 ## [0.1.0-beta.4] - 2026-06-22
 
 Publishes three additional service modules.
@@ -67,6 +79,7 @@ signals that the SPI and public API may still change.
 - Standalone server (`cloudstub-local`) and the Smithy stub generator (`cloudstub-codegen`),
   distributed as runnable JARs.
 
+[0.1.0-beta.5]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.4...v0.1.0-beta.5
 [0.1.0-beta.4]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.3...v0.1.0-beta.4
 [0.1.0-beta.3]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.2...v0.1.0-beta.3
 [0.1.0-beta.2]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.1...v0.1.0-beta.2
