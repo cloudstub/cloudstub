@@ -1,11 +1,8 @@
 name: Publish to GitHub Packages
 
+# Run on demand from a release tag: in "Run workflow", set "Use workflow from" to the v<version> tag.
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to publish (e.g. 0.1.0-beta.5), no leading v"
-        required: true
 
 permissions:
   contents: read
@@ -31,11 +28,22 @@ jobs:
         with:
           gradle-version: "8.8"
 
-      - name: Validate version
+      - name: Validate tag and version
         run: |
-          VERSION="${{ inputs.version }}"
+          if [[ "$GITHUB_REF_TYPE" != "tag" ]]; then
+            echo "::error::Run this workflow from a release tag (set 'Use workflow from' to a v* tag), not a branch."
+            exit 1
+          fi
+          VERSION="${GITHUB_REF_NAME#v}"
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || [[ "$VERSION" == *SNAPSHOT* ]]; then
-            echo "::error::'$VERSION' is not a release version (expected MAJOR.MINOR.PATCH[-prerelease], no -SNAPSHOT)."
+            echo "::error::Tag '$GITHUB_REF_NAME' is not a release version (expected vMAJOR.MINOR.PATCH[-prerelease], no -SNAPSHOT)."
+            exit 1
+          fi
+          # The release task commits gradle.properties before tagging, so a checkout of the tag
+          # already carries the right version; verify they match instead of overriding with -Pversion.
+          COMMITTED="$(grep -E '^version=' gradle.properties | cut -d= -f2)"
+          if [[ "$COMMITTED" != "$VERSION" ]]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' does not match gradle.properties version '$COMMITTED'."
             exit 1
           fi
 
@@ -43,4 +51,4 @@ jobs:
         run: gradle build
 
       - name: Publish to GitHub Packages
-        run: gradle publishAllPublicationsToGitHubPackagesRepository -Pversion="${{ inputs.version }}"
+        run: gradle publishAllPublicationsToGitHubPackagesRepository
