@@ -1,0 +1,117 @@
+name: Publish
+
+# Run on demand from a release tag: in "Run workflow", set "Use workflow from" to the v<version>
+# tag and pick where to publish.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Where to publish"
+        type: choice
+        default: github
+        options:
+          - github
+          - maven
+          - both
+
+permissions:
+  contents: read
+
+jobs:
+  github:
+    if: ${{ inputs.target == 'github' || inputs.target == 'both' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - uses: actions/setup-java@v5.2.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v5.0.2
+        with:
+          gradle-version: "8.8"
+
+      - name: Validate tag and version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" != "tag" ]]; then
+            echo "::error::Run this workflow from a release tag (set 'Use workflow from' to a v* tag), not a branch."
+            exit 1
+          fi
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || [[ "$VERSION" == *SNAPSHOT* ]]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' is not a release version (expected vMAJOR.MINOR.PATCH[-prerelease], no -SNAPSHOT)."
+            exit 1
+          fi
+          # The release task commits gradle.properties before tagging, so a checkout of the tag
+          # already carries the right version; verify they match instead of overriding with -Pversion.
+          COMMITTED="$(grep -E '^version=' gradle.properties | cut -d= -f2)"
+          if [[ "$COMMITTED" != "$VERSION" ]]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' does not match gradle.properties version '$COMMITTED'."
+            exit 1
+          fi
+
+      - name: Build and test
+        run: gradle build
+
+      - name: Publish to GitHub Packages
+        run: gradle publishAllPublicationsToGitHubPackagesRepository
+
+  maven:
+    if: ${{ inputs.target == 'maven' || inputs.target == 'both' }}
+    runs-on: ubuntu-latest
+    environment: maven-central
+
+    env:
+      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralUsername }}
+      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralPassword }}
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKey }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyPassword }}
+
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - uses: actions/setup-java@v5.2.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v5.0.2
+        with:
+          gradle-version: "8.8"
+
+      - name: Validate tag and version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" != "tag" ]]; then
+            echo "::error::Run this workflow from a release tag (set 'Use workflow from' to a v* tag), not a branch."
+            exit 1
+          fi
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || [[ "$VERSION" == *SNAPSHOT* ]]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' is not a release version (expected vMAJOR.MINOR.PATCH[-prerelease], no -SNAPSHOT)."
+            exit 1
+          fi
+          COMMITTED="$(grep -E '^version=' gradle.properties | cut -d= -f2)"
+          if [[ "$COMMITTED" != "$VERSION" ]]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' does not match gradle.properties version '$COMMITTED'."
+            exit 1
+          fi
+
+      - name: Check formatting
+        run: gradle spotlessCheck
+
+      - name: Build and test
+        run: gradle build
+
+      - name: Publish and release to Maven Central
+        run: gradle publishAndReleaseToMavenCentral
