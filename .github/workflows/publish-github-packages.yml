@@ -1,4 +1,4 @@
-name: Publish to GitHub Packages
+name: Publish to GitHub
 
 # Run on demand from a release tag: in "Run workflow", set "Use workflow from" to the v<version> tag.
 on:
