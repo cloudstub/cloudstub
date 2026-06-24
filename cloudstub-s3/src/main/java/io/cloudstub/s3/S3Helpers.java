@@ -30,6 +30,69 @@ final class S3Helpers {
     }
 
     /**
+     * Whether the request body is {@code aws-chunked} framed. True when {@code
+     * x-amz-content-sha256} is a {@code STREAMING-*} value or {@code Content-Encoding} is {@code
+     * aws-chunked}.
+     */
+    static boolean isAwsChunked(String contentSha256, String contentEncoding) {
+        if (contentSha256 != null && contentSha256.startsWith("STREAMING-")) {
+            return true;
+        }
+        return contentEncoding != null && contentEncoding.contains("aws-chunked");
+    }
+
+    /**
+     * Strips {@code aws-chunked} framing, returning the decoded object content. Each chunk is a hex
+     * byte-count with an optional {@code ;chunk-signature=…} extension, a CRLF, that many data
+     * bytes, and a trailing CRLF; a zero-size chunk ends the body. An unframed body is returned
+     * unchanged. Sizes are byte counts, so decoding runs over the UTF-8 bytes.
+     */
+    static String decodeAwsChunked(String body) {
+        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+        ByteArrayOutputStream out = new ByteArrayOutputStream(bytes.length);
+        int pos = 0;
+        boolean decodedAny = false;
+        while (pos < bytes.length) {
+            int lineEnd = indexOfCrlf(bytes, pos);
+            if (lineEnd < 0) {
+                break;
+            }
+            String header = new String(bytes, pos, lineEnd - pos, StandardCharsets.US_ASCII);
+            int semicolon = header.indexOf(';');
+            String sizeHex = (semicolon < 0 ? header : header.substring(0, semicolon)).trim();
+            int size;
+            try {
+                size = Integer.parseInt(sizeHex, 16);
+            } catch (NumberFormatException e) {
+                return decodedAny ? out.toString(StandardCharsets.UTF_8) : body;
+            }
+            if (size == 0) {
+                decodedAny = true;
+                break;
+            }
+            int dataStart = lineEnd + 2;
+            int available = Math.min(size, bytes.length - dataStart);
+            if (available <= 0) {
+                break;
+            }
+            out.write(bytes, dataStart, available);
+            decodedAny = true;
+            pos = dataStart + available + 2;
+        }
+        return decodedAny ? out.toString(StandardCharsets.UTF_8) : body;
+    }
+
+    /** Index of the next {@code CRLF} in {@code bytes} at or after {@code from}, or {@code -1}. */
+    private static int indexOfCrlf(byte[] bytes, int from) {
+        for (int i = from; i + 1 < bytes.length; i++) {
+            if (bytes[i] == '\r' && bytes[i + 1] == '\n') {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Decodes {@code %XX} escapes in a URL path segment. Unlike {@link java.net.URLDecoder}, a
      * literal {@code '+'} is left as-is: in an S3 path a {@code '+'} is a literal plus (a space is
      * sent as {@code %20}), so form-style {@code +}→space decoding would corrupt keys.
