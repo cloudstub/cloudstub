@@ -1,9 +1,8 @@
 name: Release
 
+# Run on demand from a release tag: in "Run workflow", set "Use workflow from" to the v<version> tag.
 on:
-  push:
-    tags:
-      - "v[0-9]*"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -31,14 +30,24 @@ jobs:
         with:
           gradle-version: "8.8"
 
-      - name: Derive and validate version from tag
+      - name: Validate tag and version
         run: |
+          if [[ "$GITHUB_REF_TYPE" != "tag" ]]; then
+            echo "::error::Run this workflow from a release tag (set 'Use workflow from' to a v* tag), not a branch."
+            exit 1
+          fi
           VERSION="${GITHUB_REF_NAME#v}"
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || [[ "$VERSION" == *SNAPSHOT* ]]; then
             echo "::error::Tag '$GITHUB_REF_NAME' is not a release version (expected vMAJOR.MINOR.PATCH[-prerelease], no -SNAPSHOT)."
             exit 1
           fi
-          echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
+          # The release task commits gradle.properties before tagging, so a checkout of the tag
+          # already carries the right version; verify they match instead of overriding with -Pversion.
+          COMMITTED="$(grep -E '^version=' gradle.properties | cut -d= -f2)"
+          if [[ "$COMMITTED" != "$VERSION" ]]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' does not match gradle.properties version '$COMMITTED'."
+            exit 1
+          fi
 
       - name: Check formatting
         run: gradle spotlessCheck
@@ -47,4 +56,4 @@ jobs:
         run: gradle build
 
       - name: Publish and release to Maven Central
-        run: gradle publishAndReleaseToMavenCentral -Pversion="$RELEASE_VERSION"
+        run: gradle publishAndReleaseToMavenCentral
