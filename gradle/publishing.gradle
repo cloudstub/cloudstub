@@ -68,9 +68,13 @@ def configurePom = { pom, info ->
 // with the key present, while publishToMavenLocal and the GitHub Packages publish (which do not
 // require signatures) run without one. The Central upload authenticates separately with the
 // mavenCentralUsername / mavenCentralPassword properties (a Central user token).
-def hasSigningKey =
-    providers.gradleProperty('signingInMemoryKey').isPresent() ||
-        providers.environmentVariable('ORG_GRADLE_PROJECT_signingInMemoryKey').isPresent()
+// An env var set to an empty string (e.g. a workflow referencing an inaccessible secret) is still
+// "present", so treat a blank value as no key rather than attempting to sign with it.
+def signingKey =
+    providers.gradleProperty('signingInMemoryKey')
+        .orElse(providers.environmentVariable('ORG_GRADLE_PROJECT_signingInMemoryKey'))
+        .getOrElse('')
+def hasSigningKey = !signingKey.isBlank()
 if (publishable) {
     def info = pomInfo[project.name]
     if (info == null) {
