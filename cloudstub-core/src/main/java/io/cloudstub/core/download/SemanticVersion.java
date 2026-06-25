@@ -39,11 +39,15 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
         }
         String pre = m.group(4);
         String[] ids = (pre == null || pre.isEmpty()) ? new String[0] : pre.split("\\.");
-        return new SemanticVersion(
-                Integer.parseInt(m.group(1)),
-                Integer.parseInt(m.group(2)),
-                Integer.parseInt(m.group(3)),
-                ids);
+        try {
+            return new SemanticVersion(
+                    Integer.parseInt(m.group(1)),
+                    Integer.parseInt(m.group(2)),
+                    Integer.parseInt(m.group(3)),
+                    ids);
+        } catch (NumberFormatException overflow) {
+            return null;
+        }
     }
 
     @Override
@@ -83,12 +87,34 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
         boolean aNumeric = isNumeric(a);
         boolean bNumeric = isNumeric(b);
         if (aNumeric && bNumeric) {
-            return Long.compare(Long.parseLong(a), Long.parseLong(b));
+            return compareNumericIdentifier(a, b);
         }
         if (aNumeric != bNumeric) {
             return aNumeric ? -1 : 1;
         }
         return a.compareTo(b);
+    }
+
+    /**
+     * Compares two all-digit identifiers by numeric value without parsing, so arbitrarily long runs
+     * do not overflow {@code long}. Leading zeros are stripped; the longer normalized value is
+     * larger, and equal lengths compare lexicographically.
+     */
+    private static int compareNumericIdentifier(String a, String b) {
+        String na = stripLeadingZeros(a);
+        String nb = stripLeadingZeros(b);
+        if (na.length() != nb.length()) {
+            return Integer.compare(na.length(), nb.length());
+        }
+        return na.compareTo(nb);
+    }
+
+    private static String stripLeadingZeros(String digits) {
+        int i = 0;
+        while (i < digits.length() - 1 && digits.charAt(i) == '0') {
+            i++;
+        }
+        return digits.substring(i);
     }
 
     private static boolean isNumeric(String s) {
