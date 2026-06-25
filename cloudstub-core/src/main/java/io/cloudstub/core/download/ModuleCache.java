@@ -29,6 +29,50 @@ final class ModuleCache {
         }
     }
 
+    /**
+     * @return the path of the cached jar for {@code coordinate} (preferring the versioned name over
+     *     an unversioned one), or {@code null} if none is present
+     */
+    Path locate(MavenModuleCoordinate coordinate) {
+        if (directory == null) {
+            return null;
+        }
+        Path versioned = directory.resolve(coordinate.jarFileName());
+        if (Files.exists(versioned)) {
+            return versioned;
+        }
+        Path unversioned = directory.resolve(coordinate.unversionedJarFileName());
+        return Files.exists(unversioned) ? unversioned : null;
+    }
+
+    /**
+     * @return a cached jar of {@code service} at any version (an unversioned jar is preferred, then
+     *     any versioned one — {@link #store} keeps a single versioned jar per service), or {@code
+     *     null} if none is present
+     */
+    Path locateAnyVersion(String service) {
+        if (directory == null || !Files.isDirectory(directory)) {
+            return null;
+        }
+        MavenModuleCoordinate any = new MavenModuleCoordinate(service, "0");
+        Path unversioned = directory.resolve(any.unversionedJarFileName());
+        if (Files.exists(unversioned)) {
+            return unversioned;
+        }
+        String prefix = any.versionedJarPrefix();
+        try (Stream<Path> entries = Files.list(directory)) {
+            return entries.filter(
+                            entry -> {
+                                String name = entry.getFileName().toString();
+                                return name.startsWith(prefix) && name.endsWith(".jar");
+                            })
+                    .findFirst()
+                    .orElse(null);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     Path store(MavenModuleCoordinate coordinate, byte[] jarBytes) throws IOException {
         Files.createDirectories(directory);
         String jarName = coordinate.jarFileName();

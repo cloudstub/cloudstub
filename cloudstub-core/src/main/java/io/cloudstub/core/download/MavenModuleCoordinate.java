@@ -36,16 +36,17 @@ final class MavenModuleCoordinate {
     }
 
     String artifactUrl(String baseUrl, String extension) {
+        return artifactBaseUrl(baseUrl) + "/" + version + "/" + artifactFileName(extension);
+    }
+
+    /** URL of the artifact's {@code maven-metadata.xml} (version-independent). */
+    String metadataUrl(String baseUrl) {
+        return artifactBaseUrl(baseUrl) + "/maven-metadata.xml";
+    }
+
+    private String artifactBaseUrl(String baseUrl) {
         String groupPath = ModuleDownloader.GROUP.replace('.', '/');
-        return baseUrl
-                + "/"
-                + groupPath
-                + "/"
-                + artifactId()
-                + "/"
-                + version
-                + "/"
-                + artifactFileName(extension);
+        return baseUrl + "/" + groupPath + "/" + artifactId();
     }
 
     void requireFileSystemSafe() {

@@ -71,6 +71,17 @@ class ModuleDownloaderTest {
         }
     }
 
+    private void publishMetadata(String... versions) {
+        StringBuilder xml = new StringBuilder("<metadata><versioning><versions>");
+        for (String v : versions) {
+            xml.append("<version>").append(v).append("</version>");
+        }
+        xml.append("</versions></versioning></metadata>");
+        files.put(
+                "/maven2/io/github/cloudstub/cloudstub-sqs/maven-metadata.xml",
+                xml.toString().getBytes(StandardCharsets.UTF_8));
+    }
+
     private static String checksum(byte[] data, String ext) {
         String algo =
                 switch (ext) {
@@ -149,6 +160,75 @@ class ModuleDownloaderTest {
         assertTrue(ex.getMessage().contains("sqs"));
         assertTrue(ex.getMessage().contains("Place the jar manually"));
         assertTrue(ex.getMessage().contains("--no-download"));
+    }
+
+    @Test
+    void fallsBackToHighestPublishedAtMostRequested(@TempDir Path dir) throws IOException {
+        byte[] beta4 = "beta4".getBytes(StandardCharsets.UTF_8);
+        byte[] beta5 = "beta5".getBytes(StandardCharsets.UTF_8);
+        publish("0.1.0-beta.4", beta4, "sha512");
+        publish("0.1.0-beta.5", beta5, "sha512");
+        publishMetadata("0.1.0-beta.4", "0.1.0-beta.5");
+
+        Path written = new ModuleDownloader(baseUrl).download("sqs", "0.1.0-beta.6", dir);
+
+        assertEquals(dir.resolve("cloudstub-sqs-0.1.0-beta.5.jar"), written);
+        assertEquals("beta5", Files.readString(written));
+    }
+
+    @Test
+    void fallbackExcludesVersionsNewerThanRequested(@TempDir Path dir) throws IOException {
+        byte[] beta5 = "beta5".getBytes(StandardCharsets.UTF_8);
+        byte[] beta7 = "beta7".getBytes(StandardCharsets.UTF_8);
+        publish("0.1.0-beta.5", beta5, "sha512");
+        publish("0.1.0-beta.7", beta7, "sha512");
+        publishMetadata("0.1.0-beta.5", "0.1.0-beta.7");
+
+        Path written = new ModuleDownloader(baseUrl).download("sqs", "0.1.0-beta.6", dir);
+
+        assertEquals(dir.resolve("cloudstub-sqs-0.1.0-beta.5.jar"), written);
+        assertEquals("beta5", Files.readString(written));
+    }
+
+    @Test
+    void reusesCachedFallbackJarWithoutRedownloading(@TempDir Path dir) throws IOException {
+        // The resolved (beta.5) jar is already cached but its bytes/checksums are NOT served, so a
+        // re-download would fail; the cached jar must be returned from metadata resolution alone.
+        Files.writeString(dir.resolve("cloudstub-sqs-0.1.0-beta.5.jar"), "cached-beta5");
+        publishMetadata("0.1.0-beta.4", "0.1.0-beta.5");
+
+        Path written = new ModuleDownloader(baseUrl).download("sqs", "0.1.0-beta.6", dir);
+
+        assertEquals(dir.resolve("cloudstub-sqs-0.1.0-beta.5.jar"), written);
+        assertEquals("cached-beta5", Files.readString(written));
+    }
+
+    @Test
+    void failsWhenNoPublishedVersionIsAtMostRequested(@TempDir Path dir) {
+        publish("0.1.0-beta.7", "beta7".getBytes(StandardCharsets.UTF_8), "sha512");
+        publishMetadata("0.1.0-beta.7");
+
+        ModuleDownloader downloader = new ModuleDownloader(baseUrl);
+        ModuleDownloadException ex =
+                assertThrows(
+                        ModuleDownloadException.class,
+                        () -> downloader.download("sqs", "0.1.0-beta.6", dir));
+        assertTrue(ex.getMessage().contains("no earlier published version was found"));
+        assertFalse(Files.exists(dir.resolve("cloudstub-sqs-0.1.0-beta.7.jar")));
+    }
+
+    @Test
+    void failsWhenRequestedVersionIsUnparseableAndUnpublished(@TempDir Path dir) {
+        publish("0.1.0-beta.5", "beta5".getBytes(StandardCharsets.UTF_8), "sha512");
+        publishMetadata("0.1.0-beta.5");
+
+        ModuleDownloader downloader = new ModuleDownloader(baseUrl);
+        ModuleDownloadException ex =
+                assertThrows(
+                        ModuleDownloadException.class,
+                        () -> downloader.download("sqs", "latest", dir));
+        assertTrue(ex.getMessage().contains("not a recognizable"));
+        assertFalse(Files.exists(dir.resolve("cloudstub-sqs-0.1.0-beta.5.jar")));
     }
 
     @Test
