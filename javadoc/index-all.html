@@ -178,6 +178,11 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:C">C</h2>
 <dl class="index">
+<dt><a href="io/cloudstub/core/download/ModuleDownloader.html#cachedJar(java.nio.file.Path,java.lang.String)" class="member-name-link">cachedJar(Path, String)</a> - Static method in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
+<dd>
+<div class="block">Returns a jar for <code>service</code> already present in <code>dir</code> at any version, regardless
+ of which version was requested.</div>
+</dd>
 <dt><a href="io/cloudstub/local/cli/CloudStubCli.html#call()" class="member-name-link">call()</a> - Method in class io.cloudstub.local.cli.<a href="io/cloudstub/local/cli/CloudStubCli.html" title="class in io.cloudstub.local.cli">CloudStubCli</a></dt>
 <dd>
 <div class="block">No subcommand given — show usage.</div>
@@ -406,8 +411,6 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/core/spi/StubResponse.html#contentType()" class="member-name-link">contentType()</a> - Method in class io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StubResponse.html" title="class in io.cloudstub.core.spi">StubResponse</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/cloudstub/core/download/ModuleDownloader.html#coordinate(java.lang.String,java.lang.String)" class="member-name-link">coordinate(String, String)</a> - Static method in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/download/CoreVersion.html" class="type-name-link" title="class in io.cloudstub.core.download">CoreVersion</a> - Class in <a href="io/cloudstub/core/download/package-summary.html">io.cloudstub.core.download</a></dt>
 <dd>
 <div class="block">Reports the running <code>cloudstub-core</code> version from a build-stamped classpath resource.</div>
@@ -455,8 +458,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/core/download/ModuleDownloader.html#download(java.lang.String,java.lang.String,java.nio.file.Path)" class="member-name-link">download(String, String, Path)</a> - Method in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
 <dd>
-<div class="block">Downloads the module jar for <code>service</code> at <code>version</code> into <code>dir</code>, verifying
- its checksum before the file is made visible and pruning any other cached version.</div>
+<div class="block">Downloads the module jar for <code>service</code> into <code>dir</code>, verifying its checksum before
+ the file is made visible and pruning any other cached version.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:E">E</h2>

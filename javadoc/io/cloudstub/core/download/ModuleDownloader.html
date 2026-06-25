@@ -144,17 +144,20 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#coordinate(java.lang.String,java.lang.String)" class="member-name-link">coordinate</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;version)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#cachedJar(java.nio.file.Path,java.lang.String)" class="member-name-link">cachedJar</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns a jar for <code>service</code> already present in <code>dir</code> at any version, regardless
+ of which version was requested.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#download(java.lang.String,java.lang.String,java.nio.file.Path)" class="member-name-link">download</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;version,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Downloads the module jar for <code>service</code> at <code>version</code> into <code>dir</code>, verifying
- its checksum before the file is made visible and pruning any other cached version.</div>
+<div class="block">Downloads the module jar for <code>service</code> into <code>dir</code>, verifying its checksum before
+ the file is made visible and pruning any other cached version.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isCached(java.nio.file.Path,java.lang.String,java.lang.String)" class="member-name-link">isCached</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir,
@@ -247,17 +250,6 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="coordinate(java.lang.String,java.lang.String)">
-<h3>coordinate</h3>
-<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">coordinate</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;version)</span></div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>the Maven coordinate string for a service at a version</dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="isCached(java.nio.file.Path,java.lang.String,java.lang.String)">
 <h3>isCached</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isCached</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir,
@@ -277,20 +269,45 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="cachedJar(java.nio.file.Path,java.lang.String)">
+<h3>cachedJar</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a></span>&nbsp;<span class="element-name">cachedJar</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service)</span></div>
+<div class="block">Returns a jar for <code>service</code> already present in <code>dir</code> at any version, regardless
+ of which version was requested. Intended as a fallback when a download cannot reach the
+ network: a previously provisioned (and at-download-time checksum-verified) jar is preferable
+ to failing to start.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>dir</code> - plugin directory to inspect; may be <code>null</code></dd>
+<dd><code>service</code> - service id (e.g. <code>sqs</code>)</dd>
+<dt>Returns:</dt>
+<dd>the path of a cached jar for the service, or <code>null</code> if none is present</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="download(java.lang.String,java.lang.String,java.nio.file.Path)">
 <h3>download</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a></span>&nbsp;<span class="element-name">download</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;version,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir)</span></div>
-<div class="block">Downloads the module jar for <code>service</code> at <code>version</code> into <code>dir</code>, verifying
- its checksum before the file is made visible and pruning any other cached version.</div>
+<div class="block">Downloads the module jar for <code>service</code> into <code>dir</code>, verifying its checksum before
+ the file is made visible and pruning any other cached version.
+
+ <p>The exact <code>version</code> is fetched when published. When it is not (the common case under
+ selective publishing, where an unchanged module is not re-released at every core version),
+ the highest published version that is less than or equal to <code>version</code> is resolved from
+ the artifact's <code>maven-metadata.xml</code> and fetched instead. A module already cached at the
+ resolved version is reused rather than re-downloaded.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>service</code> - service id (e.g. <code>sqs</code>)</dd>
-<dd><code>version</code> - module version to fetch</dd>
+<dd><code>version</code> - requested module version (typically the running core version)</dd>
 <dd><code>dir</code> - target plugin directory (created if absent)</dd>
 <dt>Returns:</dt>
-<dd>the path the jar was written to</dd>
+<dd>the path the jar was written to, or the cached path when the resolved version is
+     already present</dd>
 <dt>Throws:</dt>
 <dd><code><a href="ModuleDownloadException.html" title="class in io.cloudstub.core.download">ModuleDownloadException</a></code> - with an actionable message on any failure</dd>
 </dl>
