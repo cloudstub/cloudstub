@@ -67,6 +67,20 @@ public final class ModuleDownloader {
     }
 
     /**
+     * Returns a jar for {@code service} already present in {@code dir} at any version, regardless
+     * of which version was requested. Intended as a fallback when a download cannot reach the
+     * network: a previously provisioned (and at-download-time checksum-verified) jar is preferable
+     * to failing to start.
+     *
+     * @param dir plugin directory to inspect; may be {@code null}
+     * @param service service id (e.g. {@code sqs})
+     * @return the path of a cached jar for the service, or {@code null} if none is present
+     */
+    public static Path cachedJar(Path dir, String service) {
+        return new ModuleCache(dir).locateAnyVersion(service);
+    }
+
+    /**
      * Downloads the module jar for {@code service} into {@code dir}, verifying its checksum before
      * the file is made visible and pruning any other cached version.
      *
@@ -158,6 +172,13 @@ public final class ModuleDownloader {
             String service, String requestedVersion, Path dir) {
         MavenModuleCoordinate requested = new MavenModuleCoordinate(service, requestedVersion);
         SemanticVersion ceiling = SemanticVersion.parseOrNull(requestedVersion);
+        if (ceiling == null) {
+            throw ModuleDownloadException.provisioning(
+                    requested,
+                    dir,
+                    "that version is not published and is not a recognizable "
+                            + "MAJOR.MINOR.PATCH[-prerelease] version to match an earlier release against");
+        }
 
         String metadata = fetchMetadata(requested, dir);
         String best = null;
@@ -167,7 +188,7 @@ public final class ModuleDownloader {
             if (parsed == null) {
                 continue;
             }
-            if (ceiling != null && parsed.compareTo(ceiling) > 0) {
+            if (parsed.compareTo(ceiling) > 0) {
                 continue;
             }
             if (bestParsed == null || parsed.compareTo(bestParsed) > 0) {

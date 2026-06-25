@@ -213,7 +213,9 @@ loaded at runtime from a plugin directory. It is a drop-in mock server for local
   checksum (SHA-512 → SHA-256 →
   SHA-1); a mismatch, a missing checksum, or any transport error (including a transport failure fetching a checksum — it
   does not silently downgrade to a weaker algorithm) fails fast with a message naming the service and coordinate and how
-  to supply the jar manually.
+  to supply the jar manually. If provisioning fails (for example the network is unreachable on a restart) but a jar for
+  that service is already present in the plugin directory at any version, the cached jar is used with a warning rather
+  than failing to start; only a service with no cached jar at all is fatal.
   Disable with `--no-download` / `CLOUDSTUB_AUTO_DOWNLOAD=false` for offline/air-gapped runs (a declared-but-missing
   service then fails fast without reaching the network). The source is the fixed Central host, overridable to a single
   mirror via `--maven-base-url` / `CLOUDSTUB_MAVEN_BASE_URL`. The download engine is `io.cloudstub.core.download`

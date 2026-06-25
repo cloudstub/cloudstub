@@ -218,6 +218,20 @@ class ModuleDownloaderTest {
     }
 
     @Test
+    void failsWhenRequestedVersionIsUnparseableAndUnpublished(@TempDir Path dir) {
+        publish("0.1.0-beta.5", "beta5".getBytes(StandardCharsets.UTF_8), "sha512");
+        publishMetadata("0.1.0-beta.5");
+
+        ModuleDownloader downloader = new ModuleDownloader(baseUrl);
+        ModuleDownloadException ex =
+                assertThrows(
+                        ModuleDownloadException.class,
+                        () -> downloader.download("sqs", "latest", dir));
+        assertTrue(ex.getMessage().contains("not a recognizable"));
+        assertFalse(Files.exists(dir.resolve("cloudstub-sqs-0.1.0-beta.5.jar")));
+    }
+
+    @Test
     void rejectsPathTraversalInServiceOrVersion(@TempDir Path dir) {
         ModuleDownloader downloader = new ModuleDownloader(baseUrl);
 

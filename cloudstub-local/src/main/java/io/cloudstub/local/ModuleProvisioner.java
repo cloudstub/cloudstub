@@ -35,6 +35,17 @@ final class ModuleProvisioner {
                                 + jar.toAbsolutePath());
                 downloaded.add(service);
             } catch (ModuleDownloadException e) {
+                Path cached = ModuleDownloader.cachedJar(targetDir, service);
+                if (cached != null) {
+                    System.out.println(
+                            "[CloudStub] WARNING: could not provision service '"
+                                    + service
+                                    + "' ("
+                                    + e.getMessage()
+                                    + "); using already-cached "
+                                    + cached.toAbsolutePath());
+                    continue;
+                }
                 System.err.println("[CloudStub] ERROR: " + e.getMessage());
                 System.exit(1);
             }
