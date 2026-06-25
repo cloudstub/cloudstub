@@ -48,11 +48,10 @@ class LocalAutoDownloadTest {
             assertTrue(
                     server.awaitOutput(
                             line ->
-                                    line.contains("Downloaded")
+                                    line.contains("Provisioned service 'sqs'")
                                             && line.contains(
-                                                    "io.github.cloudstub:cloudstub-sqs:"
-                                                            + version)),
-                    "expected a download log line; got: " + server.output());
+                                                    "cloudstub-sqs-" + version + ".jar")),
+                    "expected a provisioning log line; got: " + server.output());
             assertTrue(
                     server.awaitOutput(line -> line.contains("Enabled services: sqs")),
                     "sqs should be enabled after download; got: " + server.output());
