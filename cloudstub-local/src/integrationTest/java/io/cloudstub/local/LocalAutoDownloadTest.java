@@ -49,8 +49,7 @@ class LocalAutoDownloadTest {
                     server.awaitOutput(
                             line ->
                                     line.contains("Provisioned service 'sqs'")
-                                            && line.contains(
-                                                    "cloudstub-sqs-" + version + ".jar")),
+                                            && line.contains("cloudstub-sqs-" + version + ".jar")),
                     "expected a provisioning log line; got: " + server.output());
             assertTrue(
                     server.awaitOutput(line -> line.contains("Enabled services: sqs")),
