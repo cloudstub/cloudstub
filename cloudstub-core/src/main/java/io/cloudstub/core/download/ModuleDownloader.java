@@ -1,7 +1,12 @@
 package io.cloudstub.core.download;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Provisions a CloudStub service module jar from Maven Central into a plugin directory: fetch,
@@ -23,6 +28,8 @@ public final class ModuleDownloader {
 
     /** Published Maven group shared by every CloudStub module. */
     public static final String GROUP = "io.github.cloudstub";
+
+    private static final Pattern VERSION_ELEMENT = Pattern.compile("<version>([^<]+)</version>");
 
     private final String baseUrl;
     private final HttpFetcher fetcher;
@@ -46,13 +53,6 @@ public final class ModuleDownloader {
     }
 
     /**
-     * @return the Maven coordinate string for a service at a version
-     */
-    public static String coordinate(String service, String version) {
-        return new MavenModuleCoordinate(service, version).displayCoordinate();
-    }
-
-    /**
      * Returns whether the jar for {@code service} at {@code version} is present in {@code dir} —
      * either the exact versioned jar or an unversioned {@code cloudstub-<service>.jar}. A jar of a
      * different version is not a match.
@@ -67,27 +67,61 @@ public final class ModuleDownloader {
     }
 
     /**
-     * Downloads the module jar for {@code service} at {@code version} into {@code dir}, verifying
-     * its checksum before the file is made visible and pruning any other cached version.
+     * Downloads the module jar for {@code service} into {@code dir}, verifying its checksum before
+     * the file is made visible and pruning any other cached version.
+     *
+     * <p>The exact {@code version} is fetched when published. When it is not (the common case under
+     * selective publishing, where an unchanged module is not re-released at every core version),
+     * the highest published version that is less than or equal to {@code version} is resolved from
+     * the artifact's {@code maven-metadata.xml} and fetched instead. A module already cached at the
+     * resolved version is reused rather than re-downloaded.
      *
      * @param service service id (e.g. {@code sqs})
-     * @param version module version to fetch
+     * @param version requested module version (typically the running core version)
      * @param dir target plugin directory (created if absent)
-     * @return the path the jar was written to
+     * @return the path the jar was written to, or the cached path when the resolved version is
+     *     already present
      * @throws ModuleDownloadException with an actionable message on any failure
      */
     public Path download(String service, String version, Path dir) {
-        MavenModuleCoordinate coordinate = new MavenModuleCoordinate(service, version);
-        coordinate.requireFileSystemSafe();
+        MavenModuleCoordinate requested = new MavenModuleCoordinate(service, version);
+        requested.requireFileSystemSafe();
 
-        byte[] jarBytes = fetchJar(coordinate, dir);
-        checksumVerifier.verify(coordinate, baseUrl, jarBytes, dir);
+        MavenModuleCoordinate resolved = requested;
+        byte[] jarBytes = tryFetchJar(requested, dir);
+        if (jarBytes == null) {
+            resolved = resolveHighestPublishedAtMost(service, version, dir);
+            Path cached = new ModuleCache(dir).locate(resolved);
+            if (cached != null) {
+                return cached;
+            }
+            jarBytes = fetchJar(resolved, dir);
+        }
+        checksumVerifier.verify(resolved, baseUrl, jarBytes, dir);
 
         try {
-            return new ModuleCache(dir).store(coordinate, jarBytes);
+            return new ModuleCache(dir).store(resolved, jarBytes);
         } catch (IOException e) {
             throw ModuleDownloadException.provisioning(
-                    coordinate, dir, "the jar could not be written (" + e + ")");
+                    resolved, dir, "the jar could not be written (" + e + ")");
+        }
+    }
+
+    /** Fetches the jar, returning {@code null} on a 404 so the caller can fall back. */
+    private byte[] tryFetchJar(MavenModuleCoordinate coordinate, Path dir) {
+        try {
+            return fetcher.get(coordinate.artifactUrl(baseUrl, "jar"));
+        } catch (HttpFetcher.NotFoundException notPublished) {
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw ModuleDownloadException.provisioning(
+                    coordinate, dir, "the download was interrupted");
+        } catch (IOException e) {
+            throw ModuleDownloadException.provisioning(
+                    coordinate,
+                    dir,
+                    "the download failed (" + e.getMessage() + ") — check your network connection");
         }
     }
 
@@ -112,6 +146,78 @@ public final class ModuleDownloader {
                     dir,
                     "the download failed (" + e.getMessage() + ") — check your network connection");
         }
+    }
+
+    /**
+     * Resolves the highest published version of {@code service} that is less than or equal to
+     * {@code requestedVersion}, from the artifact's {@code maven-metadata.xml}. Versions newer than
+     * the requested one are excluded so an older core never loads a module built against a newer
+     * one.
+     */
+    private MavenModuleCoordinate resolveHighestPublishedAtMost(
+            String service, String requestedVersion, Path dir) {
+        MavenModuleCoordinate requested = new MavenModuleCoordinate(service, requestedVersion);
+        SemanticVersion ceiling = SemanticVersion.parseOrNull(requestedVersion);
+
+        String metadata = fetchMetadata(requested, dir);
+        String best = null;
+        SemanticVersion bestParsed = null;
+        for (String candidate : parseVersions(metadata)) {
+            SemanticVersion parsed = SemanticVersion.parseOrNull(candidate);
+            if (parsed == null) {
+                continue;
+            }
+            if (ceiling != null && parsed.compareTo(ceiling) > 0) {
+                continue;
+            }
+            if (bestParsed == null || parsed.compareTo(bestParsed) > 0) {
+                best = candidate;
+                bestParsed = parsed;
+            }
+        }
+        if (best == null) {
+            throw ModuleDownloadException.provisioning(
+                    requested,
+                    dir,
+                    "that version is not published and no earlier published version was found");
+        }
+        MavenModuleCoordinate resolved = new MavenModuleCoordinate(service, best);
+        resolved.requireFileSystemSafe();
+        return resolved;
+    }
+
+    private String fetchMetadata(MavenModuleCoordinate coordinate, Path dir) {
+        String metadataUrl = coordinate.metadataUrl(baseUrl);
+        try {
+            return new String(fetcher.get(metadataUrl), StandardCharsets.UTF_8);
+        } catch (HttpFetcher.NotFoundException e) {
+            throw ModuleDownloadException.provisioning(
+                    coordinate,
+                    dir,
+                    "no artifact was found for that version, and no "
+                            + metadataUrl
+                            + " is published (the service name may be wrong)");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw ModuleDownloadException.provisioning(
+                    coordinate, dir, "resolving an earlier version was interrupted");
+        } catch (IOException e) {
+            throw ModuleDownloadException.provisioning(
+                    coordinate,
+                    dir,
+                    "resolving an earlier version failed ("
+                            + e.getMessage()
+                            + ") — check your network connection");
+        }
+    }
+
+    private static List<String> parseVersions(String metadataXml) {
+        List<String> versions = new ArrayList<>();
+        Matcher matcher = VERSION_ELEMENT.matcher(metadataXml);
+        while (matcher.find()) {
+            versions.add(matcher.group(1).trim());
+        }
+        return versions;
     }
 
     private static String stripTrailingSlash(String url) {

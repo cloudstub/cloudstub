@@ -13,6 +13,10 @@ on:
           - github
           - maven
           - both
+      modules:
+        description: "Modules to publish (comma-separated, e.g. cloudstub-core,cloudstub-sqs). Leave blank to publish all."
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -64,8 +68,14 @@ jobs:
       - name: Build and test
         run: gradle build
 
+      - name: Resolve publish tasks
+        id: tasks
+        env:
+          MODULES: ${{ inputs.modules }}
+        run: .github/scripts/publish-tasks.sh publishAllPublicationsToGitHubPackagesRepository >> "$GITHUB_OUTPUT"
+
       - name: Publish to GitHub Packages
-        run: gradle publishAllPublicationsToGitHubPackagesRepository
+        run: gradle ${{ steps.tasks.outputs.tasks }}
 
   maven:
     if: ${{ inputs.target == 'maven' || inputs.target == 'both' }}
@@ -113,5 +123,11 @@ jobs:
       - name: Build and test
         run: gradle build
 
+      - name: Resolve publish tasks
+        id: tasks
+        env:
+          MODULES: ${{ inputs.modules }}
+        run: .github/scripts/publish-tasks.sh publishAndReleaseToMavenCentral >> "$GITHUB_OUTPUT"
+
       - name: Publish and release to Maven Central
-        run: gradle publishAndReleaseToMavenCentral
+        run: gradle ${{ steps.tasks.outputs.tasks }}

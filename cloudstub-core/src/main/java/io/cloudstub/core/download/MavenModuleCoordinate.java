@@ -48,6 +48,12 @@ final class MavenModuleCoordinate {
                 + artifactFileName(extension);
     }
 
+    /** URL of the artifact's {@code maven-metadata.xml} (version-independent). */
+    String metadataUrl(String baseUrl) {
+        String groupPath = ModuleDownloader.GROUP.replace('.', '/');
+        return baseUrl + "/" + groupPath + "/" + artifactId() + "/maven-metadata.xml";
+    }
+
     void requireFileSystemSafe() {
         requireSafePathSegment("service", service);
         requireSafePathSegment("version", version);

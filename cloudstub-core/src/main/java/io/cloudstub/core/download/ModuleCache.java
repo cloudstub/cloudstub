@@ -29,6 +29,22 @@ final class ModuleCache {
         }
     }
 
+    /**
+     * @return the path of the cached jar for {@code coordinate} (preferring the versioned name over
+     *     an unversioned one), or {@code null} if none is present
+     */
+    Path locate(MavenModuleCoordinate coordinate) {
+        if (directory == null) {
+            return null;
+        }
+        Path versioned = directory.resolve(coordinate.jarFileName());
+        if (Files.exists(versioned)) {
+            return versioned;
+        }
+        Path unversioned = directory.resolve(coordinate.unversionedJarFileName());
+        return Files.exists(unversioned) ? unversioned : null;
+    }
+
     Path store(MavenModuleCoordinate coordinate, byte[] jarBytes) throws IOException {
         Files.createDirectories(directory);
         String jarName = coordinate.jarFileName();

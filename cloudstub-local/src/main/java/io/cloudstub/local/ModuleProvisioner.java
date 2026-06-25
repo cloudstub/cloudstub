@@ -29,9 +29,9 @@ final class ModuleProvisioner {
             try {
                 Path jar = downloader.download(service, version, targetDir);
                 System.out.println(
-                        "[CloudStub] Downloaded "
-                                + ModuleDownloader.coordinate(service, version)
-                                + " -> "
+                        "[CloudStub] Provisioned service '"
+                                + service
+                                + "' -> "
                                 + jar.toAbsolutePath());
                 downloaded.add(service);
             } catch (ModuleDownloadException e) {
