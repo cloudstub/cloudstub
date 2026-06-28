@@ -4,6 +4,7 @@ import io.cloudstub.core.CloudStub;
 import io.cloudstub.core.download.CoreVersion;
 import io.cloudstub.core.download.ModuleDownloader;
 import io.cloudstub.core.spi.CloudStubService;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -88,6 +89,7 @@ public final class CloudStubExtension
     private Path modulesCacheDir = DEFAULT_CACHE_DIR;
     private String mavenBaseUrl;
     private CloudStub cloudMock;
+    private URLClassLoader moduleLoader;
 
     /**
      * Registers a service implementation to be installed when CloudStub starts. Use this for stubs
@@ -195,8 +197,9 @@ public final class CloudStubExtension
      * Provisions the requested modules. A requested id already discoverable on the application
      * classpath is left to {@code CloudStub.start()}'s own {@code ServiceLoader} (so its classpath
      * copy, including any AWS-SDK-side component such as the S3 virtual-host interceptor, stays
-     * active and it is not registered twice). Each remaining id is downloaded if not cached and
-     * registered from a classloader over its jar.
+     * active, and it is not registered twice). Each remaining id is taken from the cache at the
+     * requested version, or downloaded if absent, and registered from a classloader over its jar.
+     * The classloader is retained and closed in {@code afterAll}.
      */
     private void provisionModules() {
         if (moduleIds.isEmpty()) {
@@ -217,18 +220,17 @@ public final class CloudStubExtension
                 mavenBaseUrl != null ? new ModuleDownloader(mavenBaseUrl) : new ModuleDownloader();
         List<URL> jarUrls = new ArrayList<>();
         for (String id : toDownload) {
-            Path jar =
-                    ModuleDownloader.isCached(modulesCacheDir, id, version)
-                            ? ModuleDownloader.cachedJar(modulesCacheDir, id)
-                            : downloader.download(id, version, modulesCacheDir);
+            Path jar = ModuleDownloader.cachedJar(modulesCacheDir, id, version);
+            if (jar == null) {
+                jar = downloader.download(id, version, modulesCacheDir);
+            }
             try {
                 jarUrls.add(jar.toUri().toURL());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
-        ClassLoader moduleLoader =
-                new URLClassLoader(jarUrls.toArray(new URL[0]), contextClassLoader());
+        moduleLoader = new URLClassLoader(jarUrls.toArray(new URL[0]), contextClassLoader());
         Set<String> registered = new LinkedHashSet<>();
         for (CloudStubService service : ServiceLoader.load(CloudStubService.class, moduleLoader)) {
             String id = service.serviceId();
@@ -255,9 +257,20 @@ public final class CloudStubExtension
 
     @Override
     public void afterAll(@NonNull ExtensionContext context) {
-        if (cloudMock != null) {
-            cloudMock.stop();
-            cloudMock = null;
+        try {
+            if (cloudMock != null) {
+                cloudMock.stop();
+                cloudMock = null;
+            }
+        } finally {
+            if (moduleLoader != null) {
+                try {
+                    moduleLoader.close();
+                } catch (IOException e) {
+                    // Best effort: the server is already stopped and the loader is discarded.
+                }
+                moduleLoader = null;
+            }
         }
     }
 
