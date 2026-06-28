@@ -31,6 +31,7 @@ shadowJar {
     relocate 'org.eclipse.jetty',                'io.cloudstub.shaded.jetty'
     relocate 'com.github.tomakehurst.wiremock',  'io.cloudstub.shaded.wiremock'
     relocate 'com.fasterxml.jackson',            'io.cloudstub.shaded.jackson'
+    relocate 'com.jayway.jsonpath',              'io.cloudstub.shaded.jsonpath'
 
     // Keep SLF4J API unshaded so the user's logging configuration applies.
     dependencies {
