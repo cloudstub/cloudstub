@@ -4,6 +4,21 @@ All notable changes to CloudStub are recorded here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). All published modules share a single
 lockstep version.
 
+## [Unreleased]
+
+### Fixed
+
+- `cloudstub-core`: the published POM no longer declares the bundled WireMock and Jackson as
+  dependencies. Both are relocated inside the shadow JAR, so leaking them transitively pulled
+  un-relocated WireMock plus Jetty 11 onto a consumer's classpath. Under Spring Boot 4 (Jetty 12)
+  that aborted CloudStub startup with `FatalStartupException: Jetty 11 is not present`. The published
+  POM now declares only `slf4j-api` (kept unshaded so the consumer's logging config applies). (#178)
+- `cloudstub-core`: the shadow JAR now relocates `com.jayway.jsonpath` alongside WireMock and Jackson.
+  It was bundled at its original package, colliding with a consumer's own `json-path` (e.g. the copy
+  `spring-boot-starter-test` pulls in). The collided `JacksonJsonProvider` resolved against un-relocated
+  Jackson, which Spring Boot 4 (Jackson 3) does not provide, aborting CloudStub startup with
+  `NoClassDefFoundError: com/fasterxml/jackson/databind/ObjectMapper`. (#178)
+
 ## [0.1.0-beta.5] - 2026-06-24
 
 Fixes S3 uploads from a credentialed client.

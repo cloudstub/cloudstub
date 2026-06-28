@@ -115,14 +115,26 @@ if (publishable) {
             withJavadocJar()
         }
 
-        // afterEvaluate so components.shadow exists.
+        // afterEvaluate so the shadow variant has been added to the java component.
         afterEvaluate {
             publishing {
                 publications {
                     mavenJava(MavenPublication) {
                         from(components.findByName('shadow') ?: components.java)
                         artifactId = project.name
-                        pom { configurePom(delegate, info) }
+                        pom {
+                            configurePom(delegate, info)
+                            // `shadow`-configuration deps publish as optional in the POM; clear that
+                            // so they resolve transitively for Maven consumers (e.g. core's slf4j-api).
+                            withXml {
+                                asNode().dependencies.dependency
+                                    .findAll { it.optional.text() == 'true' }
+                                    .each {
+                                        it.remove(it.optional)
+                                        it.scope*.value = 'runtime'
+                                    }
+                            }
+                        }
                     }
                 }
             }

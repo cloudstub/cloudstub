@@ -3,6 +3,8 @@ apply plugin: 'io.github.goooler.shadow'
 dependencies {
     implementation libs.wiremock
     implementation libs.jackson.databind
+    // Excluded from the shaded jar (kept unshaded), so declare it as the published runtime dependency.
+    shadow libs.slf4j.api
     testImplementation libs.slf4j.simple
 }
 
@@ -29,6 +31,7 @@ shadowJar {
     relocate 'org.eclipse.jetty',                'io.cloudstub.shaded.jetty'
     relocate 'com.github.tomakehurst.wiremock',  'io.cloudstub.shaded.wiremock'
     relocate 'com.fasterxml.jackson',            'io.cloudstub.shaded.jackson'
+    relocate 'com.jayway.jsonpath',              'io.cloudstub.shaded.jsonpath'
 
     // Keep SLF4J API unshaded so the user's logging configuration applies.
     dependencies {
@@ -36,9 +39,36 @@ shadowJar {
     }
 }
 
+// Publish only the shadow (fat) JAR. Skip the thin-jar variants so the POM is built from
+// shadowRuntimeElements; otherwise the bundled WireMock + Jackson leak into it as real dependencies.
+components.java.withVariantsFromConfiguration(configurations.apiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.runtimeElements) { skip() }
+
 // Give the regular JAR an 'original' classifier so the shadow JAR (no classifier)
 // becomes the primary published artifact. The regular JAR must still be built so
 // Gradle can resolve project-to-project compile dependencies via class directories.
 jar {
     archiveClassifier.set('original')
+}
+
+// #178 guard: the published POM must declare none of the libraries bundled+relocated into the shadow
+// jar, or a consumer pulls un-relocated WireMock + Jetty. Runs against the generated POM (the
+// project-dependency path inside the monorepo masks this), wired into check.
+afterEvaluate {
+    def pomTask = tasks.findByName('generatePomFileForMavenJavaPublication')
+    if (pomTask != null) {
+        def verify = tasks.register('verifyShadedPom') {
+            dependsOn pomTask
+            doLast {
+                def leaked = new groovy.xml.XmlSlurper().parse(pomTask.destination)
+                        .dependencies.dependency
+                        .collect { "${it.groupId.text()}:${it.artifactId.text()}" }
+                        .findAll { it ==~ /^(org\.wiremock|org\.eclipse\.jetty|com\.fasterxml\.jackson).*/ }
+                if (leaked) {
+                    throw new GradleException("cloudstub-core POM leaks bundled dependencies: ${leaked}")
+                }
+            }
+        }
+        tasks.named('check').configure { dependsOn verify }
+    }
 }
