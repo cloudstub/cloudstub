@@ -2,6 +2,7 @@ package io.cloudstub.core.download;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -253,6 +254,18 @@ class ModuleDownloaderTest {
         Files.createFile(dir.resolve("cloudstub-sqs-0.1.0.jar"));
         assertTrue(ModuleDownloader.isCached(dir, "sqs", "0.1.0"));
         assertFalse(ModuleDownloader.isCached(dir, "sqs", "0.2.0"));
+    }
+
+    @Test
+    void cachedJarResolvesTheExactRequestedVersion(@TempDir Path dir) throws IOException {
+        assertNull(ModuleDownloader.cachedJar(dir, "sqs", "0.1.0"));
+        Files.createFile(dir.resolve("cloudstub-sqs-0.1.0.jar"));
+
+        assertEquals(
+                dir.resolve("cloudstub-sqs-0.1.0.jar"),
+                ModuleDownloader.cachedJar(dir, "sqs", "0.1.0"));
+        // A different version present in the same dir is not a match.
+        assertNull(ModuleDownloader.cachedJar(dir, "sqs", "0.2.0"));
     }
 
     @Test

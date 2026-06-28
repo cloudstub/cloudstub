@@ -81,6 +81,20 @@ public final class ModuleDownloader {
     }
 
     /**
+     * Returns the cached jar for {@code service} at exactly {@code version} (the versioned jar, or
+     * an unversioned {@code cloudstub-<service>.jar}), or {@code null} if that version is not
+     * cached. Unlike {@link #cachedJar(Path, String)}, a jar of a different version is not a match.
+     *
+     * @param dir plugin directory to inspect; may be {@code null}
+     * @param service service id (e.g. {@code sqs})
+     * @param version requested module version
+     * @return the path of the cached jar for that exact version, or {@code null} if absent
+     */
+    public static Path cachedJar(Path dir, String service, String version) {
+        return new ModuleCache(dir).locate(new MavenModuleCoordinate(service, version));
+    }
+
+    /**
      * Downloads the module jar for {@code service} into {@code dir}, verifying its checksum before
      * the file is made visible and pruning any other cached version.
      *
