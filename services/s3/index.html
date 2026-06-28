@@ -1356,6 +1356,15 @@ acts only in the JVM under test and leaves a real S3 client untouched.</p>
 other mock-specific configuration. Path-style remains supported alongside virtual-hosted, so non-Java
 tooling that addresses CloudStub path-style (for example <code>curl</code> against <code>http://localhost:4566/{bucket}/{key}</code>,
 or an AWS CLI configured for path addressing) works directly.</p>
+<div class="admonition warning">
+<p class="admonition-title">S3 must be a test dependency, not download-only</p>
+<p>Because that interceptor is an AWS SDK component discovered from the application classpath, the
+<a href="../../junit-extension/">JUnit extension</a>'s <code>withModules("s3")</code> cannot provision it: a downloaded
+module supplies server-side stubs only. Declare <code>cloudstub-s3</code> as a test dependency instead (its
+stubs are then discovered automatically, so it does not go in <code>withModules(...)</code>), or enable
+<code>pathStyleAccessEnabled</code> on the <code>S3Client</code> and provision it with <code>withModules</code> like any other
+module.</p>
+</div>
 <h2 id="standalone-usage">Standalone usage</h2>
 <p>Start the standalone server with the S3 module enabled (it is auto-downloaded if not already in the
 plugin directory):</p>

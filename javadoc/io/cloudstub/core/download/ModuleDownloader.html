@@ -151,19 +151,28 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns a jar for <code>service</code> already present in <code>dir</code> at any version, regardless
  of which version was requested.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#download(java.lang.String,java.lang.String,java.nio.file.Path)" class="member-name-link">download</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#cachedJar(java.nio.file.Path,java.lang.String,java.lang.String)" class="member-name-link">cachedJar</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;version)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns the cached jar for <code>service</code> at exactly <code>version</code> (the versioned jar, or
+ an unversioned <code>cloudstub-&lt;service&gt;.jar</code>), or <code>null</code> if that version is not
+ cached.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#download(java.lang.String,java.lang.String,java.nio.file.Path)" class="member-name-link">download</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;version,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Downloads the module jar for <code>service</code> into <code>dir</code>, verifying its checksum before
  the file is made visible and pruning any other cached version.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isCached(java.nio.file.Path,java.lang.String,java.lang.String)" class="member-name-link">isCached</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isCached(java.nio.file.Path,java.lang.String,java.lang.String)" class="member-name-link">isCached</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;version)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns whether the jar for <code>service</code> at <code>version</code> is present in <code>dir</code> —
  either the exact versioned jar or an unversioned <code>cloudstub-&lt;service&gt;.jar</code>.</div>
 </div>
@@ -283,6 +292,25 @@ loadScripts(document, 'script');</script>
 <dd><code>service</code> - service id (e.g. <code>sqs</code>)</dd>
 <dt>Returns:</dt>
 <dd>the path of a cached jar for the service, or <code>null</code> if none is present</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="cachedJar(java.nio.file.Path,java.lang.String,java.lang.String)">
+<h3>cachedJar</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a></span>&nbsp;<span class="element-name">cachedJar</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;dir,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;service,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;version)</span></div>
+<div class="block">Returns the cached jar for <code>service</code> at exactly <code>version</code> (the versioned jar, or
+ an unversioned <code>cloudstub-&lt;service&gt;.jar</code>), or <code>null</code> if that version is not
+ cached. Unlike <a href="#cachedJar(java.nio.file.Path,java.lang.String)"><code>cachedJar(Path, String)</code></a>, a jar of a different version is not a match.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>dir</code> - plugin directory to inspect; may be <code>null</code></dd>
+<dd><code>service</code> - service id (e.g. <code>sqs</code>)</dd>
+<dd><code>version</code> - requested module version</dd>
+<dt>Returns:</dt>
+<dd>the path of the cached jar for that exact version, or <code>null</code> if absent</dd>
 </dl>
 </section>
 </li>

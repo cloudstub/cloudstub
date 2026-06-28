@@ -183,6 +183,12 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns a jar for <code>service</code> already present in <code>dir</code> at any version, regardless
  of which version was requested.</div>
 </dd>
+<dt><a href="io/cloudstub/core/download/ModuleDownloader.html#cachedJar(java.nio.file.Path,java.lang.String,java.lang.String)" class="member-name-link">cachedJar(Path, String, String)</a> - Static method in class io.cloudstub.core.download.<a href="io/cloudstub/core/download/ModuleDownloader.html" title="class in io.cloudstub.core.download">ModuleDownloader</a></dt>
+<dd>
+<div class="block">Returns the cached jar for <code>service</code> at exactly <code>version</code> (the versioned jar, or
+ an unversioned <code>cloudstub-&lt;service&gt;.jar</code>), or <code>null</code> if that version is not
+ cached.</div>
+</dd>
 <dt><a href="io/cloudstub/local/cli/CloudStubCli.html#call()" class="member-name-link">call()</a> - Method in class io.cloudstub.local.cli.<a href="io/cloudstub/local/cli/CloudStubCli.html" title="class in io.cloudstub.local.cli">CloudStubCli</a></dt>
 <dd>
 <div class="block">No subcommand given — show usage.</div>
@@ -1558,9 +1564,33 @@ the order they are declared.</div>
 <dd>
 <div class="block">Returns a copy of this response with an additional header.</div>
 </dd>
+<dt><a href="io/cloudstub/junit/CloudStubExtension.html#withMavenBaseUrl(java.lang.String)" class="member-name-link">withMavenBaseUrl(String)</a> - Method in class io.cloudstub.junit.<a href="io/cloudstub/junit/CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></dt>
+<dd>
+<div class="block">Sets the Maven repository base URL module jars are downloaded from.</div>
+</dd>
 <dt><a href="io/cloudstub/core/CloudStub.html#withMaxRequestHistory(int)" class="member-name-link">withMaxRequestHistory(int)</a> - Method in class io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></dt>
 <dd>
 <div class="block">Caps the number of request-history entries retained in memory.</div>
+</dd>
+<dt><a href="io/cloudstub/junit/CloudStubExtension.html#withModule(java.lang.String)" class="member-name-link">withModule(String)</a> - Method in class io.cloudstub.junit.<a href="io/cloudstub/junit/CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></dt>
+<dd>
+<div class="block">Records a published service module to auto-download by id.</div>
+</dd>
+<dt><a href="io/cloudstub/junit/CloudStubExtension.html#withModules(java.lang.String...)" class="member-name-link">withModules(String...)</a> - Method in class io.cloudstub.junit.<a href="io/cloudstub/junit/CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></dt>
+<dd>
+<div class="block">Records several published service modules to auto-download by id; the plural of <a href="io/cloudstub/junit/CloudStubExtension.html#withModule(java.lang.String)"><code>CloudStubExtension.withModule(String)</code></a>.</div>
+</dd>
+<dt><a href="io/cloudstub/junit/CloudStubExtension.html#withModules(java.util.List)" class="member-name-link">withModules(List&lt;String&gt;)</a> - Method in class io.cloudstub.junit.<a href="io/cloudstub/junit/CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></dt>
+<dd>
+<div class="block">Records several published service modules to auto-download by id; the plural of <a href="io/cloudstub/junit/CloudStubExtension.html#withModule(java.lang.String)"><code>CloudStubExtension.withModule(String)</code></a>.</div>
+</dd>
+<dt><a href="io/cloudstub/junit/CloudStubExtension.html#withModulesCacheDir(java.nio.file.Path)" class="member-name-link">withModulesCacheDir(Path)</a> - Method in class io.cloudstub.junit.<a href="io/cloudstub/junit/CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></dt>
+<dd>
+<div class="block">Sets the directory used to cache downloaded module jars.</div>
+</dd>
+<dt><a href="io/cloudstub/junit/CloudStubExtension.html#withModuleVersion(java.lang.String)" class="member-name-link">withModuleVersion(String)</a> - Method in class io.cloudstub.junit.<a href="io/cloudstub/junit/CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></dt>
+<dd>
+<div class="block">Sets the version of the modules requested via <a href="io/cloudstub/junit/CloudStubExtension.html#withModule(java.lang.String)"><code>CloudStubExtension.withModule(java.lang.String)</code></a>/<a href="io/cloudstub/junit/CloudStubExtension.html#withModules(java.lang.String...)"><code>CloudStubExtension.withModules(java.lang.String...)</code></a>.</div>
 </dd>
 <dt><a href="io/cloudstub/core/CloudStub.html#withPersistenceBackend(io.cloudstub.core.StatePersistence)" class="member-name-link">withPersistenceBackend(StatePersistence)</a> - Method in class io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></dt>
 <dd>
@@ -1576,7 +1606,11 @@ the order they are declared.</div>
 </dd>
 <dt><a href="io/cloudstub/junit/CloudStubExtension.html#withService(io.cloudstub.core.spi.CloudStubService)" class="member-name-link">withService(CloudStubService)</a> - Method in class io.cloudstub.junit.<a href="io/cloudstub/junit/CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></dt>
 <dd>
-<div class="block">Registers a service module to be installed when CloudStub starts.</div>
+<div class="block">Registers a service implementation to be installed when CloudStub starts.</div>
+</dd>
+<dt><a href="io/cloudstub/junit/CloudStubExtension.html#withServices(io.cloudstub.core.spi.CloudStubService...)" class="member-name-link">withServices(CloudStubService...)</a> - Method in class io.cloudstub.junit.<a href="io/cloudstub/junit/CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></dt>
+<dd>
+<div class="block">Registers several service implementations at once; the plural of <a href="io/cloudstub/junit/CloudStubExtension.html#withService(io.cloudstub.core.spi.CloudStubService)"><code>CloudStubExtension.withService(CloudStubService)</code></a>.</div>
 </dd>
 <dt><a href="io/cloudstub/core/CloudStub.html#withStoreDirectory(java.nio.file.Path)" class="member-name-link">withStoreDirectory(Path)</a> - Method in class io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></dt>
 <dd>

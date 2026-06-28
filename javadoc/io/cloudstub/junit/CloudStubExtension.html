@@ -107,6 +107,22 @@ implements org.junit.jupiter.api.extension.BeforeAllCallback, org.junit.jupiter.
  }
  </pre>
 
+ <h2>Auto-downloaded modules (<code>withModules</code>)</h2>
+
+ <pre>
+ @RegisterExtension
+ static CloudStubExtension cloudMock = new CloudStubExtension()
+         .withModules("sqs", "secretsmanager");
+ </pre>
+
+ <p>The named module jars are fetched from Maven Central during <code>beforeAll</code> and registered,
+ so the modules need not be on the test classpath. <a href="#withService(io.cloudstub.core.spi.CloudStubService)"><code>withService(io.cloudstub.core.spi.CloudStubService)</code></a> registers an in-process
+ instance (for stubs that are not published artifacts); <a href="#withModule(java.lang.String)"><code>withModule(java.lang.String)</code></a>/<a href="#withModules(java.lang.String...)"><code>withModules(java.lang.String...)</code></a>
+ downloads a published module by id. Downloads are cached under <code>~/.cloudstub/modules</code> by
+ default, so a module fetched once is reused across runs and JVMs. A module that ships a
+ client-side AWS SDK component (currently only S3) cannot be provisioned by download and must be a
+ test dependency; see the JUnit Extension reference for details.
+
  <h2>Fault injection</h2>
 
  <pre>
@@ -163,9 +179,44 @@ implements org.junit.jupiter.api.extension.BeforeAllCallback, org.junit.jupiter.
 <div class="block">Returns the port the embedded server is listening on.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMavenBaseUrl(java.lang.String)" class="member-name-link">withMavenBaseUrl</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mavenBaseUrl)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the Maven repository base URL module jars are downloaded from.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withModule(java.lang.String)" class="member-name-link">withModule</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;serviceId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records a published service module to auto-download by id.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withModules(java.lang.String...)" class="member-name-link">withModules</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;serviceIds)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records several published service modules to auto-download by id; the plural of <a href="#withModule(java.lang.String)"><code>withModule(String)</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withModules(java.util.List)" class="member-name-link">withModules</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;serviceIds)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records several published service modules to auto-download by id; the plural of <a href="#withModule(java.lang.String)"><code>withModule(String)</code></a>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withModulesCacheDir(java.nio.file.Path)" class="member-name-link">withModulesCacheDir</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;cacheDir)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the directory used to cache downloaded module jars.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withModuleVersion(java.lang.String)" class="member-name-link">withModuleVersion</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;version)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the version of the modules requested via <a href="#withModule(java.lang.String)"><code>withModule(java.lang.String)</code></a>/<a href="#withModules(java.lang.String...)"><code>withModules(java.lang.String...)</code></a>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withService(io.cloudstub.core.spi.CloudStubService)" class="member-name-link">withService</a><wbr>(<a href="../core/spi/CloudStubService.html" title="interface in io.cloudstub.core.spi">CloudStubService</a>&nbsp;service)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Registers a service module to be installed when CloudStub starts.</div>
+<div class="block">Registers a service implementation to be installed when CloudStub starts.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withServices(io.cloudstub.core.spi.CloudStubService...)" class="member-name-link">withServices</a><wbr>(<a href="../core/spi/CloudStubService.html" title="interface in io.cloudstub.core.spi">CloudStubService</a>...&nbsp;services)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Registers several service implementations at once; the plural of <a href="#withService(io.cloudstub.core.spi.CloudStubService)"><code>withService(CloudStubService)</code></a>.</div>
 </div>
 </div>
 </div>
@@ -202,8 +253,95 @@ implements org.junit.jupiter.api.extension.BeforeAllCallback, org.junit.jupiter.
 <section class="detail" id="withService(io.cloudstub.core.spi.CloudStubService)">
 <h3>withService</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></span>&nbsp;<span class="element-name">withService</span><wbr><span class="parameters">(<a href="../core/spi/CloudStubService.html" title="interface in io.cloudstub.core.spi">CloudStubService</a>&nbsp;service)</span></div>
-<div class="block">Registers a service module to be installed when CloudStub starts. Must be called before the
+<div class="block">Registers a service implementation to be installed when CloudStub starts. Use this for stubs
+ that are not published artifacts (custom or test-local services). Must be called before the
  extension starts (i.e. before any test runs).</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withServices(io.cloudstub.core.spi.CloudStubService...)">
+<h3>withServices</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></span>&nbsp;<span class="element-name">withServices</span><wbr><span class="parameters">(<a href="../core/spi/CloudStubService.html" title="interface in io.cloudstub.core.spi">CloudStubService</a>...&nbsp;services)</span></div>
+<div class="block">Registers several service implementations at once; the plural of <a href="#withService(io.cloudstub.core.spi.CloudStubService)"><code>withService(CloudStubService)</code></a>. Must be called before the extension starts.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withModule(java.lang.String)">
+<h3>withModule</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></span>&nbsp;<span class="element-name">withModule</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;serviceId)</span></div>
+<div class="block">Records a published service module to auto-download by id. The module jar (<code>
+ io.github.cloudstub:cloudstub-&lt;serviceId&gt;</code>) is fetched from Maven Central during <code>
+ beforeAll</code> if it is not already cached, then registered without needing the module on the
+ test classpath. Repeated ids collapse to a single fetch. Must be called before the extension
+ starts.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>serviceId</code> - service id (e.g. <code>sqs</code>)</dd>
+<dt>Returns:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withModules(java.lang.String...)">
+<h3>withModules</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></span>&nbsp;<span class="element-name">withModules</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;serviceIds)</span></div>
+<div class="block">Records several published service modules to auto-download by id; the plural of <a href="#withModule(java.lang.String)"><code>withModule(String)</code></a>. Must be called before the extension starts.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withModules(java.util.List)">
+<h3>withModules</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></span>&nbsp;<span class="element-name">withModules</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;serviceIds)</span></div>
+<div class="block">Records several published service modules to auto-download by id; the plural of <a href="#withModule(java.lang.String)"><code>withModule(String)</code></a>. Must be called before the extension starts.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withModuleVersion(java.lang.String)">
+<h3>withModuleVersion</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></span>&nbsp;<span class="element-name">withModuleVersion</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;version)</span></div>
+<div class="block">Sets the version of the modules requested via <a href="#withModule(java.lang.String)"><code>withModule(java.lang.String)</code></a>/<a href="#withModules(java.lang.String...)"><code>withModules(java.lang.String...)</code></a>.
+ Defaults to <a href="../core/download/CoreVersion.html#current()"><code>CoreVersion.current()</code></a>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withModulesCacheDir(java.nio.file.Path)">
+<h3>withModulesCacheDir</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></span>&nbsp;<span class="element-name">withModulesCacheDir</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" title="class or interface in java.nio.file" class="external-link">Path</a>&nbsp;cacheDir)</span></div>
+<div class="block">Sets the directory used to cache downloaded module jars. Defaults to <code>
+ ~/.cloudstub/modules</code>. A persistent directory lets a module fetched once be reused across
+ test classes, runs, and JVMs.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withMavenBaseUrl(java.lang.String)">
+<h3>withMavenBaseUrl</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></span>&nbsp;<span class="element-name">withMavenBaseUrl</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mavenBaseUrl)</span></div>
+<div class="block">Sets the Maven repository base URL module jars are downloaded from. Defaults to <a href="../core/download/ModuleDownloader.html#CENTRAL_BASE_URL"><code>Maven Central</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><code>this</code> for fluent chaining</dd>

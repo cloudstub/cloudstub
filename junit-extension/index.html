@@ -670,6 +670,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#auto-downloading-service-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-downloading service modules
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Auto-downloading service modules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-withmodules-can-provision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What withModules can provision
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#lifecycle" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1282,6 +1310,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#auto-downloading-service-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-downloading service modules
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Auto-downloading service modules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-withmodules-can-provision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What withModules can provision
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#lifecycle" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1402,31 +1458,97 @@
 <li><code>.withService()</code> adds a module explicitly, in addition to any modules discovered via <code>ServiceLoader</code>. Useful in module-level tests where the classpath structure may prevent auto-discovery.</li>
 <li><code>cloudMock.port()</code> is only valid after <code>beforeAll</code> has run, so it is safe inside <code>@BeforeAll</code> and all <code>@Test</code> methods.</li>
 </ol>
+<h2 id="auto-downloading-service-modules">Auto-downloading service modules</h2>
+<p><code>withModule(String)</code> and <code>withModules(...)</code> name published modules by service id. The extension downloads each named module jar (<code>io.github.cloudstub:cloudstub-&lt;serviceId&gt;</code>) from Maven Central in <code>beforeAll</code> and registers it, so a module without an SDK-side component needs no per-module dependency: only <code>cloudstub-testing</code> (or <code>cloudstub-junit</code>) is required.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@RegisterExtension</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">static</span><span class="w"> </span><span class="n">CloudStubExtension</span><span class="w"> </span><span class="n">cloudMock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CloudStubExtension</span><span class="p">()</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">        </span><span class="p">.</span><span class="na">withModules</span><span class="p">(</span><span class="s">&quot;sqs&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;secretsmanager&quot;</span><span class="p">);</span><span class="w">   </span><span class="c1">// (1)!</span>
+</span></code></pre></div>
+<ol>
+<li>Use <code>withModule("sqs")</code> for a single service. Repeated ids (across <code>withModule</code> and <code>withModules</code>) collapse to one download.</li>
+</ol>
+<p>Downloads are cached under <code>~/.cloudstub/modules</code> by default, so a module fetched once is reused across test classes, runs, and JVMs. A cached module is never re-downloaded. The first run needs network access to Maven Central; later runs are offline-safe.</p>
+<p>A module that is already a test dependency is discovered automatically via <code>ServiceLoader</code> at startup, so it does not need to be listed in <code>withModules(...)</code>. If it is listed anyway, the classpath copy is used and it is not downloaded or registered twice.</p>
+<p><code>withService</code> and <code>withModule</code> are distinct operations: <code>withService(CloudStubService)</code> (and its plural <code>withServices(...)</code>) registers an in-process instance, for custom or test-local stubs that are not published artifacts; <code>withModule</code>/<code>withModules</code> downloads a published module by id.</p>
+<p>Optional settings:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>withModuleVersion(String)</code></td>
+<td>running core version</td>
+<td>Pin the module version (recommended for determinism).</td>
+</tr>
+<tr>
+<td><code>withModulesCacheDir(Path)</code></td>
+<td><code>~/.cloudstub/modules</code></td>
+<td>Directory used to cache downloaded module jars.</td>
+</tr>
+<tr>
+<td><code>withMavenBaseUrl(String)</code></td>
+<td>Maven Central</td>
+<td>Repository base URL (e.g. a corporate mirror).</td>
+</tr>
+</tbody>
+</table>
+<p>When the exact requested version is not published, the highest published version at most the requested one is resolved and fetched. Each download is checksum-verified before it is registered.</p>
+<h3 id="what-withmodules-can-provision">What <code>withModules</code> can provision</h3>
+<p><code>withModules</code> provisions a module's <strong>server-side stubs only</strong>.</p>
+<ul>
+<li><strong>Download-only modules</strong> have no client-side component. They are fully provisioned by <code>withModules</code> and need no per-module dependency. This is the default; most modules fall here.</li>
+<li><strong>Modules with a client-side AWS SDK component</strong> cannot be fully provisioned by download. The AWS SDK discovers execution interceptors (<code>software/amazon/awssdk/global/handlers/execution.interceptors</code>) from its own application classloader, not from the isolated classloader a downloaded jar is loaded into, so a downloaded jar's interceptor is never registered with the SDK.</li>
+</ul>
+<p>A module in the second group is not provisioned with <code>withModules</code>. Instead, use one of:</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>How it works</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Declare the module as a test dependency</td>
+<td>Its interceptor is on the application classpath where the SDK finds it, and the stubs are discovered automatically via <code>ServiceLoader</code>. Do not also list it in <code>withModules(...)</code>.</td>
+</tr>
+<tr>
+<td>Configure the AWS client to not need the interceptor</td>
+<td>Removes the dependency on the client-side component, so the downloaded stubs suffice and <code>withModules(...)</code> works.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>S3 is the only such module today.</strong> <code>cloudstub-s3</code> ships <code>S3VirtualHostStyleInterceptor</code>, which rewrites virtual-hosted-style requests (<code>mybucket.localhost</code>) to the path-style addressing CloudStub's stubs serve. Without it on the application classpath a default <code>S3Client</code> sends virtual-hosted-style requests that no stub matches, and S3 calls fail with <code>404</code>. So either declare <code>cloudstub-s3</code> as a test dependency, or enable path-style access on the <code>S3Client</code> (<code>pathStyleAccessEnabled</code> / <code>forcePathStyle(true)</code>) and provision it with <code>withModules</code>.</p>
 <h2 id="lifecycle">Lifecycle</h2>
 <p><code>CloudStubExtension</code> creates one <code>CloudStub</code> instance per test class. The lifecycle is:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>beforeAll  → CloudStub.start()   (server up, aws.endpoint-url set)
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>beforeEach → fault annotations applied
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>test runs
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>afterEach  → all faults cleared
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>afterAll   → CloudStub.stop()    (server down, aws.endpoint-url cleared)
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>beforeAll  → CloudStub.start()   (server up, aws.endpoint-url set)
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>beforeEach → fault annotations applied
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>test runs
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>afterEach  → all faults cleared
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>afterAll   → CloudStub.stop()    (server down, aws.endpoint-url cleared)
 </span></code></pre></div>
 <p>Each test class gets its own independent instance. One class stopping never affects another class's running instance.</p>
 <h2 id="fault-injection">Fault injection</h2>
 <p>Fault annotations can be placed on individual test methods. Faults are always cleared after each test, even if the test throws.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">CloudStubExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kd">class</span> <span class="nc">ResilienceTest</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nd">@SimulateThrottle</span><span class="p">(</span><span class="n">service</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;sqs&quot;</span><span class="p">)</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="nd">@Test</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">handlesThrottling</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">        </span><span class="c1">// SqsException with errorCode &quot;ThrottlingException&quot;</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="nd">@Test</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">normalAfterThrottle</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">        </span><span class="c1">// Fault was cleared, so a normal response is returned.</span>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">CloudStubExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kd">class</span> <span class="nc">ResilienceTest</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="nd">@SimulateThrottle</span><span class="p">(</span><span class="n">service</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;sqs&quot;</span><span class="p">)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="nd">@Test</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">handlesThrottling</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">        </span><span class="c1">// SqsException with errorCode &quot;ThrottlingException&quot;</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">    </span><span class="nd">@Test</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">normalAfterThrottle</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">        </span><span class="c1">// Fault was cleared, so a normal response is returned.</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>See <a href="../fault-injection/">Fault Injection</a> for all three annotations and their behaviour.</p>
 
