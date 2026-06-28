@@ -90,6 +90,50 @@ class OrderServiceTest {
 1. `.withService()` adds a module explicitly, in addition to any modules discovered via `ServiceLoader`. Useful in module-level tests where the classpath structure may prevent auto-discovery.
 2. `cloudMock.port()` is only valid after `beforeAll` has run, so it is safe inside `@BeforeAll` and all `@Test` methods.
 
+## Auto-downloading service modules
+
+`withModule(String)` and `withModules(...)` name published modules by service id. The extension downloads each named module jar (`io.github.cloudstub:cloudstub-<serviceId>`) from Maven Central in `beforeAll` and registers it, so a module without an SDK-side component needs no per-module dependency: only `cloudstub-testing` (or `cloudstub-junit`) is required.
+
+```java
+@RegisterExtension
+static CloudStubExtension cloudMock = new CloudStubExtension()
+        .withModules("sqs", "secretsmanager");   // (1)!
+```
+
+1. Use `withModule("sqs")` for a single service. Repeated ids (across `withModule` and `withModules`) collapse to one download.
+
+Downloads are cached under `~/.cloudstub/modules` by default, so a module fetched once is reused across test classes, runs, and JVMs. A cached module is never re-downloaded. The first run needs network access to Maven Central; later runs are offline-safe.
+
+A module that is already a test dependency is discovered automatically via `ServiceLoader` at startup, so it does not need to be listed in `withModules(...)`. If it is listed anyway, the classpath copy is used and it is not downloaded or registered twice.
+
+`withService` and `withModule` are distinct operations: `withService(CloudStubService)` (and its plural `withServices(...)`) registers an in-process instance, for custom or test-local stubs that are not published artifacts; `withModule`/`withModules` downloads a published module by id.
+
+Optional settings:
+
+| Method                       | Default                  | Purpose                                          |
+| ---------------------------- | ------------------------ | ------------------------------------------------ |
+| `withModuleVersion(String)`  | running core version     | Pin the module version (recommended for determinism). |
+| `withModulesCacheDir(Path)`  | `~/.cloudstub/modules`   | Directory used to cache downloaded module jars.  |
+| `withMavenBaseUrl(String)`   | Maven Central            | Repository base URL (e.g. a corporate mirror).   |
+
+When the exact requested version is not published, the highest published version at most the requested one is resolved and fetched. Each download is checksum-verified before it is registered.
+
+### What `withModules` can provision
+
+`withModules` provisions a module's **server-side stubs only**.
+
+- **Download-only modules** have no client-side component. They are fully provisioned by `withModules` and need no per-module dependency. This is the default; most modules fall here.
+- **Modules with a client-side AWS SDK component** cannot be fully provisioned by download. The AWS SDK discovers execution interceptors (`software/amazon/awssdk/global/handlers/execution.interceptors`) from its own application classloader, not from the isolated classloader a downloaded jar is loaded into, so a downloaded jar's interceptor is never registered with the SDK.
+
+A module in the second group is not provisioned with `withModules`. Instead, use one of:
+
+| Route | How it works |
+| ----- | ------------ |
+| Declare the module as a test dependency | Its interceptor is on the application classpath where the SDK finds it, and the stubs are discovered automatically via `ServiceLoader`. Do not also list it in `withModules(...)`. |
+| Configure the AWS client to not need the interceptor | Removes the dependency on the client-side component, so the downloaded stubs suffice and `withModules(...)` works. |
+
+**S3 is the only such module today.** `cloudstub-s3` ships `S3VirtualHostStyleInterceptor`, which rewrites virtual-hosted-style requests (`mybucket.localhost`) to the path-style addressing CloudStub's stubs serve. Without it on the application classpath a default `S3Client` sends virtual-hosted-style requests that no stub matches, and S3 calls fail with `404`. So either declare `cloudstub-s3` as a test dependency, or enable path-style access on the `S3Client` (`pathStyleAccessEnabled` / `forcePathStyle(true)`) and provision it with `withModules`.
+
 ## Lifecycle
 
 `CloudStubExtension` creates one `CloudStub` instance per test class. The lifecycle is:
