@@ -4,7 +4,10 @@ All notable changes to CloudStub are recorded here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). All published modules share a single
 lockstep version.
 
-## [Unreleased]
+## [0.1.0-beta.6] - 2026-06-28
+
+Fixes cloudstub-core's published POM and shadow JAR leaking bundled libraries onto a consumer's
+classpath, which aborted startup under Spring Boot 4.
 
 ### Fixed
 
