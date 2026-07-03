@@ -20,11 +20,12 @@ Keep documentation factual and minimal; rationale belongs in commits and issues,
 
 The full multi-project Gradle monorepo is in place. The SPI contract is stable and governed by an explicit evolution
 policy (see **SPI evolution policy** — it is deliberately never declared closed), the core engine is running, the
-`cloudstub-sqs`, `cloudstub-secretsmanager`, `cloudstub-sns`, and `cloudstub-s3` modules are implemented and tested,
+`cloudstub-sqs`, `cloudstub-secretsmanager`, `cloudstub-sns`, `cloudstub-s3`, and `cloudstub-dynamodb` modules are
+implemented and tested,
 the JUnit extension (JUnit 5 and 6) with fault injection is live, the codegen tool exists, and a Spring Boot example application
 demonstrates end-to-end usage. A documentation site (MkDocs Material) is built and wired to GitHub Pages.
 
-Work remaining: `cloudstub-dynamodb` and `cloudstub-lambda` module implementations (scaffolding exists), and
+Work remaining: the `cloudstub-lambda` module implementation (scaffolding exists), and
 additional AWS service modules.
 
 ## Build system
@@ -118,7 +119,7 @@ Javadoc reference deploys at `/javadoc/` (a top-level **Javadoc** nav entry, dis
 | `cloudstub-sqs`            | Done             | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044)              |
 | `cloudstub-secretsmanager` | Done             | Reference impl — JSON/X-Amz-Target protocol                                                         |
 | `cloudstub-s3`             | Done             | REST path protocol; generated from real AWS Smithy model                                            |
-| `cloudstub-dynamodb`       | Scaffolding only | JSON/X-Amz-Target protocol                                                                          |
+| `cloudstub-dynamodb`       | Done             | JSON/X-Amz-Target; stateful tables + items (put/get/query/scan/update/batch) backed by state store  |
 | `cloudstub-lambda`         | Scaffolding only | JSON/X-Amz-Target protocol                                                                          |
 | `cloudstub-codegen`        | Done             | Smithy → CloudStubService stub generator                                                            |
 | `cloudstub-local`          | Done             | Dual-mode fat JAR (launcher + core + CLI); loads module jars from a plugin directory; port 4566     |

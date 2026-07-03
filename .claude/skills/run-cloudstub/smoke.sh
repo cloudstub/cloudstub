@@ -29,7 +29,7 @@ done
 # Services are opt-in: the server loads nothing unless --services is given. The smoke test
 # exercises every protocol, so enable all of them when the caller did not pick a subset.
 if [[ "$SERVICES_SET" == false ]]; then
-  EXTRA_ARGS+=("--services=sqs,sns,secretsmanager,s3")
+  EXTRA_ARGS+=("--services=sqs,sns,secretsmanager,s3,dynamodb")
 fi
 
 if [[ ! -f "$JAR" ]]; then
@@ -131,6 +131,37 @@ SNS_TOPICS=$(curl -sf "http://localhost:$API_PORT/api/sns/list-topics")
 echo "$SNS_TOPICS" | python3 -c "import sys,json; d=json.load(sys.stdin); assert any('smoke-topic' in t for t in d['topics'])" \
   || fail "SNS topic not state-backed across surfaces: $SNS_TOPICS"
 pass "SNS list-topics (state-backed)  → $SNS_TOPICS"
+
+echo ""
+echo "==> DynamoDB (JSON / X-Amz-Target)"
+curl -sf -X POST "http://localhost:$PORT" \
+  -H "X-Amz-Target: DynamoDB_20120810.CreateTable" \
+  -H "Content-Type: application/x-amz-json-1.0" \
+  -d '{"TableName":"smoke-ddb","KeySchema":[{"AttributeName":"id","KeyType":"HASH"}],"AttributeDefinitions":[{"AttributeName":"id","AttributeType":"S"}],"BillingMode":"PAY_PER_REQUEST"}' \
+  > /dev/null || fail "DynamoDB CreateTable failed"
+pass "DynamoDB CreateTable"
+
+curl -sf -X POST "http://localhost:$PORT" \
+  -H "X-Amz-Target: DynamoDB_20120810.PutItem" \
+  -H "Content-Type: application/x-amz-json-1.0" \
+  -d '{"TableName":"smoke-ddb","Item":{"id":{"S":"a1"},"value":{"S":"hello"}}}' \
+  > /dev/null || fail "DynamoDB PutItem failed"
+pass "DynamoDB PutItem"
+
+# State-backed: the item put over the AWS protocol returns its stored value over the protocol.
+DDB_GET=$(curl -sf -X POST "http://localhost:$PORT" \
+  -H "X-Amz-Target: DynamoDB_20120810.GetItem" \
+  -H "Content-Type: application/x-amz-json-1.0" \
+  -d '{"TableName":"smoke-ddb","Key":{"id":{"S":"a1"}}}')
+echo "$DDB_GET" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['Item']['value']['S']=='hello'" \
+  || fail "DynamoDB item not state-backed: $DDB_GET"
+pass "DynamoDB GetItem (state-backed)"
+
+# The same item is visible through the REST API on the API port.
+DDB_SCAN=$(curl -sf "http://localhost:$API_PORT/api/dynamodb/scan?table=smoke-ddb")
+echo "$DDB_SCAN" | python3 -c "import sys,json; d=json.load(sys.stdin); assert any(i['value']['S']=='hello' for i in d['items'])" \
+  || fail "DynamoDB item not state-backed across surfaces: $DDB_SCAN"
+pass "DynamoDB /api/dynamodb/scan (state-backed)  → $DDB_SCAN"
 
 echo ""
 echo "==> GET /api/history (3 requests logged)"

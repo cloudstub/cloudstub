@@ -14,6 +14,14 @@ CloudStub mocks one AWS service per module. Type to filter, or pick a service be
 
     [Open the Secrets Manager guide →](secretsmanager.md)
 
+- **Amazon DynamoDB**
+
+    ---
+
+    Stateful tables and items: an item put is returned by a later get, query, and scan.
+
+    [Open the DynamoDB guide →](dynamodb.md)
+
 - **Amazon S3**
 
     ---
