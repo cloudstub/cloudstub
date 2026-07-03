@@ -45,6 +45,7 @@ nav:
   - Services:
       - services/index.md
       - AWS Secrets Manager: services/secretsmanager.md
+      - Amazon DynamoDB: services/dynamodb.md
       - Amazon S3: services/s3.md
       - Amazon SNS: services/sns.md
       - Amazon SQS: services/sqs.md

@@ -1,1 +1,12 @@
-// Phase 3 — stub
+dependencies {
+    compileOnly project(':cloudstub-core')
+    testImplementation project(':cloudstub-core')
+    testImplementation libs.aws.dynamodb
+}
+
+// Declares the minimum cloudstub-core this module's SPI usage requires; core warns if it is older.
+jar {
+    manifest {
+        attributes('CloudStub-Core-Min-Version': '0.1.0-beta.6')
+    }
+}
