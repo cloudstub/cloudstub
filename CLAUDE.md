@@ -109,23 +109,23 @@ Javadoc reference deploys at `/javadoc/` (a top-level **Javadoc** nav entry, dis
 
 ### Subprojects
 
-| Module                     | Status           | Notes                                                                                               |
-| -------------------------- | ---------------- | --------------------------------------------------------------------------------------------------- |
-| `cloudstub-core`           | Done             | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                                     |
-| `cloudstub-junit`          | Done             | `@ExtendWith` + `@RegisterExtension`, fault injection annotations; JUnit 5 and 6                    |
-| `cloudstub-testing`        | Done             | Aggregator — one test dependency that pulls in cloudstub-core + cloudstub-junit (api)               |
-| `cloudstub-sns`            | Done             | XML/Form protocol; reference implementation for `registerXmlFormStub`                               |
-| `cloudstub-sqs`            | Done             | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044)              |
-| `cloudstub-secretsmanager` | Done             | Reference impl — JSON/X-Amz-Target protocol                                                         |
-| `cloudstub-s3`             | Done             | REST path protocol; generated from real AWS Smithy model                                            |
-| `cloudstub-dynamodb`       | Done             | JSON/X-Amz-Target; stateful tables + items (put/get/query/scan/update/batch) backed by state store  |
-| `cloudstub-lambda`         | Done             | REST JSON; stateful function lifecycle + tags backed by state store; Invoke echoes the payload       |
-| `cloudstub-codegen`        | Done             | Smithy → CloudStubService stub generator                                                            |
-| `cloudstub-local`          | Done             | Dual-mode fat JAR (launcher + core + CLI); loads module jars from a plugin directory; port 4566     |
-| `cloudstub-console`        | Done             | Angular web console; built by gradle-node-plugin, embedded in cloudstub-local, served at `/console` |
-| `cloudstub-sdk-v1`         | Done             | AWS SDK v1 companion — one-line per-client endpoint redirection                                     |
-| `cloudstub-example:junit6` | Done             | Spring Boot app + integration tests with JUnit 6 (CloudStubExtension)                               |
-| `cloudstub-example:junit5` | Done             | Standalone CloudStubExtension tests compiled and run against JUnit 5                                |
+| Module                     | Status | Notes                                                                                               |
+| -------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
+| `cloudstub-core`           | Done   | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                                     |
+| `cloudstub-junit`          | Done   | `@ExtendWith` + `@RegisterExtension`, fault injection annotations; JUnit 5 and 6                    |
+| `cloudstub-testing`        | Done   | Aggregator — one test dependency that pulls in cloudstub-core + cloudstub-junit (api)               |
+| `cloudstub-sns`            | Done   | XML/Form protocol; reference implementation for `registerXmlFormStub`                               |
+| `cloudstub-sqs`            | Done   | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044)              |
+| `cloudstub-secretsmanager` | Done   | Reference impl — JSON/X-Amz-Target protocol                                                         |
+| `cloudstub-s3`             | Done   | REST path protocol; generated from real AWS Smithy model                                            |
+| `cloudstub-dynamodb`       | Done   | JSON/X-Amz-Target; stateful tables + items (put/get/query/scan/update/batch) backed by state store  |
+| `cloudstub-lambda`         | Done   | REST JSON; stateful function lifecycle + tags backed by state store; Invoke echoes the payload      |
+| `cloudstub-codegen`        | Done   | Smithy → CloudStubService stub generator                                                            |
+| `cloudstub-local`          | Done   | Dual-mode fat JAR (launcher + core + CLI); loads module jars from a plugin directory; port 4566     |
+| `cloudstub-console`        | Done   | Angular web console; built by gradle-node-plugin, embedded in cloudstub-local, served at `/console` |
+| `cloudstub-sdk-v1`         | Done   | AWS SDK v1 companion — one-line per-client endpoint redirection                                     |
+| `cloudstub-example:junit6` | Done   | Spring Boot app + integration tests with JUnit 6 (CloudStubExtension)                               |
+| `cloudstub-example:junit5` | Done   | Standalone CloudStubExtension tests compiled and run against JUnit 5                                |
 
 The `cloudstub` / `clb` CLI is part of `cloudstub-local` (same dual-mode fat JAR as the server). See
 the **CLI** section.

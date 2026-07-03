@@ -166,9 +166,12 @@ State-backed operations return live data from the shared state store:
   from S3 or an image URI, and layers, are not stored.
 - Event source mappings, function URLs, concurrency, event-invoke config, and durable executions are
   not implemented.
+- `UntagResource` removes only the first `tagKeys` value in a request; removing several tags in one
+  call is not simulated.
 - `CreateFunction` accepts a function without validating the runtime, role, or handler; requests
   always succeed unless the function already exists (`ResourceConflictException`).
 - Do not enable `lambda` and `s3` on the same server yet. Both are addressed by URL path, and S3's
-  path-style routes currently shadow Lambda's paths on the shared port. Run Lambda on its own server
-  (`--services=lambda`) or alongside the header-routed services (SQS, SNS, Secrets Manager,
-  DynamoDB).
+  path-style routes currently shadow Lambda's paths on the shared port. Either run Lambda alongside
+  the header-routed services (SQS, SNS, Secrets Manager, DynamoDB) on one server, or run Lambda and
+  S3 as two separate servers on different ports (`--port`/`--api-port`, plus `--store-dir` for each)
+  and point each SDK client at its own endpoint.
