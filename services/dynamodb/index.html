@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://cloudstub.github.io/cloudstub/services/sqs/">
+        <link rel="canonical" href="https://cloudstub.github.io/cloudstub/services/dynamodb/">
       
       
-        <link rel="prev" href="../sns/">
+        <link rel="prev" href="../secretsmanager/">
       
       
-        <link rel="next" href="../../module-authoring/">
+        <link rel="next" href="../s3/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Amazon SQS - CloudStub</title>
+        <title>Amazon DynamoDB - CloudStub</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#amazon-sqs" class="md-skip">
+        <a href="#amazon-dynamodb" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Amazon SQS
+              Amazon DynamoDB
             
           </span>
         </div>
@@ -893,90 +893,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../dynamodb/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Amazon DynamoDB
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../s3/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Amazon S3
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../sns/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Amazon SNS
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -996,7 +912,7 @@
   <span class="md-ellipsis">
     
   
-    Amazon SQS
+    Amazon DynamoDB
   
 
     
@@ -1014,7 +930,7 @@
   <span class="md-ellipsis">
     
   
-    Amazon SQS
+    Amazon DynamoDB
   
 
     
@@ -1109,6 +1025,90 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../s3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Amazon S3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Amazon SNS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sqs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Amazon SQS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1341,100 +1341,125 @@
   
 
 
-<h1 id="amazon-sqs">Amazon SQS</h1>
+<h1 id="amazon-dynamodb">Amazon DynamoDB</h1>
 <h2 id="overview">Overview</h2>
-<p>The <code>cloudstub-sqs</code> module mocks Amazon Simple Queue Service. Its operation set is generated from the
-AWS SQS Smithy model; AWS SDK v2 (≥ 2.20) drives it with the JSON / <code>X-Amz-Target</code> protocol.</p>
-<p>The core queue and message operations are <strong>state-backed</strong>: a message sent through <code>SendMessage</code> is
-returned by a later <code>ReceiveMessage</code>, survives a restart when a persistent store directory is
-configured, and is visible through the <a href="../../rest-api/">REST API</a>. The remaining operations are
-registered from the model and return well-formed but stateless placeholder responses.
+<p>The <code>cloudstub-dynamodb</code> module mocks Amazon DynamoDB. Its operation set is generated from the AWS
+DynamoDB Smithy model; AWS SDK v2 drives it with the JSON / <code>X-Amz-Target</code> protocol.</p>
+<p>The table and item operations are <strong>state-backed</strong>: an item written by <code>PutItem</code> is returned by a
+later <code>GetItem</code>, <code>Query</code>, or <code>Scan</code>, survives a restart when a persistent store directory is
+configured, and is visible through the <a href="../../rest-api/">REST API</a>. Items are stored keyed by a digest
+of their primary-key attribute values, so a write to the same key overwrites the earlier item. The
+remaining operations return well-formed but stateless placeholder responses.
 See <a href="#supported-operations">Supported operations</a> for the full list.</p>
 <h2 id="standalone-usage">Standalone usage</h2>
-<p>Start the standalone server with the SQS module enabled (it is auto-downloaded if not already in the
-plugin directory):</p>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs
+<p>Start the standalone server with the DynamoDB module enabled (it is auto-downloaded if not already in
+the plugin directory):</p>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=dynamodb
 </span></code></pre></div>
 <p>Applications talk to it through the <strong>AWS SDK</strong> by pointing the client's endpoint at the mock port
-(<code>http://localhost:4566</code>) — see the <a href="#test-example">Test example</a> for an <code>SqsClient</code> setup and
+(<code>http://localhost:4566</code>), see the <a href="#test-example">Test example</a> for a <code>DynamoDbClient</code> setup and
 <a href="../../standalone/">Standalone Mode</a> for the full configuration.</p>
-<p>To inspect and drive queue state from the terminal, use the <a href="../../cli/">CLI</a> (<code>clb</code>), or call the
-<a href="../../rest-api/">REST API</a> on the API port (<code>4567</code>) directly — for example with <code>curl</code>. Parameters
-are passed as query-string values. Send a message and receive it back:</p>
+<p>Create a table, put an item, and read it back with the AWS CLI:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$ aws dynamodb create-table --endpoint-url http://localhost:4566 \
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    --table-name orders \
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    --key-schema AttributeName=id,KeyType=HASH \
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    --attribute-definitions AttributeName=id,AttributeType=S \
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    --billing-mode PAY_PER_REQUEST
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>$ aws dynamodb put-item --endpoint-url http://localhost:4566 \
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    --table-name orders \
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    --item &#39;{&quot;id&quot;:{&quot;S&quot;:&quot;o-1&quot;},&quot;status&quot;:{&quot;S&quot;:&quot;placed&quot;}}&#39;
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>$ aws dynamodb get-item --endpoint-url http://localhost:4566 \
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    --table-name orders --key &#39;{&quot;id&quot;:{&quot;S&quot;:&quot;o-1&quot;}}&#39;
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>{
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    &quot;Item&quot;: {
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        &quot;id&quot;: {&quot;S&quot;: &quot;o-1&quot;},
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        &quot;status&quot;: {&quot;S&quot;: &quot;placed&quot;}
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    }
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>}
+</span></code></pre></div>
+<p>To inspect table state from the terminal, use the <a href="../../cli/">CLI</a> (<code>clb</code>), or call the
+<a href="../../rest-api/">REST API</a> on the API port (<code>4567</code>) directly. Parameters are passed as query-string
+values. List tables and scan the items an application wrote through the SDK:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">curl</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$ clb sqs send-message --queue orders --body hello
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>{
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  &quot;md5OfBody&quot; : &quot;5d41402abc4b2a76b9719d911017c592&quot;,
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  &quot;messageId&quot; : &quot;7568e4c5-4484-4291-a44b-e648b8c47a26&quot;
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>}
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>$ clb sqs receive-message --queue orders
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>{
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  &quot;messages&quot; : [ {
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    &quot;body&quot; : &quot;hello&quot;,
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    &quot;messageId&quot; : &quot;7568e4c5-4484-4291-a44b-e648b8c47a26&quot;,
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    &quot;receiptHandle&quot; : &quot;7568e4c5-4484-4291-a44b-e648b8c47a26&quot;
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>  } ]
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>}
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$ clb dynamodb list-tables
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>{
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  &quot;tables&quot; : [ &quot;orders&quot; ]
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>}
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>$ clb dynamodb scan --table orders
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>{
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  &quot;items&quot; : [ {
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    &quot;id&quot; : { &quot;S&quot; : &quot;o-1&quot; },
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    &quot;status&quot; : { &quot;S&quot; : &quot;placed&quot; }
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  } ]
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>}
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$ curl -s -X POST &quot;http://localhost:4567/api/sqs/send-message?queue=orders&amp;body=hello&quot;
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>{&quot;md5OfBody&quot;:&quot;5d41402abc4b2a76b9719d911017c592&quot;,&quot;messageId&quot;:&quot;7568e4c5-4484-4291-a44b-e648b8c47a26&quot;}
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>$ curl -s &quot;http://localhost:4567/api/sqs/receive-message?queue=orders&quot;
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>{&quot;messages&quot;:[{&quot;body&quot;:&quot;hello&quot;,&quot;messageId&quot;:&quot;7568e4c5-4484-4291-a44b-e648b8c47a26&quot;,&quot;receiptHandle&quot;:&quot;7568e4c5-4484-4291-a44b-e648b8c47a26&quot;}]}
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$ curl -s &quot;http://localhost:4567/api/dynamodb/list-tables&quot;
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>{&quot;tables&quot;:[&quot;orders&quot;]}
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>$ curl -s &quot;http://localhost:4567/api/dynamodb/scan?table=orders&quot;
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>{&quot;items&quot;:[{&quot;id&quot;:{&quot;S&quot;:&quot;o-1&quot;},&quot;status&quot;:{&quot;S&quot;:&quot;placed&quot;}}]}
 </span></code></pre></div>
 </div>
 </div>
 </div>
-<p>The REST API and the SDK share the same state store, so a message your application sends through the
-SDK is returned by <code>GET /api/sqs/receive-message</code>, and vice versa. See
-<a href="#rest-api-access">REST API access</a> for the full route set.</p>
+<p>The REST API and the SDK share the same state store, so an item your application puts through the SDK
+is listed by <code>GET /api/dynamodb/scan</code>, and vice versa. The REST surface is read-oriented (items are
+typed attribute maps that do not map cleanly to query-string parameters), so writes go through the
+AWS SDK. See <a href="#rest-api-access">REST API access</a> for the full route set.</p>
 <h2 id="test-example">Test example</h2>
-<p>In embedded mode, add <code>cloudstub-sqs</code> (see <a href="../../getting-started/">Getting Started</a>) and exercise the
-service end to end with <code>CloudStubExtension</code>:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">io.cloudstub.junit.CloudStubExtension</span><span class="p">;</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.Test</span><span class="p">;</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.extension.ExtendWith</span><span class="p">;</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider</span><span class="p">;</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.amazon.awssdk.regions.Region</span><span class="p">;</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.amazon.awssdk.services.sqs.SqsClient</span><span class="p">;</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.amazon.awssdk.services.sqs.model.Message</span><span class="p">;</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.net.URI</span><span class="p">;</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="kn">import static</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.Assertions.*</span><span class="p">;</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">CloudStubExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="kd">class</span> <span class="nc">SqsRoundTripTest</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="nd">@Test</span>
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">messageSentIsReceived</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">        </span><span class="n">SqsClient</span><span class="w"> </span><span class="n">sqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SqsClient</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">            </span><span class="p">.</span><span class="na">endpointOverride</span><span class="p">(</span><span class="n">URI</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="s">&quot;aws.endpoint-url&quot;</span><span class="p">)))</span>
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">            </span><span class="p">.</span><span class="na">credentialsProvider</span><span class="p">(</span><span class="n">AnonymousCredentialsProvider</span><span class="p">.</span><span class="na">create</span><span class="p">())</span>
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">            </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">US_EAST_1</span><span class="p">)</span>
-</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>
-</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">queueUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqs</span><span class="p">.</span><span class="na">createQueue</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueName</span><span class="p">(</span><span class="s">&quot;orders&quot;</span><span class="p">)).</span><span class="na">queueUrl</span><span class="p">();</span>
-</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="w">        </span><span class="n">sqs</span><span class="p">.</span><span class="na">sendMessage</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueUrl</span><span class="p">(</span><span class="n">queueUrl</span><span class="p">).</span><span class="na">messageBody</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">));</span>
-</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>
-</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="w">        </span><span class="n">List</span><span class="o">&lt;</span><span class="n">Message</span><span class="o">&gt;</span><span class="w"> </span><span class="n">messages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqs</span><span class="p">.</span><span class="na">receiveMessage</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">queueUrl</span><span class="p">(</span><span class="n">queueUrl</span><span class="p">)).</span><span class="na">messages</span><span class="p">();</span>
-</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>
-</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="w">        </span><span class="n">assertEquals</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">messages</span><span class="p">.</span><span class="na">size</span><span class="p">());</span>
-</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="w">        </span><span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">messages</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="na">body</span><span class="p">());</span>
-</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a><span class="p">}</span>
+<p>In embedded mode, add <code>cloudstub-dynamodb</code> (see <a href="../../getting-started/">Getting Started</a>) and exercise
+the service end to end with <code>CloudStubExtension</code>:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">io.cloudstub.junit.CloudStubExtension</span><span class="p">;</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.Test</span><span class="p">;</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.extension.ExtendWith</span><span class="p">;</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider</span><span class="p">;</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.amazon.awssdk.regions.Region</span><span class="p">;</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.amazon.awssdk.services.dynamodb.DynamoDbClient</span><span class="p">;</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.amazon.awssdk.services.dynamodb.model.*</span><span class="p">;</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.net.URI</span><span class="p">;</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="kn">import static</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.Assertions.*</span><span class="p">;</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">CloudStubExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="kd">class</span> <span class="nc">OrderTableTest</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="nd">@Test</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">itemPutIsReadBack</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">        </span><span class="n">DynamoDbClient</span><span class="w"> </span><span class="n">ddb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DynamoDbClient</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">            </span><span class="p">.</span><span class="na">endpointOverride</span><span class="p">(</span><span class="n">URI</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="s">&quot;aws.endpoint-url&quot;</span><span class="p">)))</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">            </span><span class="p">.</span><span class="na">credentialsProvider</span><span class="p">(</span><span class="n">AnonymousCredentialsProvider</span><span class="p">.</span><span class="na">create</span><span class="p">())</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="w">            </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">US_EAST_1</span><span class="p">)</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">        </span><span class="n">ddb</span><span class="p">.</span><span class="na">createTable</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">tableName</span><span class="p">(</span><span class="s">&quot;orders&quot;</span><span class="p">)</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="w">            </span><span class="p">.</span><span class="na">keySchema</span><span class="p">(</span><span class="n">KeySchemaElement</span><span class="p">.</span><span class="na">builder</span><span class="p">().</span><span class="na">attributeName</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">).</span><span class="na">keyType</span><span class="p">(</span><span class="n">KeyType</span><span class="p">.</span><span class="na">HASH</span><span class="p">).</span><span class="na">build</span><span class="p">())</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="w">            </span><span class="p">.</span><span class="na">attributeDefinitions</span><span class="p">(</span><span class="n">AttributeDefinition</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="w">                </span><span class="p">.</span><span class="na">attributeName</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">).</span><span class="na">attributeType</span><span class="p">(</span><span class="n">ScalarAttributeType</span><span class="p">.</span><span class="na">S</span><span class="p">).</span><span class="na">build</span><span class="p">())</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="w">            </span><span class="p">.</span><span class="na">billingMode</span><span class="p">(</span><span class="n">BillingMode</span><span class="p">.</span><span class="na">PAY_PER_REQUEST</span><span class="p">));</span>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a><span class="w">        </span><span class="n">ddb</span><span class="p">.</span><span class="na">putItem</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">tableName</span><span class="p">(</span><span class="s">&quot;orders&quot;</span><span class="p">)</span>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="w">            </span><span class="p">.</span><span class="na">item</span><span class="p">(</span><span class="n">Map</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">AttributeValue</span><span class="p">.</span><span class="na">fromS</span><span class="p">(</span><span class="s">&quot;o-1&quot;</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;status&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">AttributeValue</span><span class="p">.</span><span class="na">fromS</span><span class="p">(</span><span class="s">&quot;placed&quot;</span><span class="p">))));</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="w">        </span><span class="n">GetItemResponse</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ddb</span><span class="p">.</span><span class="na">getItem</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="na">tableName</span><span class="p">(</span><span class="s">&quot;orders&quot;</span><span class="p">)</span>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a><span class="w">            </span><span class="p">.</span><span class="na">key</span><span class="p">(</span><span class="n">Map</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">AttributeValue</span><span class="p">.</span><span class="na">fromS</span><span class="p">(</span><span class="s">&quot;o-1&quot;</span><span class="p">))));</span>
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a><span class="w">        </span><span class="n">assertEquals</span><span class="p">(</span><span class="s">&quot;placed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="p">.</span><span class="na">item</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;status&quot;</span><span class="p">).</span><span class="na">s</span><span class="p">());</span>
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="rest-api-access">REST API access</h2>
-<p>The module exposes a <a href="../../rest-api/">REST API</a> under <code>/api/sqs/…</code>. These routes read and write the same
-state as the AWS-protocol stubs — a message sent with the SDK is returned by
-<code>GET /api/sqs/receive-message</code>, and vice versa. Parameters are passed as query-string values (e.g.
-<code>POST /api/sqs/send-message?queue=orders&amp;body=hello</code>).</p>
+<p>The module exposes a <a href="../../rest-api/">REST API</a> under <code>/api/dynamodb/…</code>. These routes read the same
+state as the AWS-protocol stubs, so an item put with the SDK is listed by <code>GET /api/dynamodb/scan</code>.
+Parameters are passed as query-string values (e.g. <code>GET /api/dynamodb/scan?table=orders</code>).</p>
 <table>
 <thead>
 <tr>
@@ -1445,24 +1470,19 @@ state as the AWS-protocol stubs — a message sent with the SDK is returned by
 </thead>
 <tbody>
 <tr>
-<td><code>GET /api/sqs/list-queues</code></td>
+<td><code>GET /api/dynamodb/list-tables</code></td>
 <td>—</td>
-<td>List queues</td>
+<td>List tables</td>
 </tr>
 <tr>
-<td><code>POST /api/sqs/send-message</code></td>
-<td><code>queue</code>, <code>body</code></td>
-<td>Send a message</td>
+<td><code>GET /api/dynamodb/describe-table</code></td>
+<td><code>table</code></td>
+<td>Describe a table</td>
 </tr>
 <tr>
-<td><code>GET /api/sqs/receive-message</code></td>
-<td><code>queue</code></td>
-<td>Receive messages</td>
-</tr>
-<tr>
-<td><code>POST /api/sqs/purge-queue</code></td>
-<td><code>queue</code></td>
-<td>Purge all messages</td>
+<td><code>GET /api/dynamodb/scan</code></td>
+<td><code>table</code></td>
+<td>List all items in a table</td>
 </tr>
 </tbody>
 </table>
@@ -1477,63 +1497,76 @@ state as the AWS-protocol stubs — a message sent with the SDK is returned by
 </thead>
 <tbody>
 <tr>
-<td><code>CreateQueue</code></td>
-<td>Records the queue; returns its URL</td>
+<td><code>CreateTable</code></td>
+<td>Records the table and its key schema; returns the <code>TableDescription</code></td>
 </tr>
 <tr>
-<td><code>GetQueueUrl</code></td>
-<td>Returns the URL for a queue name</td>
+<td><code>DescribeTable</code></td>
+<td>Returns the table description, including the live <code>ItemCount</code></td>
 </tr>
 <tr>
-<td><code>SendMessage</code></td>
-<td>Stores the message body; returns <code>MessageId</code> and <code>MD5OfMessageBody</code></td>
+<td><code>DeleteTable</code></td>
+<td>Removes the table and its items</td>
 </tr>
 <tr>
-<td><code>ReceiveMessage</code></td>
-<td>Returns stored messages (honors <code>MaxNumberOfMessages</code>)</td>
+<td><code>ListTables</code></td>
+<td>Returns the names of all created tables</td>
 </tr>
 <tr>
-<td><code>DeleteMessage</code></td>
-<td>Removes a message by receipt handle</td>
+<td><code>PutItem</code></td>
+<td>Stores an item keyed by its primary key; overwrites an existing item</td>
 </tr>
 <tr>
-<td><code>DeleteQueue</code></td>
-<td>Removes the queue and its messages</td>
+<td><code>GetItem</code></td>
+<td>Returns the stored item for a key, or no item</td>
 </tr>
 <tr>
-<td><code>ListQueues</code></td>
-<td>Returns the URLs of all created queues</td>
+<td><code>DeleteItem</code></td>
+<td>Removes an item by key</td>
 </tr>
 <tr>
-<td><code>GetQueueAttributes</code></td>
-<td>Returns attributes, including the live <code>ApproximateNumberOfMessages</code></td>
+<td><code>UpdateItem</code></td>
+<td>Applies a <code>SET</code>/<code>REMOVE</code> update expression (or legacy <code>AttributeUpdates</code>)</td>
+</tr>
+<tr>
+<td><code>Query</code></td>
+<td>Returns items matching the partition key in <code>KeyConditionExpression</code></td>
+</tr>
+<tr>
+<td><code>Scan</code></td>
+<td>Returns every item in the table</td>
+</tr>
+<tr>
+<td><code>BatchWriteItem</code></td>
+<td>Applies the put and delete requests across tables</td>
+</tr>
+<tr>
+<td><code>BatchGetItem</code></td>
+<td>Returns the stored items for the requested keys across tables</td>
 </tr>
 </tbody>
 </table>
 <p>The remaining operations are registered and return well-formed but stateless placeholder responses;
-they do not read or mutate state: <code>AddPermission</code>, <code>CancelMessageMoveTask</code>, <code>ChangeMessageVisibility</code>,
-<code>ChangeMessageVisibilityBatch</code>, <code>DeleteMessageBatch</code>, <code>ListDeadLetterSourceQueues</code>,
-<code>ListMessageMoveTasks</code>, <code>ListQueueTags</code>, <code>PurgeQueue</code>, <code>RemovePermission</code>, <code>SendMessageBatch</code>,
-<code>SetQueueAttributes</code>, <code>StartMessageMoveTask</code>, <code>TagQueue</code>, <code>UntagQueue</code>.</p>
-<p>To purge a queue against state, use the <code>POST /api/sqs/purge-queue</code> REST route (see
-<a href="#rest-api-access">REST API access</a>); the AWS-protocol <code>PurgeQueue</code> operation is a placeholder and
-does not clear messages.</p>
+they do not read or mutate state: <code>UpdateTable</code>, <code>DescribeLimits</code>, <code>DescribeTimeToLive</code>,
+<code>UpdateTimeToLive</code>, <code>DescribeContinuousBackups</code>, <code>ListTagsOfResource</code>, <code>TagResource</code>,
+<code>UntagResource</code>.</p>
 <h2 id="limitations">Limitations</h2>
 <ul>
-<li>Visibility timeout is not enforced — a received message stays visible until it is explicitly
-  deleted (no in-flight tracking or <code>ApproximateNumberOfMessagesNotVisible</code> accounting).</li>
-<li>FIFO queues are treated like standard queues — the <code>.fifo</code> name and <code>FifoQueue</code> attribute are
-  accepted but no deduplication or ordering is applied.</li>
-<li>Dead-letter queues and message-move tasks are placeholders — no redrive is performed.</li>
-<li>Batch operations (<code>SendMessageBatch</code>, <code>DeleteMessageBatch</code>, <code>ChangeMessageVisibilityBatch</code>) are
-  placeholders and do not mutate state.</li>
-<li>Queue permissions and tagging are placeholders.</li>
-<li><code>SetQueueAttributes</code> is a placeholder; queue attributes returned by <code>GetQueueAttributes</code> are fixed
-  defaults (plus the live message count) and cannot be changed.</li>
-<li>Message attributes, system attributes, and delay seconds are not stored or returned.</li>
-<li>The SQS Query API (queue URLs as HTTP endpoints with <code>?Action=…</code>) is not supported; CloudStub
-  serves SQS over the JSON / <code>X-Amz-Target</code> protocol only.
-```</li>
+<li>Secondary indexes (GSI/LSI) are not maintained: a <code>Query</code> or <code>Scan</code> with an <code>IndexName</code> reads the
+  base table, matching on the base table's partition key only.</li>
+<li><code>Query</code> matches the partition key only. Sort-key range conditions (<code>begins_with</code>, <code>BETWEEN</code>, <code>&lt;</code>,
+  <code>&gt;</code>) in <code>KeyConditionExpression</code> are ignored and the whole partition is returned.</li>
+<li><code>FilterExpression</code> on <code>Query</code> and <code>Scan</code> is not applied. <code>ProjectionExpression</code>, pagination
+  (<code>Limit</code>, <code>ExclusiveStartKey</code>, <code>LastEvaluatedKey</code>), and <code>ScanIndexForward</code> are not applied.</li>
+<li>Conditional writes (<code>ConditionExpression</code>, <code>Expected</code>) are not evaluated: writes always succeed.</li>
+<li><code>UpdateItem</code> supports <code>SET</code> and <code>REMOVE</code> with <code>ExpressionAttributeValues</code> / <code>ExpressionAttributeNames</code>,
+  and legacy <code>AttributeUpdates</code> (<code>PUT</code>/<code>DELETE</code>). Arithmetic (<code>a = a + :n</code>), <code>list_append</code>, and the
+  <code>ADD</code> / <code>DELETE</code> set actions are not applied.</li>
+<li>Transactions (<code>TransactWriteItems</code>, <code>TransactGetItems</code>), PartiQL (<code>ExecuteStatement</code>,
+  <code>BatchExecuteStatement</code>, <code>ExecuteTransaction</code>), streams, global tables, backups, imports/exports,
+  and time-to-live expiry are not simulated.</li>
+<li>Provisioned-throughput and capacity accounting are not simulated: <code>ConsumedCapacity</code> is not
+  returned and requests are never throttled.</li>
 </ul>
 
 

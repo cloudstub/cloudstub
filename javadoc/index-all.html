@@ -298,6 +298,18 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/CloudStubContextImpl.html#%3Cinit%3E(io.cloudstub.core.spi.StubRegistrar,io.cloudstub.core.spi.StateStore)" class="member-name-link">CloudStubContextImpl(StubRegistrar, StateStore)</a> - Constructor for class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubContextImpl.html" title="class in io.cloudstub.core.internal">CloudStubContextImpl</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html" class="type-name-link" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBApiService</a> - Class in <a href="io/cloudstub/dynamodb/package-summary.html">io.cloudstub.dynamodb</a></dt>
+<dd>
+<div class="block">REST API surface for DynamoDB, mounted under <code>/api/dynamodb/…</code>.</div>
+</dd>
+<dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html#%3Cinit%3E()" class="member-name-link">CloudStubDynamoDBApiService()</a> - Constructor for class io.cloudstub.dynamodb.<a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBApiService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html" class="type-name-link" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBService</a> - Class in <a href="io/cloudstub/dynamodb/package-summary.html">io.cloudstub.dynamodb</a></dt>
+<dd>
+<div class="block">CloudStub service module for Amazon DynamoDB.</div>
+</dd>
+<dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html#%3Cinit%3E()" class="member-name-link">CloudStubDynamoDBService()</a> - Constructor for class io.cloudstub.dynamodb.<a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBService</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/junit/CloudStubExtension.html" class="type-name-link" title="class in io.cloudstub.junit">CloudStubExtension</a> - Class in <a href="io/cloudstub/junit/package-summary.html">io.cloudstub.junit</a></dt>
 <dd>
 <div class="block">JUnit extension (JUnit 5 and 6) that manages the <a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core"><code>CloudStub</code></a> lifecycle around a test class
@@ -709,6 +721,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/spi/restapi/package-summary.html">io.cloudstub.core.spi.restapi</a> - package io.cloudstub.core.spi.restapi</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/dynamodb/package-summary.html">io.cloudstub.dynamodb</a> - package io.cloudstub.dynamodb</dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/junit/package-summary.html">io.cloudstub.junit</a> - package io.cloudstub.junit</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/local/package-summary.html">io.cloudstub.local</a> - package io.cloudstub.local</dt>
@@ -1081,6 +1095,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Registers all stubs for this service and receives the shared state store.</div>
 </dd>
+<dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html#register(io.cloudstub.core.spi.CloudStubContext)" class="member-name-link">register(CloudStubContext)</a> - Method in class io.cloudstub.dynamodb.<a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBService</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/s3/CloudStubS3Service.html#register(io.cloudstub.core.spi.CloudStubContext)" class="member-name-link">register(CloudStubContext)</a> - Method in class io.cloudstub.s3.<a href="io/cloudstub/s3/CloudStubS3Service.html" title="class in io.cloudstub.s3">CloudStubS3Service</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/secretsmanager/CloudStubSecretsManagerService.html#register(io.cloudstub.core.spi.CloudStubContext)" class="member-name-link">register(CloudStubContext)</a> - Method in class io.cloudstub.secretsmanager.<a href="io/cloudstub/secretsmanager/CloudStubSecretsManagerService.html" title="class in io.cloudstub.secretsmanager">CloudStubSecretsManagerService</a></dt>
@@ -1126,6 +1142,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Called at API server startup.</div>
 </dd>
+<dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html#registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)" class="member-name-link">registerRoutes(CloudStubApiContext)</a> - Method in class io.cloudstub.dynamodb.<a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBApiService</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/s3/CloudStubS3ApiService.html#registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)" class="member-name-link">registerRoutes(CloudStubApiContext)</a> - Method in class io.cloudstub.s3.<a href="io/cloudstub/s3/CloudStubS3ApiService.html" title="class in io.cloudstub.s3">CloudStubS3ApiService</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/secretsmanager/CloudStubSecretsManagerApiService.html#registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)" class="member-name-link">registerRoutes(CloudStubApiContext)</a> - Method in class io.cloudstub.secretsmanager.<a href="io/cloudstub/secretsmanager/CloudStubSecretsManagerApiService.html" title="class in io.cloudstub.secretsmanager">CloudStubSecretsManagerApiService</a></dt>
@@ -1264,6 +1282,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Unique, lowercase identifier for the AWS service this module handles.</div>
 </dd>
+<dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html#serviceId()" class="member-name-link">serviceId()</a> - Method in class io.cloudstub.dynamodb.<a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBApiService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html#serviceId()" class="member-name-link">serviceId()</a> - Method in class io.cloudstub.dynamodb.<a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBService</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/s3/CloudStubS3ApiService.html#serviceId()" class="member-name-link">serviceId()</a> - Method in class io.cloudstub.s3.<a href="io/cloudstub/s3/CloudStubS3ApiService.html" title="class in io.cloudstub.s3">CloudStubS3ApiService</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/s3/CloudStubS3Service.html#serviceId()" class="member-name-link">serviceId()</a> - Method in class io.cloudstub.s3.<a href="io/cloudstub/s3/CloudStubS3Service.html" title="class in io.cloudstub.s3">CloudStubS3Service</a></dt>
