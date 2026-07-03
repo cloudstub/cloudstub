@@ -44,6 +44,7 @@ nav:
       - SDK v1 Support: sdk-v1.md
   - Services:
       - services/index.md
+      - AWS Lambda: services/lambda.md
       - AWS Secrets Manager: services/secretsmanager.md
       - Amazon DynamoDB: services/dynamodb.md
       - Amazon S3: services/s3.md

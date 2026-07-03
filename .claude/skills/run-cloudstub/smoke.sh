@@ -29,7 +29,7 @@ done
 # Services are opt-in: the server loads nothing unless --services is given. The smoke test
 # exercises every protocol, so enable all of them when the caller did not pick a subset.
 if [[ "$SERVICES_SET" == false ]]; then
-  EXTRA_ARGS+=("--services=sqs,sns,secretsmanager,s3,dynamodb")
+  EXTRA_ARGS+=("--services=sqs,sns,secretsmanager,s3,dynamodb,lambda")
 fi
 
 if [[ ! -f "$JAR" ]]; then
@@ -162,6 +162,33 @@ DDB_SCAN=$(curl -sf "http://localhost:$API_PORT/api/dynamodb/scan?table=smoke-dd
 echo "$DDB_SCAN" | python3 -c "import sys,json; d=json.load(sys.stdin); assert any(i['value']['S']=='hello' for i in d['items'])" \
   || fail "DynamoDB item not state-backed across surfaces: $DDB_SCAN"
 pass "DynamoDB /api/dynamodb/scan (state-backed)  → $DDB_SCAN"
+
+echo ""
+echo "==> Lambda (REST JSON)"
+curl -sf -X POST "http://localhost:$PORT/2015-03-31/functions" \
+  -H "Content-Type: application/json" \
+  -d '{"FunctionName":"smoke-fn","Runtime":"nodejs20.x","Role":"arn:aws:iam::000000000000:role/r","Handler":"index.handler","Code":{"ZipFile":"code"}}' \
+  > /dev/null || fail "Lambda CreateFunction failed"
+pass "Lambda CreateFunction"
+
+# State-backed: the function created over the AWS protocol is returned by GetFunction.
+LMB_GET=$(curl -sf "http://localhost:$PORT/2015-03-31/functions/smoke-fn")
+echo "$LMB_GET" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['Configuration']['FunctionName']=='smoke-fn'" \
+  || fail "Lambda function not state-backed: $LMB_GET"
+pass "Lambda GetFunction (state-backed)"
+
+# Invoke echoes the request payload.
+LMB_INVOKE=$(curl -sf -X POST "http://localhost:$PORT/2015-03-31/functions/smoke-fn/invocations" \
+  -H "Content-Type: application/json" -d '{"ping":true}')
+echo "$LMB_INVOKE" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['ping'] is True" \
+  || fail "Lambda Invoke did not echo payload: $LMB_INVOKE"
+pass "Lambda Invoke (echoes payload)"
+
+# The same function is visible through the REST API on the API port.
+LMB_LIST=$(curl -sf "http://localhost:$API_PORT/api/lambda/list-functions")
+echo "$LMB_LIST" | python3 -c "import sys,json; d=json.load(sys.stdin); assert any(f['FunctionName']=='smoke-fn' for f in d['functions'])" \
+  || fail "Lambda function not state-backed across surfaces: $LMB_LIST"
+pass "Lambda /api/lambda/list-functions (state-backed)  → $LMB_LIST"
 
 echo ""
 echo "==> GET /api/history (3 requests logged)"

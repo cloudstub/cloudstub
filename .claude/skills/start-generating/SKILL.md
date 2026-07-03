@@ -11,6 +11,22 @@ state-backed behavior is always hand-written. Do not ask which level of finish.
 `cloudstub-sqs` is the working reference to copy patterns from. Adapt the design to the service;
 mirror SQS's **level of finish**, not its literal structure.
 
+## How to run this skill (compliance rules — do these, not just the steps)
+
+A skill is guidance, not a guarantee: it is easy to silently reinterpret or skip a step. These three
+rules make that impossible to do quietly.
+
+1. **Checklist first.** Before writing any code, create a task list (TaskCreate) with one item per
+   step below (0–8), and keep it updated: mark each `in_progress` when you start it and `completed`
+   when its evidence exists. The reader can then see, at any moment, which steps ran.
+2. **Deviation rule.** If you skip a step, change its approach, or find it does not apply, **stop and
+   say so, with the reason, before continuing** — do not proceed and justify it later only if asked.
+   "Codegen can't scaffold this service" is a valid deviation; deciding that silently is not.
+3. **Evidence, not claims.** Every "verify" action (Step 8, and the build after each code change)
+   is done by running the command and showing its real output (the `BUILD SUCCESSFUL` / `PASS:` /
+   test-count lines). A step is not complete because you intended it; it is complete because its
+   command passed.
+
 ## Documentation style
 
 Every doc you write (javadoc, comments, reference docs) describes only actual behavior: what it does,
@@ -26,8 +42,11 @@ gh issue view <N> --repo cloudstub/cloudstub
 git checkout -b feature/<service>-module        # from main; never commit feature work to main
 ```
 
-Read the issue's acceptance criteria and subtasks. Confirm the AWS protocol (JSON/X-Amz-Target,
-XML/Query, or REST path) and the reference module named in the issue.
+Read the issue's acceptance criteria and subtasks. **Do not trust the issue's stated protocol** —
+it is copied from a template and has been wrong before (it claimed X-Amz-Target for both SQS and
+Lambda; Lambda is actually REST path). Confirm the protocol from the **model** in Step 2, and pick
+the reference module that matches the real protocol (`cloudstub-s3` for REST path, `cloudstub-sns`
+for XML/Query, `cloudstub-sqs`/`cloudstub-secretsmanager` for JSON/X-Amz-Target).
 
 ## Step 1 — Study the reference
 
@@ -36,24 +55,60 @@ test classes, and `build.gradle`. Read the core SPI: `StubRegistrar`, `StubHandl
 (note `jsonField` returns **scalars only**), `StubResponse`, `StateStore`, `Json`, `Digest`, and the
 `restapi/*` types. These are the only types a module may use besides the JDK.
 
-## Step 2 — Generate the scaffold with codegen
+## Step 2 — Get the model, confirm the protocol, then generate the scaffold
 
-Find the model file in the AWS repo, then run codegen into a scratch dir to review:
+**2a. Pick the right model file.** A service can have several models in `api-models-aws` (Lambda has
+`lambda`, `lambda-core`, `lambda-microvms` — only `lambda` has the full API). List them and choose
+the one whose service has the most operations / actually contains the core ops:
 
 ```
-gh api repos/aws/api-models-aws/contents/models/<service>/service/<version> --jq '.[] | "\(.name)\t\(.download_url)"'
+gh api repos/aws/api-models-aws/contents/models --jq '.[].name' | grep -i <service>
+gh api repos/aws/api-models-aws/contents/models/<dir>/service/<version> --jq '.[] | "\(.name)\t\(.download_url)"'
+```
+
+**2b. Confirm the protocol and the operation surface from the model itself** (do not trust the
+issue). Download it and inspect, or run codegen `--validate` which prints the detected protocol and
+operation count:
+
+```
+./gradlew :cloudstub-codegen:run --args="--model <raw-url> --validate"
+```
+
+Protocol → registrar method: `restJson1`/`restXml` → REST path (`registerRestStub`, reference
+`cloudstub-s3`); `awsJson1_0`/`awsJson1_1` → `registerJsonTargetStub` (reference `cloudstub-sqs`);
+`awsQuery`/`ec2Query` → XML/form (`registerXmlFormStub`, reference `cloudstub-sns`).
+
+**2c. Codegen only sees `service.operations` — it does NOT traverse Smithy `resources`.** Operations
+bound to a resource's lifecycle (`create`/`read`/`update`/`delete`/`list`/`put`) or its nested
+`operations` are **silently omitted from the scaffold**. Check whether the model is resource-structured
+before relying on codegen:
+
+```
+python3 -c "import json,sys; m=json.load(open('<model.json>')); s=m['shapes']; svc=[k for k,v in s.items() if v.get('type')=='service'][0]; print('service.operations',len(s[svc].get('operations',[])),'| resources',len(s[svc].get('resources',[])),'| total op shapes',sum(1 for v in s.values() if v.get('type')=='operation'))"
+```
+
+If `total op shapes` >> `service.operations` (e.g. Lambda: 85 vs 19 with 10 resources), codegen's
+scaffold is **incomplete and misleading** — it will miss the core CRUD/invoke ops. In that case do
+NOT use the scaffold as the base: **hand-author the operations from the model's `http` traits**
+(`traits."smithy.api#http"` → `method`, `uri`, `code`) so paths and status codes match AWS exactly.
+Announce this deviation (compliance rule 2) and proceed.
+
+**2d. Generate the scaffold** (skip only when 2c showed it is incomplete — say so if you skip):
+
+```
 ./gradlew :cloudstub-codegen:run --args="--model <raw-url> --output <scratch>/gen --core-version <current-version>"
 ```
 
 `<current-version>` is the `version=` in `gradle.properties`. The scaffold gives the service class
-(all operations registered as template stubs), one `.hbs` per operation, and a `response/` builder
-package. Keep it as reference; you will re-author most of it.
+(operations registered as template stubs), one `.hbs` per operation, and a `response/` builder
+package. Keep it as reference; you will re-author most of it. Codegen only ever emits stateless
+placeholders — the state-backed behavior in Step 3 is always hand-written regardless.
 
 ## Step 3 — Hand-finish the module (the real work)
 
 Create the module under `cloudstub-<service>/src/main/java/io/cloudstub/<service>/`.
 
-1. **Service class** `CloudStub<ACRONYM>Service` (match the acronym casing of siblings: `CloudStubSNSService`, `CloudStubS3Service`). Fix the target prefix / action values for the real protocol (JSON DynamoDB is `DynamoDB_20120810.`). Register the **resource/CRUD operations as `StubHandler`s** that read/write the shared `StateStore` keyed under `<service>/`; keep the rest as `StubTemplates.load(...)` template stubs for breadth so SDK calls do not error. Delete the templates for ops you converted; **drop the generated `response/` builders** (dead code, unused by handler-based modules).
+1. **Service class** `CloudStub<ACRONYM>Service` (match the acronym casing of siblings: `CloudStubSNSService`, `CloudStubS3Service`). Wire each operation to the real protocol: JSON/X-Amz-Target uses the target prefix (e.g. `DynamoDB_20120810.`); REST path uses the model's method + `uri` per operation (e.g. `POST /2015-03-31/functions`). Register the **resource/CRUD operations as `StubHandler`s** that read/write the shared `StateStore` keyed under `<service>/`; keep the rest as `StubTemplates.load(...)` template stubs for breadth so SDK calls do not error. Delete the templates for ops you converted; **drop the generated `response/` builders** (dead code, unused by handler-based modules). REST-path note: `registerRestStub` uses WireMock `urlMatching`, which is **anchored to the full URL (path + query)** — write patterns that match the whole URL (allow an optional `(\\?.*)?` query suffix) and remember `req.path()` excludes the query. Extract path parameters (e.g. the resource name) from `req.path()`.
 2. **`<Service>Keys`** — the state-store key scheme, defined once and shared by the service and the API surface so they cannot drift (mirror `SqsKeys`, including a marker-key vs sub-resource-key test).
 3. **Protocol helpers as needed.** `StubRequest` exposes only `jsonField` (scalar). For nested request bodies (DynamoDB `Item`/`Key`, etc.) write a small **JDK-only JSON parser** in the module — modules cannot see core's shaded jackson. For XML/Query add form/XML helpers (see `SnsForm`/`SnsXml`). Store parsed `Map`/`List` trees directly; `StateStore` round-trips concrete JDK types.
 4. **Error + response conventions.** Build responses with `StubResponse.json(Json.object(...))`. For AWS JSON errors return `StubResponse.json(status, Json.object("__type", "<namespace>#<Error>", "message", ...))`; the SDK maps `__type`. Enforce realistic errors (missing resource → NotFound, duplicate → InUse).
@@ -92,7 +147,7 @@ Ensure `cloudstub-<service>` is in `settings.gradle` and in `serviceModules` in
 
 ## Step 6 — Tests (the definition of done is a real consumer)
 
-- Service test (`CloudStub<ACRONYM>ServiceTest`): boot embedded `new CloudStub().withService(...)`, drive the real AWS SDK v2 client, assert **state-backed round-trips** (write then read), plus a raw `X-Amz-Target`/protocol match test and a template-op smoke (`assertDoesNotThrow`).
+- Service test (`CloudStub<ACRONYM>ServiceTest`): boot embedded `new CloudStub().withService(...)`, drive the real AWS SDK v2 client, assert **state-backed round-trips** (write then read), plus a raw protocol-match test (an X-Amz-Target header for JSON services, or a raw HTTP path request for REST services) and a template-op smoke (`assertDoesNotThrow`) if you kept any template stubs.
 - Persistence test: `withStoreDirectory(tempDir)`, write, restart, assert the data survived.
 - Add a regression test for any parsing edge case you hand-rolled.
 
@@ -113,13 +168,18 @@ Ensure `cloudstub-<service>` is in `settings.gradle` and in `serviceModules` in
 ./.claude/skills/run-cloudstub/smoke.sh --build     # standalone, all protocols + REST
 ```
 
-Then run `/code-review` on the diff and fix real findings before finishing. To validate the real
-distribution path (auto-download of the published module jar), run `/test-local <service>`.
+Run each command and **show its real output** (compliance rule 3) — a green `BUILD SUCCESSFUL` and
+the `PASS:` lines from the smoke run, not a summary. Then run `/code-review` on the diff and fix real
+findings before finishing. To validate the real distribution path (auto-download of the published
+module jar), run `/test-local <service>`.
 
 ## Gotchas learned
 
+- **Codegen ignores Smithy `resources`.** It enumerates only `service.operations`; lifecycle- and resource-bound operations are silently dropped from the scaffold. For resource-structured services (Lambda) the core ops are missing — hand-author from the model's `http` traits (see Step 2c).
+- **The issue's stated protocol can be wrong** (template-copied). Confirm it from the model; it was wrong for SQS and Lambda.
 - Modules cannot import jackson/WireMock/AWS SDK/picocli; only the core SPI + JDK. Hand-roll a JSON parser for nested bodies.
 - `jsonField(path)` returns `null` for objects/arrays (scalars only); dotted paths into objects work for scalar leaves.
-- `StubResponse.json` uses the `application/x-amz-json-1.1` content type; the SDK parses by operation model, so this works for json-1.0 services too (SQS precedent).
+- `registerRestStub` matching is anchored to the full URL (path + query) via `urlMatching`; `req.path()` excludes the query. Allow an optional `(\\?.*)?` suffix in patterns.
+- `StubResponse.json` uses the `application/x-amz-json-1.1` content type; the SDK parses by operation model, so this works for json-1.0 and REST-json services too (SQS/S3 precedent).
 - Publishing is a separate gated step: only add the module to `publishedServices` + a `pomInfo` entry once validated (see `/test-local`).
 - Never manually `git tag` or edit `version=`; releases go through `./gradlew release -PreleaseVersion=...`.
