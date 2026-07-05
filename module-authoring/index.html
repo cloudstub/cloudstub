@@ -802,6 +802,8 @@
       
         
       
+        
+      
     
     
     
@@ -854,6 +856,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/lambda/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AWS Lambda
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1534,13 +1564,19 @@ with real AWS SDK v2 clients.</p>
 </tr>
 <tr>
 <td>REST path</td>
-<td>S3</td>
+<td>S3, Lambda</td>
 <td>HTTP method + URL path regex</td>
 <td><code>registerRestStub</code></td>
 </tr>
 </tbody>
 </table>
 <p>Check the AWS SDK v2 source or Smithy model for your target service to confirm which protocol it uses.</p>
+<p>REST-path modules share one URL matching space. When more than one is loaded (for example S3 and
+Lambda in one standalone server), their path patterns compete, and S3's catch-all object patterns
+(<code>/[^/]+/.+</code>) overlap most other services' paths. The engine picks the most specific match: a stub's
+priority is <code>PRIORITY_BASE - literalLength(pattern)</code>, so the pattern with more literal characters
+wins. Anchor your patterns with a literal path prefix (Lambda uses <code>/2015-03-31/functions/...</code>) so
+they outscore a generic catch-all rather than relying on registration order.</p>
 <hr />
 <h2 id="2-create-the-gradle-subproject">2. Create the Gradle subproject</h2>
 <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>cloudstub-myservice/
@@ -1777,6 +1813,11 @@ same data as the module's stubs (use the same key scheme on both surfaces so the
 <td><code>cloudstub-s3</code></td>
 <td>REST path</td>
 <td>HTTP method + path-regex stubs, XML responses</td>
+</tr>
+<tr>
+<td><code>cloudstub-lambda</code></td>
+<td>REST path</td>
+<td>Literal-prefixed path-regex stubs (coexist with S3)</td>
 </tr>
 </tbody>
 </table>

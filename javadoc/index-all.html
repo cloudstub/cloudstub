@@ -318,6 +318,18 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/junit/CloudStubExtension.html#%3Cinit%3E()" class="member-name-link">CloudStubExtension()</a> - Constructor for class io.cloudstub.junit.<a href="io/cloudstub/junit/CloudStubExtension.html" title="class in io.cloudstub.junit">CloudStubExtension</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/lambda/CloudStubLambdaApiService.html" class="type-name-link" title="class in io.cloudstub.lambda">CloudStubLambdaApiService</a> - Class in <a href="io/cloudstub/lambda/package-summary.html">io.cloudstub.lambda</a></dt>
+<dd>
+<div class="block">REST API surface for Lambda, mounted under <code>/api/lambda/…</code>.</div>
+</dd>
+<dt><a href="io/cloudstub/lambda/CloudStubLambdaApiService.html#%3Cinit%3E()" class="member-name-link">CloudStubLambdaApiService()</a> - Constructor for class io.cloudstub.lambda.<a href="io/cloudstub/lambda/CloudStubLambdaApiService.html" title="class in io.cloudstub.lambda">CloudStubLambdaApiService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/lambda/CloudStubLambdaService.html" class="type-name-link" title="class in io.cloudstub.lambda">CloudStubLambdaService</a> - Class in <a href="io/cloudstub/lambda/package-summary.html">io.cloudstub.lambda</a></dt>
+<dd>
+<div class="block">CloudStub service module for AWS Lambda.</div>
+</dd>
+<dt><a href="io/cloudstub/lambda/CloudStubLambdaService.html#%3Cinit%3E()" class="member-name-link">CloudStubLambdaService()</a> - Constructor for class io.cloudstub.lambda.<a href="io/cloudstub/lambda/CloudStubLambdaService.html" title="class in io.cloudstub.lambda">CloudStubLambdaService</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/exception/CloudStubNotStartedException.html" class="type-name-link" title="class in io.cloudstub.core.exception">CloudStubNotStartedException</a> - Exception in <a href="io/cloudstub/core/exception/package-summary.html">io.cloudstub.core.exception</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/exception/CloudStubNotStartedException.html#%3Cinit%3E()" class="member-name-link">CloudStubNotStartedException()</a> - Constructor for exception io.cloudstub.core.exception.<a href="io/cloudstub/core/exception/CloudStubNotStartedException.html" title="class in io.cloudstub.core.exception">CloudStubNotStartedException</a></dt>
@@ -725,6 +737,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/junit/package-summary.html">io.cloudstub.junit</a> - package io.cloudstub.junit</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/lambda/package-summary.html">io.cloudstub.lambda</a> - package io.cloudstub.lambda</dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/local/package-summary.html">io.cloudstub.local</a> - package io.cloudstub.local</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/local/cli/package-summary.html">io.cloudstub.local.cli</a> - package io.cloudstub.local.cli</dt>
@@ -1084,6 +1098,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the value of the <code>queryParams</code> record component.</div>
 </dd>
+<dt><a href="io/cloudstub/core/spi/StubRequest.html#queryParamValues(java.lang.String)" class="member-name-link">queryParamValues(String)</a> - Method in interface io.cloudstub.core.spi.<a href="io/cloudstub/core/spi/StubRequest.html" title="interface in io.cloudstub.core.spi">StubRequest</a></dt>
+<dd>
+<div class="block">All values of the named query-string parameter, in request order, for a parameter that may
+ repeat (e.g.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:R">R</h2>
 <dl class="index">
@@ -1096,6 +1115,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Registers all stubs for this service and receives the shared state store.</div>
 </dd>
 <dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html#register(io.cloudstub.core.spi.CloudStubContext)" class="member-name-link">register(CloudStubContext)</a> - Method in class io.cloudstub.dynamodb.<a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/lambda/CloudStubLambdaService.html#register(io.cloudstub.core.spi.CloudStubContext)" class="member-name-link">register(CloudStubContext)</a> - Method in class io.cloudstub.lambda.<a href="io/cloudstub/lambda/CloudStubLambdaService.html" title="class in io.cloudstub.lambda">CloudStubLambdaService</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/s3/CloudStubS3Service.html#register(io.cloudstub.core.spi.CloudStubContext)" class="member-name-link">register(CloudStubContext)</a> - Method in class io.cloudstub.s3.<a href="io/cloudstub/s3/CloudStubS3Service.html" title="class in io.cloudstub.s3">CloudStubS3Service</a></dt>
 <dd>&nbsp;</dd>
@@ -1143,6 +1164,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Called at API server startup.</div>
 </dd>
 <dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html#registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)" class="member-name-link">registerRoutes(CloudStubApiContext)</a> - Method in class io.cloudstub.dynamodb.<a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBApiService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/lambda/CloudStubLambdaApiService.html#registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)" class="member-name-link">registerRoutes(CloudStubApiContext)</a> - Method in class io.cloudstub.lambda.<a href="io/cloudstub/lambda/CloudStubLambdaApiService.html" title="class in io.cloudstub.lambda">CloudStubLambdaApiService</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/s3/CloudStubS3ApiService.html#registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)" class="member-name-link">registerRoutes(CloudStubApiContext)</a> - Method in class io.cloudstub.s3.<a href="io/cloudstub/s3/CloudStubS3ApiService.html" title="class in io.cloudstub.s3">CloudStubS3ApiService</a></dt>
 <dd>&nbsp;</dd>
@@ -1285,6 +1308,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html#serviceId()" class="member-name-link">serviceId()</a> - Method in class io.cloudstub.dynamodb.<a href="io/cloudstub/dynamodb/CloudStubDynamoDBApiService.html" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBApiService</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html#serviceId()" class="member-name-link">serviceId()</a> - Method in class io.cloudstub.dynamodb.<a href="io/cloudstub/dynamodb/CloudStubDynamoDBService.html" title="class in io.cloudstub.dynamodb">CloudStubDynamoDBService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/lambda/CloudStubLambdaApiService.html#serviceId()" class="member-name-link">serviceId()</a> - Method in class io.cloudstub.lambda.<a href="io/cloudstub/lambda/CloudStubLambdaApiService.html" title="class in io.cloudstub.lambda">CloudStubLambdaApiService</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/lambda/CloudStubLambdaService.html#serviceId()" class="member-name-link">serviceId()</a> - Method in class io.cloudstub.lambda.<a href="io/cloudstub/lambda/CloudStubLambdaService.html" title="class in io.cloudstub.lambda">CloudStubLambdaService</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/s3/CloudStubS3ApiService.html#serviceId()" class="member-name-link">serviceId()</a> - Method in class io.cloudstub.s3.<a href="io/cloudstub/s3/CloudStubS3ApiService.html" title="class in io.cloudstub.s3">CloudStubS3ApiService</a></dt>
 <dd>&nbsp;</dd>

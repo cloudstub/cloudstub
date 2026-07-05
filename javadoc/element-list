@@ -9,6 +9,7 @@ io.cloudstub.core.spi
 io.cloudstub.core.spi.restapi
 io.cloudstub.dynamodb
 io.cloudstub.junit
+io.cloudstub.lambda
 io.cloudstub.local
 io.cloudstub.local.cli
 io.cloudstub.local.cli.command
