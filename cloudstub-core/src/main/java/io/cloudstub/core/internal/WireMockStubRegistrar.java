@@ -194,16 +194,18 @@ public final class WireMockStubRegistrar implements StubRegistrar {
         boolean inClass = false;
         for (int i = 0; i < pattern.length(); i++) {
             char c = pattern.charAt(i);
+            if (inClass) {
+                if (c == '\\') {
+                    i++;
+                } else if (c == ']') {
+                    inClass = false;
+                }
+                continue;
+            }
             if (c == '\\') {
                 if (i + 1 < pattern.length()) {
                     i++;
                     count++;
-                }
-                continue;
-            }
-            if (inClass) {
-                if (c == ']') {
-                    inClass = false;
                 }
                 continue;
             }

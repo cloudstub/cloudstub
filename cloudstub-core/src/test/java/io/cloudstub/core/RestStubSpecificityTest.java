@@ -22,11 +22,11 @@ class RestStubSpecificityTest {
 
     private static final HttpClient HTTP = HttpClient.newHttpClient();
 
-    private final CloudStub cloudMock = new CloudStub();
+    private final CloudStub cloudStub = new CloudStub();
 
     @AfterEach
     void tearDown() {
-        cloudMock.stop();
+        cloudStub.stop();
     }
 
     /** Registers a broad catch-all matching any two-segment path (S3 GetObject-style). */
@@ -62,7 +62,7 @@ class RestStubSpecificityTest {
     private String get(String path) throws Exception {
         return HTTP.send(
                         HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:" + cloudMock.port() + path))
+                                .uri(URI.create("http://localhost:" + cloudStub.port() + path))
                                 .GET()
                                 .build(),
                         HttpResponse.BodyHandlers.ofString())
@@ -71,9 +71,9 @@ class RestStubSpecificityTest {
 
     @Test
     void specificPathWinsWhenCatchAllRegisteredLast() throws Exception {
-        cloudMock.withService(new SpecificService());
-        cloudMock.withService(new CatchAllService());
-        cloudMock.start();
+        cloudStub.withService(new SpecificService());
+        cloudStub.withService(new CatchAllService());
+        cloudStub.start();
 
         assertEquals(
                 "specific",
@@ -87,9 +87,9 @@ class RestStubSpecificityTest {
 
     @Test
     void specificPathWinsWhenCatchAllRegisteredFirst() throws Exception {
-        cloudMock.withService(new CatchAllService());
-        cloudMock.withService(new SpecificService());
-        cloudMock.start();
+        cloudStub.withService(new CatchAllService());
+        cloudStub.withService(new SpecificService());
+        cloudStub.start();
 
         assertEquals(
                 "specific",
