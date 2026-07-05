@@ -133,7 +133,7 @@ the **CLI** section.
 ### Key dependency versions
 
 - Java 17 LTS minimum
-- AWS SDK v2: `2.25.70`
+- AWS SDK v2: `2.46.21`
 - WireMock: `3.13.1` (shaded inside `cloudstub-core`)
 - JUnit: `6.1.0`
 - Smithy: `1.50.0`
