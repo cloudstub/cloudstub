@@ -4,6 +4,37 @@ All notable changes to CloudStub are recorded here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). All published modules share a single
 lockstep version.
 
+## [0.1.0-beta.7] - 2026-07-05
+
+Publishes the DynamoDB and Lambda service modules, disambiguates REST-path routing so S3 and Lambda
+can run in one server, and patches dependency vulnerabilities in the shipped and test-path classpaths.
+
+### Added
+
+- `cloudstub-dynamodb`: new module for Amazon DynamoDB. Stateful tables and items
+  (put/get/query/scan/update/batch) backed by the state store over the JSON/X-Amz-Target protocol. (#197)
+- `cloudstub-lambda`: new module for AWS Lambda. Stateful function lifecycle and tags backed by the
+  state store over REST JSON; `Invoke` echoes the request payload. (#200)
+- `cloudstub-junit`: `CloudStubExtension.withModules(...)` and `withServices(...)` auto-download and
+  enable service modules in embedded tests, matching standalone mode's provisioning. (#195)
+
+### Fixed
+
+- `cloudstub-core`: overlapping REST-path stubs are disambiguated by pattern specificity (the pattern
+  with more literal characters wins), so S3's catch-all object patterns and Lambda's API routes no
+  longer collide when both modules are loaded in one server. (#199)
+
+### Security
+
+- `cloudstub-core`: the shaded jar now bundles `net.minidev:json-smart` 2.6.0 (GHSA-pq2g-wx69-c263)
+  and Jetty 11.0.26 (GHSA-mmxm-8w33-wc4h). Advisories still pinned by WireMock 3 (EOL Jetty 11,
+  Handlebars 4.3.x) are tracked for the WireMock 4 migration in #203.
+- Bumped the AWS SDK v2 test dependency to 2.46.21 (Netty 4.1.135.Final), clearing the Netty
+  advisories from the test and example classpaths. The SDK is not shipped in any published artifact.
+- `cloudstub-console`: updated the Angular build toolchain (`npm audit fix`), clearing the Vite,
+  esbuild, undici, and Piscina advisories. The toolchain is build-only and not embedded in the
+  published console.
+
 ## [0.1.0-beta.6] - 2026-06-28
 
 Fixes cloudstub-core's published POM and shadow JAR leaking bundled libraries onto a consumer's
@@ -97,6 +128,8 @@ signals that the SPI and public API may still change.
 - Standalone server (`cloudstub-local`) and the Smithy stub generator (`cloudstub-codegen`),
   distributed as runnable JARs.
 
+[0.1.0-beta.7]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.6...v0.1.0-beta.7
+[0.1.0-beta.6]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.5...v0.1.0-beta.6
 [0.1.0-beta.5]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.4...v0.1.0-beta.5
 [0.1.0-beta.4]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.3...v0.1.0-beta.4
 [0.1.0-beta.3]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.2...v0.1.0-beta.3
