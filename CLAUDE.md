@@ -20,13 +20,12 @@ Keep documentation factual and minimal; rationale belongs in commits and issues,
 
 The full multi-project Gradle monorepo is in place. The SPI contract is stable and governed by an explicit evolution
 policy (see **SPI evolution policy** — it is deliberately never declared closed), the core engine is running, the
-`cloudstub-sqs`, `cloudstub-secretsmanager`, `cloudstub-sns`, `cloudstub-s3`, and `cloudstub-dynamodb` modules are
-implemented and tested,
+`cloudstub-sqs`, `cloudstub-secretsmanager`, `cloudstub-sns`, `cloudstub-s3`, `cloudstub-dynamodb`, and
+`cloudstub-lambda` modules are implemented and tested,
 the JUnit extension (JUnit 5 and 6) with fault injection is live, the codegen tool exists, and a Spring Boot example application
 demonstrates end-to-end usage. A documentation site (MkDocs Material) is built and wired to GitHub Pages.
 
-Work remaining: the `cloudstub-lambda` module implementation (scaffolding exists), and
-additional AWS service modules.
+Work remaining: additional AWS service modules.
 
 ## Build system
 
@@ -110,23 +109,23 @@ Javadoc reference deploys at `/javadoc/` (a top-level **Javadoc** nav entry, dis
 
 ### Subprojects
 
-| Module                     | Status           | Notes                                                                                               |
-| -------------------------- | ---------------- | --------------------------------------------------------------------------------------------------- |
-| `cloudstub-core`           | Done             | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                                     |
-| `cloudstub-junit`          | Done             | `@ExtendWith` + `@RegisterExtension`, fault injection annotations; JUnit 5 and 6                    |
-| `cloudstub-testing`        | Done             | Aggregator — one test dependency that pulls in cloudstub-core + cloudstub-junit (api)               |
-| `cloudstub-sns`            | Done             | XML/Form protocol; reference implementation for `registerXmlFormStub`                               |
-| `cloudstub-sqs`            | Done             | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044)              |
-| `cloudstub-secretsmanager` | Done             | Reference impl — JSON/X-Amz-Target protocol                                                         |
-| `cloudstub-s3`             | Done             | REST path protocol; generated from real AWS Smithy model                                            |
-| `cloudstub-dynamodb`       | Done             | JSON/X-Amz-Target; stateful tables + items (put/get/query/scan/update/batch) backed by state store  |
-| `cloudstub-lambda`         | Scaffolding only | JSON/X-Amz-Target protocol                                                                          |
-| `cloudstub-codegen`        | Done             | Smithy → CloudStubService stub generator                                                            |
-| `cloudstub-local`          | Done             | Dual-mode fat JAR (launcher + core + CLI); loads module jars from a plugin directory; port 4566     |
-| `cloudstub-console`        | Done             | Angular web console; built by gradle-node-plugin, embedded in cloudstub-local, served at `/console` |
-| `cloudstub-sdk-v1`         | Done             | AWS SDK v1 companion — one-line per-client endpoint redirection                                     |
-| `cloudstub-example:junit6` | Done             | Spring Boot app + integration tests with JUnit 6 (CloudStubExtension)                               |
-| `cloudstub-example:junit5` | Done             | Standalone CloudStubExtension tests compiled and run against JUnit 5                                |
+| Module                     | Status | Notes                                                                                               |
+| -------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
+| `cloudstub-core`           | Done   | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                                     |
+| `cloudstub-junit`          | Done   | `@ExtendWith` + `@RegisterExtension`, fault injection annotations; JUnit 5 and 6                    |
+| `cloudstub-testing`        | Done   | Aggregator — one test dependency that pulls in cloudstub-core + cloudstub-junit (api)               |
+| `cloudstub-sns`            | Done   | XML/Form protocol; reference implementation for `registerXmlFormStub`                               |
+| `cloudstub-sqs`            | Done   | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044)              |
+| `cloudstub-secretsmanager` | Done   | Reference impl — JSON/X-Amz-Target protocol                                                         |
+| `cloudstub-s3`             | Done   | REST path protocol; generated from real AWS Smithy model                                            |
+| `cloudstub-dynamodb`       | Done   | JSON/X-Amz-Target; stateful tables + items (put/get/query/scan/update/batch) backed by state store  |
+| `cloudstub-lambda`         | Done   | REST JSON; stateful function lifecycle + tags backed by state store; Invoke echoes the payload      |
+| `cloudstub-codegen`        | Done   | Smithy → CloudStubService stub generator                                                            |
+| `cloudstub-local`          | Done   | Dual-mode fat JAR (launcher + core + CLI); loads module jars from a plugin directory; port 4566     |
+| `cloudstub-console`        | Done   | Angular web console; built by gradle-node-plugin, embedded in cloudstub-local, served at `/console` |
+| `cloudstub-sdk-v1`         | Done   | AWS SDK v1 companion — one-line per-client endpoint redirection                                     |
+| `cloudstub-example:junit6` | Done   | Spring Boot app + integration tests with JUnit 6 (CloudStubExtension)                               |
+| `cloudstub-example:junit5` | Done   | Standalone CloudStubExtension tests compiled and run against JUnit 5                                |
 
 The `cloudstub` / `clb` CLI is part of `cloudstub-local` (same dual-mode fat JAR as the server). See
 the **CLI** section.
@@ -415,13 +414,30 @@ infra issue must therefore name the consumer that proves it works, not just the 
 
 AWS SDK v2 uses JSON/X-Amz-Target for SQS (confirmed in implementation — the CLAUDE.md table was outdated).
 All three `StubRegistrar` routing methods are now exercised by real modules: JSON/X-Amz-Target by `cloudstub-sqs` and
-`cloudstub-secretsmanager`, XML/Form by `cloudstub-sns`, and REST path by `cloudstub-s3`.
+`cloudstub-secretsmanager`, XML/Form by `cloudstub-sns`, and REST path by `cloudstub-s3` and `cloudstub-lambda`.
 
 | Protocol            | Services                       | Matching rule                |
 | ------------------- | ------------------------------ | ---------------------------- |
 | JSON / X-Amz-Target | SQS, Secrets Manager, DynamoDB | `X-Amz-Target` header        |
 | XML / Form URL      | SNS (legacy)                   | `Action` form body parameter |
-| REST path           | S3                             | HTTP method + path regex     |
+| REST path           | S3, Lambda                     | HTTP method + path regex     |
+
+### REST-path modules share one URL space (S3 + Lambda)
+
+REST-path modules match on HTTP method + path regex, so when two of them are loaded in the same
+server their patterns compete in one matching space. S3 registers broad catch-all object patterns
+(`/[^/]+/.+` and variants) that overlap the entire Lambda URL space (`/2015-03-31/functions/...`,
+`/2017-03-31/tags/...`, `/2016-08-19/account-settings/`). Correct routing depends on stub
+specificity: a REST stub's WireMock priority is `PRIORITY_BASE - literalLength(pattern)`
+(`WireMockStubRegistrar`, issue #199), so the pattern with more literal (non-regex) characters wins.
+Lambda's literal `/2015-03-31/functions/` prefix outscores S3's `/[^/]+/.+`, so Lambda routes win on
+its own paths while every normal S3 bucket/key is untouched. This is what lets S3 and Lambda run in
+one standalone server; it is exercised by `cloudstub-local`'s integration test and the mixed
+`test-local` run.
+
+Residual caveat: an S3 bucket named exactly like a Lambda API date prefix (`2015-03-31`,
+`2016-08-19`, `2017-03-31`) with a key path matching a Lambda route is shadowed by the Lambda stub.
+Not simulated; use distinct bucket names.
 
 Response templates use Handlebars. Available helpers:
 

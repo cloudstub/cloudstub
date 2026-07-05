@@ -70,6 +70,12 @@ final class WireMockStubRequest implements StubRequest {
     }
 
     @Override
+    public java.util.List<String> queryParamValues(String name) {
+        QueryParameter param = request.queryParameter(name);
+        return param != null && param.isPresent() ? param.values() : java.util.List.of();
+    }
+
+    @Override
     public String jsonField(String path) {
         JsonNode root = bodyTree();
         if (root == null || path == null) {

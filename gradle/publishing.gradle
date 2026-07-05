@@ -32,6 +32,8 @@ def pomInfo = [
         'CloudStub stub module for AWS Secrets Manager with stateful secret storage backed by the state store.'],
     'cloudstub-dynamodb': ['CloudStub DynamoDB',
         'CloudStub stub module for Amazon DynamoDB with stateful tables and items backed by the state store.'],
+    'cloudstub-lambda' : ['CloudStub Lambda',
+        'CloudStub stub module for AWS Lambda with a stateful function lifecycle backed by the state store.'],
     'cloudstub-sdk-v1' : ['CloudStub AWS SDK v1 Support',
         'CloudStub companion library for AWS SDK v1 consumers.'],
 ]

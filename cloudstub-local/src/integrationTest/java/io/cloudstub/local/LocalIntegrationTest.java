@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
@@ -17,6 +18,8 @@ import software.amazon.awssdk.services.dynamodb.model.BillingMode;
 import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
 import software.amazon.awssdk.services.dynamodb.model.KeyType;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
+import software.amazon.awssdk.services.lambda.LambdaClient;
+import software.amazon.awssdk.services.lambda.model.InvokeResponse;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.ListTopicsResponse;
@@ -31,7 +34,7 @@ class LocalIntegrationTest {
     @BeforeAll
     static void startServer() throws Exception {
         // Services are opt-in: declare the services the tests below exercise.
-        process = LocalProcess.start(PORT, "--services=sqs,sns,secretsmanager,dynamodb");
+        process = LocalProcess.start(PORT, "--services=sqs,sns,secretsmanager,dynamodb,lambda");
     }
 
     @AfterAll
@@ -116,9 +119,13 @@ class LocalIntegrationTest {
                                         AwsBasicCredentials.create("test", "test")))
                         .build()) {
 
+            // Unique name: the standalone server persists state to .cloudstub, so a fixed name
+            // would
+            // collide (ResourceInUseException) on a re-run.
+            String table = "local-table-" + java.util.UUID.randomUUID();
             ddb.createTable(
                     b ->
-                            b.tableName("local-table")
+                            b.tableName(table)
                                     .keySchema(
                                             KeySchemaElement.builder()
                                                     .attributeName("id")
@@ -132,7 +139,7 @@ class LocalIntegrationTest {
                                     .billingMode(BillingMode.PAY_PER_REQUEST));
             ddb.putItem(
                     b ->
-                            b.tableName("local-table")
+                            b.tableName(table)
                                     .item(
                                             java.util.Map.of(
                                                     "id", AttributeValue.fromS("k1"),
@@ -142,7 +149,7 @@ class LocalIntegrationTest {
             var item =
                     ddb.getItem(
                                     b ->
-                                            b.tableName("local-table")
+                                            b.tableName(table)
                                                     .key(
                                                             java.util.Map.of(
                                                                     "id",
@@ -151,6 +158,46 @@ class LocalIntegrationTest {
             assertTrue(
                     "local-value".equals(item.get("payload").s()),
                     "item written over the AWS protocol must be returned by the standalone server");
+        }
+    }
+
+    @Test
+    void lambdaFunctionIsStateBackedByLocalProcess() {
+        try (LambdaClient lambda =
+                LambdaClient.builder()
+                        .endpointOverride(URI.create("http://localhost:" + PORT))
+                        .region(Region.US_EAST_1)
+                        .credentialsProvider(
+                                StaticCredentialsProvider.create(
+                                        AwsBasicCredentials.create("test", "test")))
+                        .build()) {
+
+            // Unique name: the standalone server persists state to .cloudstub, so a fixed name
+            // would
+            // collide (ResourceConflictException) on a re-run.
+            String fn = "local-fn-" + java.util.UUID.randomUUID();
+            lambda.createFunction(
+                    b ->
+                            b.functionName(fn)
+                                    .runtime("nodejs20.x")
+                                    .role("arn:aws:iam::000000000000:role/lambda-role")
+                                    .handler("index.handler")
+                                    .code(c -> c.zipFile(SdkBytes.fromUtf8String("code"))));
+
+            assertTrue(
+                    lambda.listFunctions().functions().stream()
+                            .anyMatch(f -> fn.equals(f.functionName())),
+                    "function created over the AWS protocol must be returned by the standalone"
+                            + " server");
+
+            InvokeResponse response =
+                    lambda.invoke(
+                            b ->
+                                    b.functionName(fn)
+                                            .payload(SdkBytes.fromUtf8String("{\"ping\":true}")));
+            assertTrue(
+                    "{\"ping\":true}".equals(response.payload().asUtf8String()),
+                    "Invoke must echo the request payload");
         }
     }
 }

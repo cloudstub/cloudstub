@@ -28,11 +28,24 @@ public interface StubRequest {
     String header(String name);
 
     /**
-     * The value of the named query-string parameter, or {@code null} if absent.
+     * The value of the named query-string parameter, or {@code null} if absent. When a parameter is
+     * repeated, this returns its first value; use {@link #queryParamValues} to read them all.
      *
      * @param name query parameter name
      */
     String queryParam(String name);
+
+    /**
+     * All values of the named query-string parameter, in request order, for a parameter that may
+     * repeat (e.g. {@code ?tagKeys=a&tagKeys=b}). Returns an empty list if the parameter is absent.
+     *
+     * @param name query parameter name
+     * @return the values, or an empty list; never {@code null}
+     */
+    default java.util.List<String> queryParamValues(String name) {
+        String value = queryParam(name);
+        return value == null ? java.util.List.of() : java.util.List.of(value);
+    }
 
     /**
      * Reads a scalar field from the JSON request body, addressed by a dotted path, so JSON-protocol

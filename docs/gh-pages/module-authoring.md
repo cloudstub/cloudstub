@@ -16,9 +16,16 @@ Every AWS service uses one of three wire protocols. Your module implements which
 |---------------------|--------------------------------|-------------------------------|--------------------------|
 | JSON / X-Amz-Target | SQS, Secrets Manager, DynamoDB | `X-Amz-Target` request header | `registerJsonTargetStub` |
 | XML / Form URL      | SNS (legacy SDK v1)            | `Action` form body parameter  | `registerXmlFormStub`    |
-| REST path           | S3                             | HTTP method + URL path regex  | `registerRestStub`       |
+| REST path           | S3, Lambda                     | HTTP method + URL path regex  | `registerRestStub`       |
 
 Check the AWS SDK v2 source or Smithy model for your target service to confirm which protocol it uses.
+
+REST-path modules share one URL matching space. When more than one is loaded (for example S3 and
+Lambda in one standalone server), their path patterns compete, and S3's catch-all object patterns
+(`/[^/]+/.+`) overlap most other services' paths. The engine picks the most specific match: a stub's
+priority is `PRIORITY_BASE - literalLength(pattern)`, so the pattern with more literal characters
+wins. Anchor your patterns with a literal path prefix (Lambda uses `/2015-03-31/functions/...`) so
+they outscore a generic catch-all rather than relying on registration order.
 
 ---
 
@@ -288,6 +295,7 @@ enabled with `--services` are not registered, keeping the stub view and the API 
 | `cloudstub-secretsmanager` | JSON / X-Amz-Target | ARN construction, nested JSON responses                   |
 | `cloudstub-sns`            | XML / Form URL      | `Action`-matched stubs, XML responses                     |
 | `cloudstub-s3`             | REST path           | HTTP method + path-regex stubs, XML responses             |
+| `cloudstub-lambda`         | REST path           | Literal-prefixed path-regex stubs (coexist with S3)       |
 
 For `CloudStubApiService` (§8), `CloudStubSqsApiService`, `CloudStubS3ApiService`, and
 `CloudStubSecretsManagerApiService` are the reference implementations.

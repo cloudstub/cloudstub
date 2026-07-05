@@ -6,6 +6,14 @@ CloudStub mocks one AWS service per module. Type to filter, or pick a service be
 
 <div class="grid cards" markdown>
 
+- **AWS Lambda**
+
+    ---
+
+    Stateful functions over the REST JSON protocol: a function created is returned by a later get, and Invoke echoes the payload.
+
+    [Open the Lambda guide →](lambda.md)
+
 - **AWS Secrets Manager**
 
     ---
