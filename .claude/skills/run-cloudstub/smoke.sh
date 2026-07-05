@@ -29,10 +29,7 @@ done
 # Services are opt-in: the server loads nothing unless --services is given. The smoke test
 # exercises every protocol, so enable all of them when the caller did not pick a subset.
 if [[ "$SERVICES_SET" == false ]]; then
-  # lambda is intentionally omitted: it is REST-path routed and collides with s3's path-style
-  # catch-alls on the shared port (see cloudstub/cloudstub#199). Lambda's standalone coverage lives
-  # in cloudstub-local's LocalIntegrationTest, which runs it without s3.
-  EXTRA_ARGS+=("--services=sqs,sns,secretsmanager,s3,dynamodb")
+  EXTRA_ARGS+=("--services=sqs,sns,secretsmanager,s3,dynamodb,lambda")
 fi
 
 if [[ ! -f "$JAR" ]]; then
@@ -165,6 +162,32 @@ DDB_SCAN=$(curl -sf "http://localhost:$API_PORT/api/dynamodb/scan?table=smoke-dd
 echo "$DDB_SCAN" | python3 -c "import sys,json; d=json.load(sys.stdin); assert any(i['value']['S']=='hello' for i in d['items'])" \
   || fail "DynamoDB item not state-backed across surfaces: $DDB_SCAN"
 pass "DynamoDB /api/dynamodb/scan (state-backed)  → $DDB_SCAN"
+
+echo ""
+echo "==> Lambda (REST path; shares the port with s3)"
+curl -sf -X POST "http://localhost:$PORT/2015-03-31/functions" \
+  -H "Content-Type: application/json" \
+  -d '{"FunctionName":"smoke-fn","Runtime":"nodejs20.x","Role":"arn:aws:iam::0:role/r","Handler":"i.h","Code":{"ZipFile":"aGVsbG8="}}' \
+  > /dev/null || fail "Lambda CreateFunction failed"
+pass "Lambda CreateFunction"
+
+# ListFunctions carries a query string; with s3 loaded, its catch-all path patterns must not steal it.
+LAMBDA_LIST=$(curl -sf "http://localhost:$PORT/2015-03-31/functions/?MaxItems=5")
+echo "$LAMBDA_LIST" | python3 -c "import sys,json; d=json.load(sys.stdin); assert any(f['FunctionName']=='smoke-fn' for f in d['Functions'])" \
+  || fail "Lambda ListFunctions (with s3 loaded) did not return smoke-fn: $LAMBDA_LIST"
+pass "Lambda ListFunctions?MaxItems=5 (not shadowed by s3)"
+
+# Invoke echoes the request payload verbatim.
+LAMBDA_INVOKE=$(curl -sf -X POST "http://localhost:$PORT/2015-03-31/functions/smoke-fn/invocations" -d '{"ping":true}')
+echo "$LAMBDA_INVOKE" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['ping'] is True" \
+  || fail "Lambda Invoke did not echo payload: $LAMBDA_INVOKE"
+pass "Lambda Invoke (payload echo)"
+
+# The same function is visible through the REST API on the API port.
+LAMBDA_REST=$(curl -sf "http://localhost:$API_PORT/api/lambda/list-functions")
+echo "$LAMBDA_REST" | python3 -c "import sys,json; d=json.load(sys.stdin); assert any(f['FunctionName']=='smoke-fn' for f in d['functions'])" \
+  || fail "Lambda function not visible across surfaces: $LAMBDA_REST"
+pass "Lambda /api/lambda/list-functions (state-backed)"
 
 echo ""
 echo "==> GET /api/history (3 requests logged)"
