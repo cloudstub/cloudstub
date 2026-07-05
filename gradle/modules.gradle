@@ -13,4 +13,4 @@ ext.toolModules = ['cloudstub-local', 'cloudstub-codegen']
 
 // Services rolled out so far; add the next one here (and its pomInfo) when its publishing is validated.
 ext.publishedServices = ['cloudstub-sqs', 'cloudstub-s3', 'cloudstub-sns', 'cloudstub-secretsmanager',
-                         'cloudstub-dynamodb']
+                         'cloudstub-dynamodb', 'cloudstub-lambda']

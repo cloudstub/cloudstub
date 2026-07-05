@@ -162,16 +162,15 @@ State-backed operations return live data from the shared state store:
   the log tail, and the `FunctionError` field are not simulated.
 - Versions and aliases are not simulated: a qualifier in the function name or ARN (for example
   `processor:PROD`) is stripped and resolves to the unqualified function.
-- `CodeSize` and `CodeSha256` are derived from the inline `Code.ZipFile` bytes only. Code supplied
-  from S3 or an image URI, and layers, are not stored.
+- `CodeSize` and `CodeSha256` are computed from the decoded inline `Code.ZipFile` bytes. Code
+  supplied from S3 or an image URI, and layers, are not stored.
 - Event source mappings, function URLs, concurrency, event-invoke config, and durable executions are
   not implemented.
-- `UntagResource` removes only the first `tagKeys` value in a request; removing several tags in one
-  call is not simulated.
 - `CreateFunction` accepts a function without validating the runtime, role, or handler; requests
   always succeed unless the function already exists (`ResourceConflictException`).
-- Do not enable `lambda` and `s3` on the same server yet. Both are addressed by URL path, and S3's
-  path-style routes currently shadow Lambda's paths on the shared port. Either run Lambda alongside
-  the header-routed services (SQS, SNS, Secrets Manager, DynamoDB) on one server, or run Lambda and
-  S3 as two separate servers on different ports (`--port`/`--api-port`, plus `--store-dir` for each)
-  and point each SDK client at its own endpoint.
+- `lambda` and `s3` can run on the same server. Both use URL-path routing, and S3's catch-all object
+  patterns (`/[^/]+/.+`) overlap Lambda's paths, so routing relies on stub specificity: Lambda's
+  literal `/2015-03-31/functions/...` prefixes are more specific than S3's catch-alls and win, while
+  every normal S3 bucket and key is unaffected. The one exception: an S3 bucket named exactly like a
+  Lambda API date prefix (`2015-03-31`, `2016-08-19`, `2017-03-31`) with a key path matching a Lambda
+  route is shadowed by the Lambda stub. Use a different bucket name.

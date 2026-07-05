@@ -414,13 +414,30 @@ infra issue must therefore name the consumer that proves it works, not just the 
 
 AWS SDK v2 uses JSON/X-Amz-Target for SQS (confirmed in implementation — the CLAUDE.md table was outdated).
 All three `StubRegistrar` routing methods are now exercised by real modules: JSON/X-Amz-Target by `cloudstub-sqs` and
-`cloudstub-secretsmanager`, XML/Form by `cloudstub-sns`, and REST path by `cloudstub-s3`.
+`cloudstub-secretsmanager`, XML/Form by `cloudstub-sns`, and REST path by `cloudstub-s3` and `cloudstub-lambda`.
 
 | Protocol            | Services                       | Matching rule                |
 | ------------------- | ------------------------------ | ---------------------------- |
 | JSON / X-Amz-Target | SQS, Secrets Manager, DynamoDB | `X-Amz-Target` header        |
 | XML / Form URL      | SNS (legacy)                   | `Action` form body parameter |
 | REST path           | S3, Lambda                     | HTTP method + path regex     |
+
+### REST-path modules share one URL space (S3 + Lambda)
+
+REST-path modules match on HTTP method + path regex, so when two of them are loaded in the same
+server their patterns compete in one matching space. S3 registers broad catch-all object patterns
+(`/[^/]+/.+` and variants) that overlap the entire Lambda URL space (`/2015-03-31/functions/...`,
+`/2017-03-31/tags/...`, `/2016-08-19/account-settings/`). Correct routing depends on stub
+specificity: a REST stub's WireMock priority is `PRIORITY_BASE - literalLength(pattern)`
+(`WireMockStubRegistrar`, issue #199), so the pattern with more literal (non-regex) characters wins.
+Lambda's literal `/2015-03-31/functions/` prefix outscores S3's `/[^/]+/.+`, so Lambda routes win on
+its own paths while every normal S3 bucket/key is untouched. This is what lets S3 and Lambda run in
+one standalone server; it is exercised by `cloudstub-local`'s integration test and the mixed
+`test-local` run.
+
+Residual caveat: an S3 bucket named exactly like a Lambda API date prefix (`2015-03-31`,
+`2016-08-19`, `2017-03-31`) with a key path matching a Lambda route is shadowed by the Lambda stub.
+Not simulated; use distinct bucket names.
 
 Response templates use Handlebars. Available helpers:
 
