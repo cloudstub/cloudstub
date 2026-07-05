@@ -32,6 +32,12 @@ public final class WireMockStubRegistrar implements StubRegistrar {
 
     private static final Logger log = LoggerFactory.getLogger(WireMockStubRegistrar.class);
 
+    /** Minuend for {@link #restPriority}: priority is this minus the pattern's literal length. */
+    private static final int PRIORITY_BASE = 1000;
+
+    /** Regex metacharacters that do not contribute to a pattern's literal length. */
+    private static final String METACHARACTERS = ".*+?()|^${}";
+
     private final WireMockServer server;
     private final CloudStubResponseTransformer transformer;
     private final ServiceRegistry registry;
@@ -91,6 +97,7 @@ public final class WireMockStubRegistrar implements StubRegistrar {
         String matchKey = method.name() + " " + pathPattern;
         server.stubFor(
                 request(method.name(), urlMatching(pathPattern))
+                        .atPriority(restPriority(pathPattern))
                         .withName(stubName(matchKey))
                         .willReturn(
                                 aResponse()
@@ -126,7 +133,8 @@ public final class WireMockStubRegistrar implements StubRegistrar {
         registerHandlerStub(
                 StubProtocol.REST,
                 method.name() + " " + pathPattern,
-                request(method.name(), urlMatching(pathPattern)),
+                request(method.name(), urlMatching(pathPattern))
+                        .atPriority(restPriority(pathPattern)),
                 handler);
     }
 
@@ -165,6 +173,52 @@ public final class WireMockStubRegistrar implements StubRegistrar {
                                                                         r.matchKey()))
                                                 .toList()))
                 .toList();
+    }
+
+    /**
+     * WireMock priority for a REST path pattern: {@code PRIORITY_BASE - literalLength(pattern)},
+     * floored at {@code 1}. A lower number is higher priority in WireMock.
+     */
+    private static int restPriority(String pathPattern) {
+        return Math.max(1, PRIORITY_BASE - literalLength(pathPattern));
+    }
+
+    /**
+     * Counts the literal characters in a regex path pattern: characters outside a {@code [...]}
+     * character class that are neither regex metacharacters nor the escape backslash. An escaped
+     * metacharacter (e.g. {@code \?}) counts as one literal; the contents of a character class
+     * count as none. Path separators and other ordinary characters count as one each.
+     */
+    private static int literalLength(String pattern) {
+        int count = 0;
+        boolean inClass = false;
+        for (int i = 0; i < pattern.length(); i++) {
+            char c = pattern.charAt(i);
+            if (inClass) {
+                if (c == '\\') {
+                    i++;
+                } else if (c == ']') {
+                    inClass = false;
+                }
+                continue;
+            }
+            if (c == '\\') {
+                if (i + 1 < pattern.length()) {
+                    i++;
+                    count++;
+                }
+                continue;
+            }
+            if (c == '[') {
+                inClass = true;
+                continue;
+            }
+            if (METACHARACTERS.indexOf(c) >= 0) {
+                continue;
+            }
+            count++;
+        }
+        return count;
     }
 
     private String stubName(String matchKey) {
