@@ -128,7 +128,11 @@ final class LambdaJson {
                     case 'u' -> {
                         String hex = s.substring(i, i + 4);
                         i += 4;
-                        sb.append((char) Integer.parseInt(hex, 16));
+                        try {
+                            sb.append((char) Integer.parseInt(hex, 16));
+                        } catch (NumberFormatException e) {
+                            throw new IllegalStateException("bad unicode escape: \\u" + hex, e);
+                        }
                     }
                     default -> throw new IllegalStateException("bad escape: \\" + esc);
                 }
