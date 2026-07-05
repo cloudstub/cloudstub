@@ -178,11 +178,18 @@ final class LambdaJson {
                 // Fall through to double for values outside the long range.
             }
         }
+        double value;
         try {
-            return Double.parseDouble(token);
+            value = Double.parseDouble(token);
         } catch (NumberFormatException e) {
             throw new IllegalStateException("invalid number: " + token, e);
         }
+        // A whole number written with a point or exponent round-trips as a Long; beyond 2^53 an
+        // exact long cast is not guaranteed, so keep the Double.
+        if (value == Math.rint(value) && Math.abs(value) < 0x1p53) {
+            return (long) value;
+        }
+        return value;
     }
 
     private void skipWhitespace() {

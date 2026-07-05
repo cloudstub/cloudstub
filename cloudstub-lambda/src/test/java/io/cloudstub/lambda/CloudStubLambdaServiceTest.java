@@ -17,6 +17,7 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 import software.amazon.awssdk.services.lambda.model.GetFunctionResponse;
+import software.amazon.awssdk.services.lambda.model.InvocationType;
 import software.amazon.awssdk.services.lambda.model.InvokeResponse;
 import software.amazon.awssdk.services.lambda.model.ResourceConflictException;
 import software.amazon.awssdk.services.lambda.model.ResourceNotFoundException;
@@ -205,5 +206,80 @@ class CloudStubLambdaServiceTest {
         lambda.tagResource(b -> b.resource(arn).tags(Map.of("team", "payments")));
 
         assertEquals("payments", lambda.listTags(b -> b.resource(arn)).tags().get("team"));
+    }
+
+    @Test
+    void listFunctionsWithMaxItemsIsNotMisroutedToGetFunction() {
+        String name = newFunction();
+        assertTrue(
+                lambda.listFunctions(b -> b.maxItems(50)).functions().stream()
+                        .anyMatch(f -> name.equals(f.functionName())),
+                "ListFunctions with a query string must still list functions, not 404");
+    }
+
+    @Test
+    void createFunctionPersistsTags() {
+        String name = "tagged-" + UUID.randomUUID();
+        lambda.createFunction(
+                b ->
+                        b.functionName(name)
+                                .runtime("nodejs20.x")
+                                .role("arn:aws:iam::0:role/r")
+                                .handler("index.handler")
+                                .code(c -> c.zipFile(SdkBytes.fromUtf8String("z")))
+                                .tags(Map.of("env", "prod")));
+        String arn = "arn:aws:lambda:us-east-1:000000000000:function:" + name;
+        assertEquals("prod", lambda.listTags(b -> b.resource(arn)).tags().get("env"));
+    }
+
+    @Test
+    void untagResourceRemovesEveryRequestedKey() {
+        String name = newFunction();
+        String arn = "arn:aws:lambda:us-east-1:000000000000:function:" + name;
+        lambda.tagResource(b -> b.resource(arn).tags(Map.of("a", "1", "b", "2", "c", "3")));
+
+        lambda.untagResource(b -> b.resource(arn).tagKeys("a", "b"));
+
+        var tags = lambda.listTags(b -> b.resource(arn)).tags();
+        assertFalse(tags.containsKey("a"), "key a must be removed");
+        assertFalse(tags.containsKey("b"), "key b must be removed");
+        assertEquals("3", tags.get("c"), "untouched key must remain");
+    }
+
+    @Test
+    void asyncInvokeReturns202WithNoPayload() {
+        String name = newFunction();
+        InvokeResponse response =
+                lambda.invoke(
+                        b ->
+                                b.functionName(name)
+                                        .invocationType(InvocationType.EVENT)
+                                        .payload(SdkBytes.fromUtf8String("{\"x\":1}")));
+        assertEquals(202, response.statusCode());
+        assertEquals("", response.payload().asUtf8String());
+    }
+
+    @Test
+    void dryRunInvokeReturns204() {
+        String name = newFunction();
+        InvokeResponse response =
+                lambda.invoke(b -> b.functionName(name).invocationType(InvocationType.DRY_RUN));
+        assertEquals(204, response.statusCode());
+    }
+
+    @Test
+    void codeSha256MatchesDigestOfDecodedZipBytes() {
+        String name = "sha-" + UUID.randomUUID();
+        byte[] zip = "the-real-zip-bytes".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        var response =
+                lambda.createFunction(
+                        b ->
+                                b.functionName(name)
+                                        .runtime("nodejs20.x")
+                                        .role("arn:aws:iam::0:role/r")
+                                        .handler("index.handler")
+                                        .code(c -> c.zipFile(SdkBytes.fromByteArray(zip))));
+        assertEquals(LambdaHelpers.sha256Base64(zip), response.codeSha256());
+        assertEquals((long) zip.length, response.codeSize());
     }
 }

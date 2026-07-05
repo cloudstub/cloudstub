@@ -11,6 +11,7 @@ import io.cloudstub.core.spi.StubResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,10 @@ public class CloudStubLambdaService implements CloudStubService {
     private static final String TAGS = "/2017-03-31/tags/";
     private static final String QUERY = "(\\?.*)?";
 
+    // Serialises the read-modify-write mutating handlers so concurrent requests on one function
+    // cannot lose an update.
+    private final Object writeLock = new Object();
+
     @Override
     public String serviceId() {
         return SERVICE_ID;
@@ -61,29 +66,27 @@ public class CloudStubLambdaService implements CloudStubService {
     public void register(CloudStubContext context) {
         StubRegistrar r = context.registrar();
 
-        // Function lifecycle (REST path; urlMatching is anchored, so these patterns do not
-        // overlap).
         r.registerRestStub(
                 HttpMethod.POST, "/2015-03-31/functions/?" + QUERY, this::createFunction);
         r.registerRestStub(HttpMethod.GET, "/2015-03-31/functions/?" + QUERY, this::listFunctions);
         r.registerRestStub(
-                HttpMethod.GET, "/2015-03-31/functions/[^/]+" + QUERY, this::getFunction);
+                HttpMethod.GET, "/2015-03-31/functions/[^/?]+" + QUERY, this::getFunction);
         r.registerRestStub(
-                HttpMethod.DELETE, "/2015-03-31/functions/[^/]+" + QUERY, this::deleteFunction);
+                HttpMethod.DELETE, "/2015-03-31/functions/[^/?]+" + QUERY, this::deleteFunction);
         r.registerRestStub(
                 HttpMethod.GET,
-                "/2015-03-31/functions/[^/]+/configuration" + QUERY,
+                "/2015-03-31/functions/[^/?]+/configuration" + QUERY,
                 this::getFunctionConfiguration);
         r.registerRestStub(
                 HttpMethod.PUT,
-                "/2015-03-31/functions/[^/]+/configuration" + QUERY,
+                "/2015-03-31/functions/[^/?]+/configuration" + QUERY,
                 this::updateFunctionConfiguration);
         r.registerRestStub(
                 HttpMethod.PUT,
-                "/2015-03-31/functions/[^/]+/code" + QUERY,
+                "/2015-03-31/functions/[^/?]+/code" + QUERY,
                 this::updateFunctionCode);
         r.registerRestStub(
-                HttpMethod.POST, "/2015-03-31/functions/[^/]+/invocations" + QUERY, this::invoke);
+                HttpMethod.POST, "/2015-03-31/functions/[^/?]+/invocations" + QUERY, this::invoke);
 
         // Tags.
         r.registerRestStub(HttpMethod.GET, TAGS + ".+", this::listTags);
@@ -103,13 +106,19 @@ public class CloudStubLambdaService implements CloudStubService {
         if (name == null || name.isBlank()) {
             return error(400, "InvalidParameterValueException", "FunctionName is required.");
         }
-        if (store.get(LambdaKeys.functionKey(name)) != null) {
-            return error(409, "ResourceConflictException", "Function already exist: " + name);
+        synchronized (writeLock) {
+            if (store.get(LambdaKeys.functionKey(name)) != null) {
+                return error(409, "ResourceConflictException", "Function already exist: " + name);
+            }
+            Map<String, Object> config = functionConfiguration(name, body, null);
+            applyCode(config, inlineZip(body));
+            store.put(LambdaKeys.functionKey(name), config);
+            Map<String, Object> tags = asMap(body.get("Tags"));
+            if (tags != null && !tags.isEmpty()) {
+                store.put(LambdaKeys.tagsKey(name), new LinkedHashMap<>(tags));
+            }
+            return StubResponse.json(201, config);
         }
-        Map<String, Object> config = functionConfiguration(name, body, null);
-        applyCode(config, inlineZip(body));
-        store.put(LambdaKeys.functionKey(name), config);
-        return StubResponse.json(201, config);
     }
 
     private StubResponse getFunction(StubRequest req, StateStore store) {
@@ -152,44 +161,59 @@ public class CloudStubLambdaService implements CloudStubService {
 
     private StubResponse deleteFunction(StubRequest req, StateStore store) {
         String name = LambdaHelpers.functionName(pathToken(req.path(), FUNCTIONS));
-        if (config(store, name) == null) {
-            return notFound(name);
+        synchronized (writeLock) {
+            if (config(store, name) == null) {
+                return notFound(name);
+            }
+            store.delete(LambdaKeys.functionKey(name));
+            store.delete(LambdaKeys.tagsKey(name));
+            return StubResponse.of(204, "application/json", "");
         }
-        store.delete(LambdaKeys.functionKey(name));
-        store.delete(LambdaKeys.tagsKey(name));
-        return StubResponse.of(204, "application/json", "");
     }
 
     private StubResponse updateFunctionConfiguration(StubRequest req, StateStore store) {
         String name = LambdaHelpers.functionName(pathToken(req.path(), FUNCTIONS));
-        Map<String, Object> existing = config(store, name);
-        if (existing == null) {
-            return notFound(name);
-        }
         Map<String, Object> body = LambdaJson.parseObject(req.body());
-        Map<String, Object> config = functionConfiguration(name, body, existing);
-        store.put(LambdaKeys.functionKey(name), config);
-        return StubResponse.json(config);
+        synchronized (writeLock) {
+            Map<String, Object> existing = config(store, name);
+            if (existing == null) {
+                return notFound(name);
+            }
+            Map<String, Object> config = functionConfiguration(name, body, existing);
+            store.put(LambdaKeys.functionKey(name), config);
+            return StubResponse.json(config);
+        }
     }
 
     private StubResponse updateFunctionCode(StubRequest req, StateStore store) {
         String name = LambdaHelpers.functionName(pathToken(req.path(), FUNCTIONS));
-        Map<String, Object> existing = config(store, name);
-        if (existing == null) {
-            return notFound(name);
-        }
         Map<String, Object> body = LambdaJson.parseObject(req.body());
-        Map<String, Object> config = new LinkedHashMap<>(existing);
-        applyCode(config, str(body.get("ZipFile")));
-        config.put("LastModified", Instant.now().toString());
-        store.put(LambdaKeys.functionKey(name), config);
-        return StubResponse.json(config);
+        synchronized (writeLock) {
+            Map<String, Object> existing = config(store, name);
+            if (existing == null) {
+                return notFound(name);
+            }
+            Map<String, Object> config = new LinkedHashMap<>(existing);
+            applyCode(config, str(body.get("ZipFile")));
+            config.put("LastModified", Instant.now().toString());
+            store.put(LambdaKeys.functionKey(name), config);
+            return StubResponse.json(config);
+        }
     }
 
     private StubResponse invoke(StubRequest req, StateStore store) {
         String name = LambdaHelpers.functionName(pathToken(req.path(), FUNCTIONS));
         if (config(store, name) == null) {
             return notFound(name);
+        }
+        String invocationType = req.header("X-Amz-Invocation-Type");
+        if ("Event".equalsIgnoreCase(invocationType)) {
+            return StubResponse.of(202, "application/json", "")
+                    .withHeader("X-Amz-Executed-Version", "$LATEST");
+        }
+        if ("DryRun".equalsIgnoreCase(invocationType)) {
+            return StubResponse.of(204, "application/json", "")
+                    .withHeader("X-Amz-Executed-Version", "$LATEST");
         }
         String payload = req.body() == null ? "" : req.body();
         return StubResponse.of(200, "application/json", payload)
@@ -208,29 +232,28 @@ public class CloudStubLambdaService implements CloudStubService {
         String name = LambdaHelpers.functionName(pathToken(req.path(), TAGS));
         Map<String, Object> body = LambdaJson.parseObject(req.body());
         Map<String, Object> incoming = asMap(body.get("Tags"));
-        Map<String, Object> existing = asMap(store.get(LambdaKeys.tagsKey(name)));
-        Map<String, Object> tags =
-                existing != null ? new LinkedHashMap<>(existing) : new LinkedHashMap<>();
-        if (incoming != null) {
-            tags.putAll(incoming);
+        synchronized (writeLock) {
+            Map<String, Object> existing = asMap(store.get(LambdaKeys.tagsKey(name)));
+            Map<String, Object> tags =
+                    existing != null ? new LinkedHashMap<>(existing) : new LinkedHashMap<>();
+            if (incoming != null) {
+                tags.putAll(incoming);
+            }
+            store.put(LambdaKeys.tagsKey(name), tags);
         }
-        store.put(LambdaKeys.tagsKey(name), tags);
         return StubResponse.of(204, "application/json", "");
     }
 
     private StubResponse untagResource(StubRequest req, StateStore store) {
         String name = LambdaHelpers.functionName(pathToken(req.path(), TAGS));
-        Map<String, Object> existing = asMap(store.get(LambdaKeys.tagsKey(name)));
-        if (existing != null) {
-            Map<String, Object> tags = new LinkedHashMap<>(existing);
-            // UntagResource sends a repeated ?tagKeys= list; the SPI exposes only the first value,
-            // so
-            // only one key is removed per request. Removing multiple keys at once is not simulated.
-            String key = req.queryParam("tagKeys");
-            if (key != null) {
-                tags.remove(key);
+        List<String> keys = req.queryParamValues("tagKeys");
+        synchronized (writeLock) {
+            Map<String, Object> existing = asMap(store.get(LambdaKeys.tagsKey(name)));
+            if (existing != null) {
+                Map<String, Object> tags = new LinkedHashMap<>(existing);
+                keys.forEach(tags::remove);
+                store.put(LambdaKeys.tagsKey(name), tags);
             }
-            store.put(LambdaKeys.tagsKey(name), tags);
         }
         return StubResponse.of(204, "application/json", "");
     }
@@ -283,12 +306,21 @@ public class CloudStubLambdaService implements CloudStubService {
         return config;
     }
 
-    /** Recomputes {@code CodeSize}/{@code CodeSha256} from the inline zip bytes when present. */
+    /**
+     * Recomputes {@code CodeSize}/{@code CodeSha256} from the deployment package. The inline {@code
+     * ZipFile} arrives base64-encoded, so it is decoded first and the size and digest describe the
+     * decoded zip bytes. A value that is not valid base64 is hashed as-is.
+     */
     private void applyCode(Map<String, Object> config, String zipFileBase64) {
         if (zipFileBase64 == null) {
             return;
         }
-        byte[] bytes = zipFileBase64.getBytes(StandardCharsets.UTF_8);
+        byte[] bytes;
+        try {
+            bytes = Base64.getDecoder().decode(zipFileBase64);
+        } catch (IllegalArgumentException e) {
+            bytes = zipFileBase64.getBytes(StandardCharsets.UTF_8);
+        }
         config.put("CodeSize", (long) bytes.length);
         config.put("CodeSha256", LambdaHelpers.sha256Base64(bytes));
     }
