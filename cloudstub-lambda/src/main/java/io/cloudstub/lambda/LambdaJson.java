@@ -178,7 +178,11 @@ final class LambdaJson {
                 // Fall through to double for values outside the long range.
             }
         }
-        return Double.parseDouble(token);
+        try {
+            return Double.parseDouble(token);
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("invalid number: " + token, e);
+        }
     }
 
     private void skipWhitespace() {
