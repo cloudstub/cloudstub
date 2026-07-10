@@ -26,6 +26,7 @@ dependencies {
     testImplementation libs.aws.s3
     testImplementation libs.aws.dynamodb
     testImplementation libs.aws.lambda
+    testImplementation libs.aws.ssm
     testImplementation libs.slf4j.simple
     // StatefulCrossSurfaceTest / ApiServerIntegrationTest need these discoverable via ServiceLoader.
     testRuntimeOnly project(':cloudstub-sqs')
@@ -38,6 +39,7 @@ dependencies {
     integrationTestModuleJars project(':cloudstub-s3')
     integrationTestModuleJars project(':cloudstub-dynamodb')
     integrationTestModuleJars project(':cloudstub-lambda')
+    integrationTestModuleJars project(':cloudstub-ssm')
 }
 
 application {

@@ -29,7 +29,7 @@ done
 # Services are opt-in: the server loads nothing unless --services is given. The smoke test
 # exercises every protocol, so enable all of them when the caller did not pick a subset.
 if [[ "$SERVICES_SET" == false ]]; then
-  EXTRA_ARGS+=("--services=sqs,sns,secretsmanager,s3,dynamodb,lambda")
+  EXTRA_ARGS+=("--services=sqs,sns,secretsmanager,s3,dynamodb,lambda,ssm")
 fi
 
 if [[ ! -f "$JAR" ]]; then
@@ -188,6 +188,29 @@ LAMBDA_REST=$(curl -sf "http://localhost:$API_PORT/api/lambda/list-functions")
 echo "$LAMBDA_REST" | python3 -c "import sys,json; d=json.load(sys.stdin); assert any(f['FunctionName']=='smoke-fn' for f in d['functions'])" \
   || fail "Lambda function not visible across surfaces: $LAMBDA_REST"
 pass "Lambda /api/lambda/list-functions (state-backed)"
+
+echo ""
+echo "==> SSM (JSON / X-Amz-Target)"
+curl -sf -X POST "http://localhost:$PORT/" \
+  -H "X-Amz-Target: AmazonSSM.PutParameter" \
+  -H "Content-Type: application/x-amz-json-1.1" \
+  -d '{"Name":"smoke-param","Value":"hello","Type":"String"}' \
+  > /dev/null || fail "SSM PutParameter failed"
+pass "SSM PutParameter"
+
+SSM_GET=$(curl -sf -X POST "http://localhost:$PORT/" \
+  -H "X-Amz-Target: AmazonSSM.GetParameter" \
+  -H "Content-Type: application/x-amz-json-1.1" \
+  -d '{"Name":"smoke-param"}')
+echo "$SSM_GET" | python3 -c "import sys,json; assert json.load(sys.stdin)['Parameter']['Value']=='hello'" \
+  || fail "SSM GetParameter not state-backed: $SSM_GET"
+pass "SSM GetParameter (state-backed)"
+
+# The same parameter is visible through the REST API on the API port.
+SSM_REST=$(curl -sf "http://localhost:$API_PORT/api/ssm/get-parameter?name=smoke-param")
+echo "$SSM_REST" | python3 -c "import sys,json; assert json.load(sys.stdin)['parameter']['Value']=='hello'" \
+  || fail "SSM parameter not visible across surfaces: $SSM_REST"
+pass "SSM /api/ssm/get-parameter (state-backed)  → $SSM_REST"
 
 echo ""
 echo "==> GET /api/history (3 requests logged)"

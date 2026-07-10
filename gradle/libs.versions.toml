@@ -21,6 +21,7 @@ aws-secretsmanager = { module = "software.amazon.awssdk:secretsmanager",     ver
 aws-s3             = { module = "software.amazon.awssdk:s3",                 version.ref = "awssdk" }
 aws-dynamodb       = { module = "software.amazon.awssdk:dynamodb",           version.ref = "awssdk" }
 aws-lambda         = { module = "software.amazon.awssdk:lambda",             version.ref = "awssdk" }
+aws-ssm            = { module = "software.amazon.awssdk:ssm",                version.ref = "awssdk" }
 junit-bom          = { module = "org.junit:junit-bom",                       version.ref = "junit" }
 junit-jupiter      = { module = "org.junit.jupiter:junit-jupiter",           version.ref = "junit" }
 slf4j-api          = { module = "org.slf4j:slf4j-api",                       version.ref = "slf4j" }

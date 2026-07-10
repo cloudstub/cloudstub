@@ -54,4 +54,12 @@ CloudStub mocks one AWS service per module. Type to filter, or pick a service be
 
     [Open the SQS guide →](sqs.md)
 
+- **Amazon SSM**
+
+    ---
+
+    Stateful Parameter Store: a parameter put is returned by a later get, with versioning and tags.
+
+    [Open the SSM guide →](ssm.md)
+
 </div>

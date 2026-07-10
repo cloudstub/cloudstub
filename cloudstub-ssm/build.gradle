@@ -1,0 +1,11 @@
+dependencies {
+    compileOnly project(':cloudstub-core')
+    testImplementation project(':cloudstub-core')
+    testImplementation libs.aws.ssm
+}
+
+jar {
+    manifest {
+        attributes('CloudStub-Core-Min-Version': '0.1.0-beta.7')
+    }
+}

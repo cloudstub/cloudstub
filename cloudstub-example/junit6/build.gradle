@@ -8,6 +8,7 @@ dependencies {
     implementation libs.aws.s3
     implementation libs.aws.dynamodb
     implementation libs.aws.lambda
+    implementation libs.aws.ssm
 
     testImplementation project(':cloudstub-core')
     testImplementation project(':cloudstub-junit')
@@ -17,6 +18,7 @@ dependencies {
     testImplementation project(':cloudstub-s3')
     testImplementation project(':cloudstub-dynamodb')
     testImplementation project(':cloudstub-lambda')
+    testImplementation project(':cloudstub-ssm')
     testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
 
     testImplementation project(':cloudstub-sdk-v1')

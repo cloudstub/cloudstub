@@ -20,8 +20,8 @@ Keep documentation factual and minimal; rationale belongs in commits and issues,
 
 The full multi-project Gradle monorepo is in place. The SPI contract is stable and governed by an explicit evolution
 policy (see **SPI evolution policy** — it is deliberately never declared closed), the core engine is running, the
-`cloudstub-sqs`, `cloudstub-secretsmanager`, `cloudstub-sns`, `cloudstub-s3`, `cloudstub-dynamodb`, and
-`cloudstub-lambda` modules are implemented and tested,
+`cloudstub-sqs`, `cloudstub-secretsmanager`, `cloudstub-sns`, `cloudstub-s3`, `cloudstub-dynamodb`,
+`cloudstub-lambda`, and `cloudstub-ssm` modules are implemented and tested,
 the JUnit extension (JUnit 5 and 6) with fault injection is live, the codegen tool exists, and a Spring Boot example application
 demonstrates end-to-end usage. A documentation site (MkDocs Material) is built and wired to GitHub Pages.
 
@@ -120,6 +120,7 @@ Javadoc reference deploys at `/javadoc/` (a top-level **Javadoc** nav entry, dis
 | `cloudstub-s3`             | Done   | REST path protocol; generated from real AWS Smithy model                                            |
 | `cloudstub-dynamodb`       | Done   | JSON/X-Amz-Target; stateful tables + items (put/get/query/scan/update/batch) backed by state store  |
 | `cloudstub-lambda`         | Done   | REST JSON; stateful function lifecycle + tags backed by state store; Invoke echoes the payload      |
+| `cloudstub-ssm`            | Done   | JSON/X-Amz-Target; stateful Parameter Store (put/get/by-path/delete/describe/history/tags) backed by state store |
 | `cloudstub-codegen`        | Done   | Smithy → CloudStubService stub generator                                                            |
 | `cloudstub-local`          | Done   | Dual-mode fat JAR (launcher + core + CLI); loads module jars from a plugin directory; port 4566     |
 | `cloudstub-console`        | Done   | Angular web console; built by gradle-node-plugin, embedded in cloudstub-local, served at `/console` |
@@ -418,7 +419,7 @@ All three `StubRegistrar` routing methods are now exercised by real modules: JSO
 
 | Protocol            | Services                       | Matching rule                |
 | ------------------- | ------------------------------ | ---------------------------- |
-| JSON / X-Amz-Target | SQS, Secrets Manager, DynamoDB | `X-Amz-Target` header        |
+| JSON / X-Amz-Target | SQS, Secrets Manager, DynamoDB, SSM | `X-Amz-Target` header   |
 | XML / Form URL      | SNS (legacy)                   | `Action` form body parameter |
 | REST path           | S3, Lambda                     | HTTP method + path regex     |
 

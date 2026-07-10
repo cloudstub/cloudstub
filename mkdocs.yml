@@ -50,6 +50,7 @@ nav:
       - Amazon S3: services/s3.md
       - Amazon SNS: services/sns.md
       - Amazon SQS: services/sqs.md
+      - Amazon SSM: services/ssm.md
   - Module Authoring: module-authoring.md
   - CloudStub Codegen: codegen.md
   - Changelog: changelog.md
