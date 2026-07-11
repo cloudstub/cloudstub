@@ -4,6 +4,23 @@ All notable changes to CloudStub are recorded here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). All published modules share a single
 lockstep version.
 
+## [0.1.0-beta.8] - 2026-07-11
+
+Publishes the SSM Parameter Store service module and fixes the codegen tool's model download so
+GitHub blob URLs resolve and models land in a project-local directory.
+
+### Added
+
+- `cloudstub-ssm`: new module for AWS Systems Manager Parameter Store. Stateful parameters
+  (put/get/get-by-path/delete/describe/history/tags) backed by the state store over the
+  JSON/X-Amz-Target protocol. (#118)
+
+### Fixed
+
+- `cloudstub-codegen`: `github.com/.../blob/...` model URLs are rewritten to their raw form before
+  fetching, and downloaded models are written to a project-local `build/.cloudstub/codegen/`
+  directory instead of a shared temp location. (#210)
+
 ## [0.1.0-beta.7] - 2026-07-05
 
 Publishes the DynamoDB and Lambda service modules, disambiguates REST-path routing so S3 and Lambda
@@ -128,6 +145,7 @@ signals that the SPI and public API may still change.
 - Standalone server (`cloudstub-local`) and the Smithy stub generator (`cloudstub-codegen`),
   distributed as runnable JARs.
 
+[0.1.0-beta.8]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.7...v0.1.0-beta.8
 [0.1.0-beta.7]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.6...v0.1.0-beta.7
 [0.1.0-beta.6]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.5...v0.1.0-beta.6
 [0.1.0-beta.5]: https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.4...v0.1.0-beta.5
