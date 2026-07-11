@@ -62,4 +62,53 @@ class ModelResolverTest {
         assertTrue(Files.exists(resolved));
         assertTrue(resolved.isAbsolute());
     }
+
+    @Test
+    void rewritesGitHubBlobUrlToRawContent() {
+        assertEquals(
+                "https://raw.githubusercontent.com/aws/api-models-aws/main/models/sqs/service/2012-11-05/sqs-2012-11-05.json",
+                HttpsModelResolver.rewriteGitHubBlobUrl(
+                        "https://github.com/aws/api-models-aws/blob/main/models/sqs/service/2012-11-05/sqs-2012-11-05.json"));
+    }
+
+    @Test
+    void httpsResolverDownloadsToProjectLocalDir() throws Exception {
+        Path source = Files.writeString(tempDir.resolve("model.json"), "{\"smithy\":\"2.0\"}");
+        Path resolved = new HttpsModelResolver(source.toUri().toString()).resolve();
+        try {
+            assertTrue(resolved.isAbsolute());
+            assertTrue(resolved.startsWith(HttpsModelResolver.DOWNLOAD_DIR.toAbsolutePath()));
+            assertEquals("model.json", resolved.getFileName().toString());
+            assertEquals("{\"smithy\":\"2.0\"}", Files.readString(resolved));
+        } finally {
+            Files.deleteIfExists(resolved);
+        }
+    }
+
+    @Test
+    void rewriteStripsQueryAndFragmentFromBlobUrl() {
+        assertEquals(
+                "https://raw.githubusercontent.com/o/r/main/model.json",
+                HttpsModelResolver.rewriteGitHubBlobUrl(
+                        "https://github.com/o/r/blob/main/model.json?plain=1#L5"));
+    }
+
+    @Test
+    void leavesRawGitHubUrlUnchanged() {
+        String raw =
+                "https://raw.githubusercontent.com/aws/api-models-aws/main/models/sqs/service/2012-11-05/sqs-2012-11-05.json";
+        assertEquals(raw, HttpsModelResolver.rewriteGitHubBlobUrl(raw));
+    }
+
+    @Test
+    void leavesNonGitHubUrlUnchanged() {
+        String url = "https://example.com/models/model.json";
+        assertEquals(url, HttpsModelResolver.rewriteGitHubBlobUrl(url));
+    }
+
+    @Test
+    void downloadDirIsProjectLocalUnderBuild() {
+        assertFalse(HttpsModelResolver.DOWNLOAD_DIR.isAbsolute());
+        assertTrue(HttpsModelResolver.DOWNLOAD_DIR.startsWith(Path.of("build")));
+    }
 }
