@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://cloudstub.github.io/cloudstub/changelog/">
+        <link rel="canonical" href="https://cloudstub.github.io/cloudstub/troubleshooting/">
       
       
-        <link rel="prev" href="../troubleshooting/">
+        <link rel="prev" href="../codegen/">
       
       
-        <link rel="next" href="../javadoc/">
+        <link rel="next" href="../changelog/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Changelog - CloudStub</title>
+        <title>Troubleshooting - CloudStub</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#changelog" class="md-skip">
+        <a href="#troubleshooting-known-issues" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Changelog
+              Troubleshooting
             
           </span>
         </div>
@@ -343,9 +343,11 @@
   
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../troubleshooting/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
   
@@ -362,11 +364,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../changelog/" class="md-tabs__link">
         
   
   
@@ -1140,33 +1140,6 @@
       
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Troubleshooting
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
     
   
   
@@ -1186,7 +1159,7 @@
   <span class="md-ellipsis">
     
   
-    Changelog
+    Troubleshooting
   
 
     
@@ -1204,7 +1177,7 @@
   <span class="md-ellipsis">
     
   
-    Changelog
+    Troubleshooting
   
 
     
@@ -1230,22 +1203,33 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#010-beta8-2026-07-11" class="md-nav__link">
+  <a href="#known-bugs-in-current-versions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.8 - 2026-07-11
+        Known bugs in current versions
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.1.0-beta.8 - 2026-07-11">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-configuration-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common configuration issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common configuration issues">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#jvm-java-version" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Added
+        JVM / Java version
       
     </span>
   </a>
@@ -1253,10 +1237,43 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#dependency-conflicts-gradle-maven" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fixed
+        Dependency conflicts (Gradle / Maven)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#port-conflicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Port conflicts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standalone-mode-starts-but-serves-nothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standalone mode starts but serves nothing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging configuration
       
     </span>
   </a>
@@ -1269,22 +1286,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta7-2026-07-05" class="md-nav__link">
+  <a href="#integration-troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.7 - 2026-07-05
+        Integration troubleshooting
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.1.0-beta.7 - 2026-07-05">
+    <nav class="md-nav" aria-label="Integration troubleshooting">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added_1" class="md-nav__link">
+  <a href="#spring-boot" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Added
+        Spring Boot
       
     </span>
   </a>
@@ -1292,10 +1309,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed_1" class="md-nav__link">
+  <a href="#junit-extension" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fixed
+        JUnit extension
       
     </span>
   </a>
@@ -1303,10 +1320,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#security" class="md-nav__link">
+  <a href="#aws-sdk-v1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security
+        AWS SDK v1
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-service-setups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-service setups
       
     </span>
   </a>
@@ -1319,134 +1347,66 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta6-2026-06-28" class="md-nav__link">
+  <a href="#codegen-troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.6 - 2026-06-28
+        Codegen troubleshooting
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="0.1.0-beta.6 - 2026-06-28">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fixed_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fixed
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta5-2026-06-24" class="md-nav__link">
+  <a href="#performance-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.5 - 2026-06-24
+        Performance &amp; limitations
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="0.1.0-beta.5 - 2026-06-24">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fixed_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fixed
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta4-2026-06-22" class="md-nav__link">
+  <a href="#service-specific-known-issues" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.4 - 2026-06-22
+        Service-specific known issues
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="0.1.0-beta.4 - 2026-06-22">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#added_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Added
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta3-2026-06-17" class="md-nav__link">
+  <a href="#faq" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.3 - 2026-06-17
+        FAQ
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="0.1.0-beta.3 - 2026-06-17">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#changed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Changed
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta2-2026-06-17" class="md-nav__link">
+  <a href="#getting-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.2 - 2026-06-17
+        Getting help
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.1.0-beta.2 - 2026-06-17">
+    <nav class="md-nav" aria-label="Getting help">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added_3" class="md-nav__link">
+  <a href="#collect-debug-information" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Added
+        Collect debug information
       
     </span>
   </a>
@@ -1454,38 +1414,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#changed_1" class="md-nav__link">
+  <a href="#enable-debug-logging" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Changed
+        Enable DEBUG logging
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#010-beta1-2026-06-13" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        0.1.0-beta.1 - 2026-06-13
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="0.1.0-beta.1 - 2026-06-13">
-      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added_4" class="md-nav__link">
+  <a href="#file-an-issue" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Added
+        File an issue
       
     </span>
   </a>
@@ -1501,6 +1444,33 @@
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1559,22 +1529,33 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#010-beta8-2026-07-11" class="md-nav__link">
+  <a href="#known-bugs-in-current-versions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.8 - 2026-07-11
+        Known bugs in current versions
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.1.0-beta.8 - 2026-07-11">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-configuration-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common configuration issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common configuration issues">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#jvm-java-version" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Added
+        JVM / Java version
       
     </span>
   </a>
@@ -1582,10 +1563,43 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#dependency-conflicts-gradle-maven" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fixed
+        Dependency conflicts (Gradle / Maven)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#port-conflicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Port conflicts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standalone-mode-starts-but-serves-nothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standalone mode starts but serves nothing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging configuration
       
     </span>
   </a>
@@ -1598,22 +1612,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta7-2026-07-05" class="md-nav__link">
+  <a href="#integration-troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.7 - 2026-07-05
+        Integration troubleshooting
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.1.0-beta.7 - 2026-07-05">
+    <nav class="md-nav" aria-label="Integration troubleshooting">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added_1" class="md-nav__link">
+  <a href="#spring-boot" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Added
+        Spring Boot
       
     </span>
   </a>
@@ -1621,10 +1635,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed_1" class="md-nav__link">
+  <a href="#junit-extension" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fixed
+        JUnit extension
       
     </span>
   </a>
@@ -1632,10 +1646,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#security" class="md-nav__link">
+  <a href="#aws-sdk-v1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security
+        AWS SDK v1
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-service-setups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-service setups
       
     </span>
   </a>
@@ -1648,134 +1673,66 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta6-2026-06-28" class="md-nav__link">
+  <a href="#codegen-troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.6 - 2026-06-28
+        Codegen troubleshooting
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="0.1.0-beta.6 - 2026-06-28">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fixed_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fixed
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta5-2026-06-24" class="md-nav__link">
+  <a href="#performance-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.5 - 2026-06-24
+        Performance &amp; limitations
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="0.1.0-beta.5 - 2026-06-24">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fixed_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fixed
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta4-2026-06-22" class="md-nav__link">
+  <a href="#service-specific-known-issues" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.4 - 2026-06-22
+        Service-specific known issues
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="0.1.0-beta.4 - 2026-06-22">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#added_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Added
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta3-2026-06-17" class="md-nav__link">
+  <a href="#faq" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.3 - 2026-06-17
+        FAQ
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="0.1.0-beta.3 - 2026-06-17">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#changed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Changed
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#010-beta2-2026-06-17" class="md-nav__link">
+  <a href="#getting-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.1.0-beta.2 - 2026-06-17
+        Getting help
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.1.0-beta.2 - 2026-06-17">
+    <nav class="md-nav" aria-label="Getting help">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added_3" class="md-nav__link">
+  <a href="#collect-debug-information" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Added
+        Collect debug information
       
     </span>
   </a>
@@ -1783,38 +1740,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#changed_1" class="md-nav__link">
+  <a href="#enable-debug-logging" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Changed
+        Enable DEBUG logging
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#010-beta1-2026-06-13" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        0.1.0-beta.1 - 2026-06-13
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="0.1.0-beta.1 - 2026-06-13">
-      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added_4" class="md-nav__link">
+  <a href="#file-an-issue" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Added
+        File an issue
       
     </span>
   </a>
@@ -1846,135 +1786,277 @@
   
 
 
-<h1 id="changelog">Changelog</h1>
-<p>All notable changes to CloudStub are recorded here. The format is based on
-<a href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>. All published modules share a single
-lockstep version.</p>
-<h2 id="010-beta8-2026-07-11"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.7...v0.1.0-beta.8">0.1.0-beta.8</a> - 2026-07-11</h2>
-<p>Publishes the SSM Parameter Store service module and fixes the codegen tool's model download so
-GitHub blob URLs resolve and models land in a project-local directory.</p>
-<h3 id="added">Added</h3>
+<h1 id="troubleshooting-known-issues">Troubleshooting &amp; Known Issues</h1>
+<p>Solutions for common problems, documented limitations, and where to get help. If your issue is not
+covered here, search the <a href="https://github.com/cloudstub/cloudstub/issues">issue tracker</a> before
+filing a new report.</p>
+<div class="admonition tip">
+<p class="admonition-title">First step for any problem: enable DEBUG logging</p>
+<p>DEBUG logging prints every registered stub, the full request and response bodies for matched
+requests, and a WARN line for every unmatched request. It resolves most integration problems on
+its own. See <a href="#enable-debug-logging">Enable DEBUG logging</a> below and the full
+<a href="../logging/">Logging guide</a>.</p>
+</div>
+<h2 id="known-bugs-in-current-versions">Known bugs in current versions</h2>
+<p>CloudStub is in the <code>0.1.0</code> beta series. The bugs below are tracked and scheduled for a fix; each
+lists a workaround where one exists.</p>
+<div class="admonition bug">
+<p class="admonition-title">Codegen emits a <code>cloudMock</code> field and defaults the core version to <code>-SNAPSHOT</code></p>
+<p><strong>Affected:</strong> <code>cloudstub-codegen</code>, <code>0.1.0</code> beta series &nbsp;·&nbsp;
+<a href="https://github.com/cloudstub/cloudstub/issues/212">#212</a></p>
+<p>Generated test skeletons use a field named <code>cloudMock</code>, and the generated <code>build.gradle</code> pins
+<code>cloudstub-core</code> at <code>0.1.0-SNAPSHOT</code> when <code>--core-version</code> is not supplied. A <code>-SNAPSHOT</code> version
+does not resolve from Maven Central.</p>
+<p><strong>Workaround:</strong> always pass an explicit published version, for example
+<code>--core-version 0.1.0</code>, and rename the generated field to <code>cloudStub</code> during the
+<a href="../codegen/#manual-review-steps">manual review</a>.</p>
+</div>
+<div class="admonition bug">
+<p class="admonition-title">S3 virtual-hosted-style addressing requires the client-side interceptor</p>
+<p><strong>Affected:</strong> <code>cloudstub-s3</code> &nbsp;·&nbsp;
+<a href="https://github.com/cloudstub/cloudstub/issues/196">#196</a></p>
+<p>A vanilla AWS SDK v2 <code>S3Client</code> uses virtual-hosted-style addressing
+(<code>https://{bucket}.s3.amazonaws.com/...</code>). CloudStub matches path-style
+(<code>http://localhost:4566/{bucket}/{key}</code>). The module ships an <code>ExecutionInterceptor</code> that rewrites
+virtual-hosted requests to path-style, but it is discovered only when <code>cloudstub-s3</code> is on the
+application classpath as a test dependency. A module loaded only via the JUnit extension's
+<code>withModules("s3")</code> (a downloaded, server-side-only jar) does not supply the interceptor.</p>
+<p><strong>Workaround:</strong> declare <code>cloudstub-s3</code> as a test dependency (its stubs are then discovered
+automatically, so it does <strong>not</strong> go in <code>withModules(...)</code>), or set <code>pathStyleAccessEnabled(true)</code>
+on the <code>S3Client</code>. See the <a href="../services/s3/">S3 guide</a>.</p>
+</div>
+<div class="admonition bug">
+<p class="admonition-title">An S3 bucket named like a Lambda API date prefix is shadowed by Lambda</p>
+<p><strong>Affected:</strong> <code>cloudstub-s3</code> + <code>cloudstub-lambda</code> in the same server &nbsp;·&nbsp;
+<a href="https://github.com/cloudstub/cloudstub/issues/201">#201</a></p>
+<p>S3 and Lambda both route on URL path. Routing is resolved by stub specificity, so Lambda's literal
+<code>/2015-03-31/functions/...</code> prefixes win over S3's catch-all object patterns, and every normal S3
+bucket is unaffected. The one exception: an S3 bucket named exactly like a Lambda API date prefix
+(<code>2015-03-31</code>, <code>2016-08-19</code>, <code>2017-03-31</code>) with a key path matching a Lambda route is shadowed by
+the Lambda stub.</p>
+<p><strong>Workaround:</strong> use a bucket name that is not one of those date strings.</p>
+</div>
+<h2 id="common-configuration-issues">Common configuration issues</h2>
+<h3 id="jvm-java-version">JVM / Java version</h3>
+<p>CloudStub requires <strong>Java 17 or newer</strong> (both the runtime and, for the codegen, the build). On an
+older JVM you will see <code>UnsupportedClassVersionError</code> at startup or a compile error such as
+<code>invalid target release: 17</code>.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>java -version   # must report 17 or higher
+</span></code></pre></div>
+<p>Set <code>JAVA_HOME</code> to a JDK 17+ installation, or configure your build's toolchain to a matching Java
+version.</p>
+<h3 id="dependency-conflicts-gradle-maven">Dependency conflicts (Gradle / Maven)</h3>
+<p>CloudStub shades WireMock and Jetty inside <code>cloudstub-core</code> under <code>io.cloudstub.shaded.*</code>, so it does
+<strong>not</strong> conflict with your own Jetty, Jackson, or a Spring Boot BOM. If you hit a version conflict, it
+is almost never with a shaded dependency.</p>
 <ul>
-<li><code>cloudstub-ssm</code>: new module for AWS Systems Manager Parameter Store. Stateful parameters
-  (put/get/get-by-path/delete/describe/history/tags) backed by the state store over the
-  JSON/X-Amz-Target protocol. (#118)</li>
+<li>Match your <strong>AWS SDK v2</strong> version across all clients. CloudStub does not pin the SDK for you; use a
+  single BOM (<code>software.amazon.awssdk:bom</code>) so every <code>sqs</code>, <code>s3</code>, <code>dynamodb</code>, and so on resolves to
+  the same version.</li>
+<li>Add <code>cloudstub-testing</code> (which pulls in <code>cloudstub-core</code> and the JUnit extension) plus only the
+  service modules you use. See <a href="../getting-started/#1-add-dependencies">Getting Started</a>.</li>
 </ul>
-<h3 id="fixed">Fixed</h3>
+<h3 id="port-conflicts">Port conflicts</h3>
+<p>Standalone mode binds two ports: <strong>4566</strong> for the AWS mock and <strong>4567</strong> for the REST API. A
+<code>BindException: Address already in use</code> on startup means another process holds one of them.</p>
+<p>Override both (CLI flag takes precedence over the environment variable):</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI flags</label><label for="__tabbed_1_2">Environment variables</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>java -jar cloudstub-local.jar --port=15566 --api-port=15567 --services=sqs
+</span></code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>CLOUDSTUB_PORT=15566 CLOUDSTUB_API_PORT=15567 java -jar cloudstub-local.jar --services=sqs
+</span></code></pre></div>
+</div>
+</div>
+</div>
+<p>Remember to point your client at the new port: <code>AWS_ENDPOINT_URL=http://localhost:15566</code>. In embedded
+mode, CloudStub picks a free port automatically and publishes it as the <code>aws.endpoint-url</code> system
+property, so port conflicts do not arise.</p>
+<h3 id="standalone-mode-starts-but-serves-nothing">Standalone mode starts but serves nothing</h3>
+<p>Services are <strong>opt-in</strong>. Starting the server with no selection logs a warning and loads nothing:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>java -jar cloudstub-local.jar --services=sqs,s3,dynamodb
+</span></code></pre></div>
+<p>or set <code>CLOUDSTUB_SERVICES=sqs,s3</code>. Naming an unknown service fails fast. The resolved plugin
+directory and the loaded modules are printed at startup, so check that line first. See
+<a href="../standalone/">Standalone Mode</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Auto-download and offline runs</p>
+<p>A service named via <code>--services</code> whose jar is not in the plugin directory is fetched from Maven
+Central, checksum-verified, and cached in the plugin directory. If the network is unreachable and
+no jar is cached, startup fails fast naming the service and how to supply the jar manually. For
+air-gapped runs, pre-populate the plugin directory and pass <code>--no-download</code> (or
+<code>CLOUDSTUB_AUTO_DOWNLOAD=false</code>).</p>
+</div>
+<h3 id="logging-configuration">Logging configuration</h3>
+<p>CloudStub uses SLF4J with no bundled implementation in embedded mode (standalone ships
+<code>slf4j-simple</code>). If you see the SLF4J "no providers were found" notice in a test, add a logging
+implementation (Logback is already present via <code>spring-boot-starter</code>) to your test dependencies. See
+<a href="../logging/">Logging</a>.</p>
+<h2 id="integration-troubleshooting">Integration troubleshooting</h2>
+<h3 id="spring-boot">Spring Boot</h3>
 <ul>
-<li><code>cloudstub-codegen</code>: <code>github.com/.../blob/...</code> model URLs are rewritten to their raw form before
-  fetching, and downloaded models are written to a project-local <code>build/.cloudstub/codegen/</code>
-  directory instead of a shared temp location. (#210)</li>
+<li><strong>Jetty version conflict:</strong> cannot happen through the published artifacts. WireMock and Jetty are
+  shaded, so a <code>spring-boot-dependencies</code> BOM does not clash. See
+  <a href="../spring-boot/">Spring Boot Integration</a>.</li>
+<li><strong>The SDK does not hit CloudStub:</strong> confirm the client reads the endpoint. CloudStub sets the
+  <code>aws.endpoint-url</code> system property; an <code>S3Client</code>/<code>SqsClient</code> built before CloudStub starts, or one
+  with a hard-coded <code>endpointOverride</code>, will not pick it up. Build clients inside the test, or wire the
+  endpoint through configuration.</li>
 </ul>
-<h2 id="010-beta7-2026-07-05"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.6...v0.1.0-beta.7">0.1.0-beta.7</a> - 2026-07-05</h2>
-<p>Publishes the DynamoDB and Lambda service modules, disambiguates REST-path routing so S3 and Lambda
-can run in one server, and patches dependency vulnerabilities in the shipped and test-path classpaths.</p>
-<h3 id="added_1">Added</h3>
+<h3 id="junit-extension">JUnit extension</h3>
 <ul>
-<li><code>cloudstub-dynamodb</code>: new module for Amazon DynamoDB. Stateful tables and items
-  (put/get/query/scan/update/batch) backed by the state store over the JSON/X-Amz-Target protocol. (#197)</li>
-<li><code>cloudstub-lambda</code>: new module for AWS Lambda. Stateful function lifecycle and tags backed by the
-  state store over REST JSON; <code>Invoke</code> echoes the request payload. (#200)</li>
-<li><code>cloudstub-junit</code>: <code>CloudStubExtension.withModules(...)</code> and <code>withServices(...)</code> auto-download and
-  enable service modules in embedded tests, matching standalone mode's provisioning. (#195)</li>
+<li><strong>State leaks between tests:</strong> the extension resets fault injection after every test method, but
+  service <strong>state</strong> (queues, items, secrets) persists for the lifetime of the CloudStub instance. Use
+  a fresh instance per class, or reset explicitly between tests. See
+  <a href="../junit-extension/">JUnit Extension</a>.</li>
+<li><strong><code>withModules("s3")</code> behaves oddly:</strong> S3 needs the client-side interceptor and therefore a
+  test-scope dependency, not a downloaded module. See the
+  <a href="#known-bugs-in-current-versions">S3 known bug</a> above.</li>
+<li><strong>Fault annotations do nothing:</strong> <code>@SimulateThrottle</code>, <code>@SimulateTimeout</code>, and
+  <code>@SimulateNetworkBrownout</code> name a <code>service</code>; the id must match a loaded module (for example
+  <code>service = "sqs"</code>). See <a href="../fault-injection/">Fault Injection</a>.</li>
 </ul>
-<h3 id="fixed_1">Fixed</h3>
+<h3 id="aws-sdk-v1">AWS SDK v1</h3>
+<p>The <code>cloudstub-sdk-v1</code> companion redirects the <strong>endpoint</strong> of an SDK v1 client to CloudStub; it does
+<strong>not</strong> translate protocols. First-party modules target the SDK v2 protocol shape. An SDK v1 client
+whose wire protocol differs from v2 (for example a service whose v1 and v2 request encodings diverge)
+will connect but may fail to parse the response. The signing region and credentials on a v1 client are
+inert: CloudStub does not verify signatures. See <a href="../sdk-v1/">SDK v1 Support</a>.</p>
+<h3 id="multi-service-setups">Multi-service setups</h3>
 <ul>
-<li><code>cloudstub-core</code>: overlapping REST-path stubs are disambiguated by pattern specificity (the pattern
-  with more literal characters wins), so S3's catch-all object patterns and Lambda's API routes no
-  longer collide when both modules are loaded in one server. (#199)</li>
+<li>REST-path modules (<strong>S3</strong>, <strong>Lambda</strong>) share one URL space; routing is resolved by stub specificity.
+  The only collision is the <a href="#known-bugs-in-current-versions">Lambda-date-prefix bucket name</a> noted
+  above.</li>
+<li>State is isolated per service by key prefix. A full <code>POST /api/reset</code> clears all state;
+  <code>POST /api/reset?service=sqs</code> clears only that service.</li>
 </ul>
-<h3 id="security">Security</h3>
+<h2 id="codegen-troubleshooting">Codegen troubleshooting</h2>
+<p>See the <a href="../codegen/">Codegen guide</a> for the full workflow. Common issues:</p>
 <ul>
-<li><code>cloudstub-core</code>: the shaded jar now bundles <code>net.minidev:json-smart</code> 2.6.0 (GHSA-pq2g-wx69-c263)
-  and Jetty 11.0.26 (GHSA-mmxm-8w33-wc4h). Advisories still pinned by WireMock 3 (EOL Jetty 11,
-  Handlebars 4.3.x) are tracked for the WireMock 4 migration in #203.</li>
-<li>Bumped the AWS SDK v2 test dependency to 2.46.21 (Netty 4.1.135.Final), clearing the Netty
-  advisories from the test and example classpaths. The SDK is not shipped in any published artifact.</li>
-<li><code>cloudstub-console</code>: updated the Angular build toolchain (<code>npm audit fix</code>), clearing the Vite,
-  esbuild, undici, and Piscina advisories. The toolchain is build-only and not embedded in the
-  published console.</li>
+<li><strong>Model validation errors:</strong> run the validator before generating to see the derived service id,
+  protocol, and operations without writing files:
+  <code>./gradlew :cloudstub-codegen:validate --args="--model &lt;path&gt;"</code> (or <code>--validate</code> on the JAR).</li>
+<li><strong><code>http://</code> model URL rejected:</strong> use <code>https://</code>. <code>--model</code> must be a single <code>.smithy</code> or <code>.json</code>
+  file, not a directory.</li>
+<li><strong>Generation needs Java 17+:</strong> the codegen fails to build or run on an older JVM.</li>
+<li><strong><code>-SNAPSHOT</code> core version in the generated <code>build.gradle</code>:</strong> pass <code>--core-version 0.1.0</code>
+  explicitly (see the <a href="#known-bugs-in-current-versions">#212 known bug</a>).</li>
+<li><strong>Generated responses do not parse:</strong> templates are <strong>minimal placeholders</strong> with a
+  <code>{{! REVIEW REQUIRED ... }}</code> header. The SDK may require additional fields. Enrich each template from
+  the SDK's response shape, as described in the
+  <a href="../codegen/#manual-review-steps">manual review steps</a>.</li>
+<li><strong>Module is not discovered at runtime:</strong> confirm the generated
+  <code>META-INF/services/io.cloudstub.core.spi.CloudStubService</code> names the generated class and is on the
+  classpath.</li>
+<li><strong>Wrong <code>X-Amz-Target</code> prefix:</strong> <code>TARGET_PREFIX</code> is a generated guess with a <code>TODO</code>. Confirm the
+  real value against a captured SDK call.</li>
 </ul>
-<h2 id="010-beta6-2026-06-28"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.5...v0.1.0-beta.6">0.1.0-beta.6</a> - 2026-06-28</h2>
-<p>Fixes cloudstub-core's published POM and shadow JAR leaking bundled libraries onto a consumer's
-classpath, which aborted startup under Spring Boot 4.</p>
-<h3 id="fixed_2">Fixed</h3>
+<h2 id="performance-limitations">Performance &amp; limitations</h2>
 <ul>
-<li><code>cloudstub-core</code>: the published POM no longer declares the bundled WireMock and Jackson as
-  dependencies. Both are relocated inside the shadow JAR, so leaking them transitively pulled
-  un-relocated WireMock plus Jetty 11 onto a consumer's classpath. Under Spring Boot 4 (Jetty 12)
-  that aborted CloudStub startup with <code>FatalStartupException: Jetty 11 is not present</code>. The published
-  POM now declares only <code>slf4j-api</code> (kept unshaded so the consumer's logging config applies). (#178)</li>
-<li><code>cloudstub-core</code>: the shadow JAR now relocates <code>com.jayway.jsonpath</code> alongside WireMock and Jackson.
-  It was bundled at its original package, colliding with a consumer's own <code>json-path</code> (e.g. the copy
-  <code>spring-boot-starter-test</code> pulls in). The collided <code>JacksonJsonProvider</code> resolved against un-relocated
-  Jackson, which Spring Boot 4 (Jackson 3) does not provide, aborting CloudStub startup with
-  <code>NoClassDefFoundError: com/fasterxml/jackson/databind/ObjectMapper</code>. (#178)</li>
+<li><strong>State persistence file growth:</strong> the default persistent backend (<code>AppendLogStateStore</code>) appends
+  one line per mutation and compacts periodically, so a write costs the size of the change, not the
+  size of the store. The legacy <code>JsonFileStateStore</code> rewrites the whole document on every write and
+  suits only small or static state. See <a href="../standalone/">State store</a>.</li>
+<li><strong>Memory with large datasets:</strong> state is held in memory (and mirrored to the log when persistent). A
+  very large working set is bounded by heap; size the JVM accordingly.</li>
+<li><strong>Request history cap:</strong> <code>GET /api/history</code> is bounded (default 1000 entries); raise or disable with
+  <code>--max-history</code> / <code>CLOUDSTUB_MAX_HISTORY</code>.</li>
+<li><strong>SNS does not deliver messages:</strong> <code>Publish</code> returns a <code>MessageId</code> but is not fanned out to
+  subscribers. See the <a href="../services/sns/#limitations">SNS limitations</a>.</li>
+<li><strong>Batch operations are frequently placeholders:</strong> several services accept batch calls without
+  mutating state (see the per-service tables below).</li>
 </ul>
-<h2 id="010-beta5-2026-06-24"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.4...v0.1.0-beta.5">0.1.0-beta.5</a> - 2026-06-24</h2>
-<p>Fixes S3 uploads from a credentialed client.</p>
-<h3 id="fixed_3">Fixed</h3>
-<ul>
-<li><code>cloudstub-s3</code>: <code>PutObject</code> from a credentialed <code>S3Client</code> (any non-anonymous credentials
-  provider) now passes the SDK's checksum validation. A signed client frames the request body as
-  <code>aws-chunked</code>; the module now strips that chunk framing before storing the object and computing the
-  ETag, so the ETag is the MD5 of the actual content. Previously only an <code>AnonymousCredentialsProvider</code>
-  client (which sends an unframed body) succeeded.</li>
-</ul>
-<h2 id="010-beta4-2026-06-22"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.3...v0.1.0-beta.4">0.1.0-beta.4</a> - 2026-06-22</h2>
-<p>Publishes three additional service modules.</p>
-<h3 id="added_2">Added</h3>
-<ul>
-<li>Published <code>cloudstub-s3</code>, <code>cloudstub-sns</code>, and <code>cloudstub-secretsmanager</code> to Maven Central
-  (previously only <code>cloudstub-sqs</code> shipped among the service modules).</li>
-<li><code>cloudstub-s3</code>: Amazon S3 over the REST path protocol. Bucket and object operations
-    (<code>PutObject</code>, <code>GetObject</code>, <code>ListObjectsV2</code>/<code>ListObjects</code>, <code>DeleteObject</code>) and object/bucket
-    tagging are state-backed: an object put is returned by a later get and listed in the bucket. A
-    bundled AWS SDK v2 interceptor rewrites virtual-hosted-style requests aimed at the CloudStub
-    endpoint to path-style, so a vanilla <code>S3Client</code> works with no <code>pathStyleAccessEnabled</code>.</li>
-<li><code>cloudstub-sns</code>: Amazon SNS topics and subscriptions over the AWS Query (XML/form) protocol.</li>
-<li><code>cloudstub-secretsmanager</code>: AWS Secrets Manager over the AWS JSON protocol with state-backed
-    secret storage: a secret created is returned by a later get.</li>
-</ul>
-<h2 id="010-beta3-2026-06-17"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.2...v0.1.0-beta.3">0.1.0-beta.3</a> - 2026-06-17</h2>
-<p>Publishes the refactored <code>cloudstub-sqs</code> module.</p>
-<h3 id="changed">Changed</h3>
-<ul>
-<li><code>cloudstub-sqs</code> regenerated from the AWS SQS Smithy model with full coverage of all 23 operations.
-  The eight core queue and message operations remain state-backed: a message sent with <code>SendMessage</code>
-  is returned by a later <code>ReceiveMessage</code>, while the remaining operations return well-formed template
-  responses.</li>
-</ul>
-<h2 id="010-beta2-2026-06-17"><a href="https://github.com/cloudstub/cloudstub/compare/v0.1.0-beta.1...v0.1.0-beta.2">0.1.0-beta.2</a> - 2026-06-17</h2>
-<p>Republished the non-service modules. <code>cloudstub-sqs</code> was held at <code>0.1.0-beta.1</code> and is unchanged in
-this release.</p>
-<h3 id="added_3">Added</h3>
-<ul>
-<li><code>cloudstub-local</code>: automatic download of declared service modules from Maven Central, verified
-  against the strongest published checksum, with the plugin directory acting as the cache.</li>
-<li><code>cloudstub-local</code>: optional <code>.properties</code> configuration file for any launcher option, resolved with
-  CLI flag → environment variable → file → default precedence.</li>
-<li><code>cloudstub-core</code>: <code>StubTemplates</code> helper for loading bundled Handlebars response templates;
-  <code>cloudstub-codegen</code> emits it for generated modules.</li>
-</ul>
-<h3 id="changed_1">Changed</h3>
-<ul>
-<li><code>cloudstub-local</code>: port and request-history flags tolerate non-numeric values instead of failing.</li>
-</ul>
-<h2 id="010-beta1-2026-06-13"><a href="https://github.com/cloudstub/cloudstub/releases/tag/v0.1.0-beta.1">0.1.0-beta.1</a> - 2026-06-13</h2>
-<p>First publication to Maven Central under the <code>io.github.cloudstub</code> namespace. The <code>-beta</code> qualifier
-signals that the SPI and public API may still change.</p>
-<h3 id="added_4">Added</h3>
-<ul>
-<li>Published artifacts: <code>cloudstub-core</code>, <code>cloudstub-testing</code>, <code>cloudstub-junit</code>, <code>cloudstub-sqs</code>,
-  <code>cloudstub-sdk-v1</code>, <code>cloudstub-local</code>, <code>cloudstub-codegen</code>.</li>
-<li>Embedded mock engine (<code>cloudstub-core</code>) that redirects AWS SDK v2 traffic and discovers service
-  modules via the <code>CloudStubService</code> SPI.</li>
-<li>JUnit 5 and 6 extension (<code>cloudstub-junit</code>) with lifecycle management and throttle/timeout/brownout
-  fault injection, aggregated for test use by <code>cloudstub-testing</code>.</li>
-<li>Stateful Amazon SQS module (<code>cloudstub-sqs</code>) backed by the shared state store.</li>
-<li>Standalone server (<code>cloudstub-local</code>) and the Smithy stub generator (<code>cloudstub-codegen</code>),
-  distributed as runnable JARs.</li>
-</ul>
+<h2 id="service-specific-known-issues">Service-specific known issues</h2>
+<p>Each service page has a full <strong>Limitations</strong> section; the most common surprises are summarized here.</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Most common gaps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../services/lambda/#limitations">Lambda</a></td>
+<td><code>Invoke</code> echoes the payload (does not execute code); versions/aliases, event source mappings, and function URLs not simulated</td>
+</tr>
+<tr>
+<td><a href="../services/secretsmanager/#limitations">Secrets Manager</a></td>
+<td>Only the current version is tracked; <code>DeleteSecret</code> is immediate (no recovery window); <code>SecretBinary</code> not stored</td>
+</tr>
+<tr>
+<td><a href="../services/dynamodb/#limitations">DynamoDB</a></td>
+<td><code>Query</code> matches the partition key only; <code>FilterExpression</code>, secondary indexes, conditional writes, transactions, and pagination not applied</td>
+</tr>
+<tr>
+<td><a href="../services/s3/#limitations">S3</a></td>
+<td>Multipart upload, versioning, and <code>CopyObject</code> are placeholders; object metadata beyond content type not stored</td>
+</tr>
+<tr>
+<td><a href="../services/sns/#limitations">SNS</a></td>
+<td>No message delivery or fan-out; subscriptions auto-confirmed; tagging is a placeholder</td>
+</tr>
+<tr>
+<td><a href="../services/sqs/#limitations">SQS</a></td>
+<td>Visibility timeout not enforced; FIFO treated as standard; batch operations and DLQ redrive are placeholders; Query API not supported</td>
+</tr>
+<tr>
+<td><a href="../services/ssm/#limitations">SSM</a></td>
+<td><code>SecureString</code> stored in plaintext; single version retained; filters and pagination not applied</td>
+</tr>
+</tbody>
+</table>
+<p>Behaviors CloudStub does <strong>not</strong> yet simulate at all: SQS FIFO deduplication/ordering, S3 multipart
+upload lifecycle, DynamoDB conditional expressions/transactions, and IAM policy evaluation. Until a
+behavior is implemented, test code that depends on it should run against real AWS.</p>
+<h2 id="faq">FAQ</h2>
+<p><strong>Which AWS behaviors are simulated?</strong> CloudStub simulates the request/response contract and, for
+stateful modules, live data (what you send is returned by a later read). It does not run your Lambda
+code, evaluate IAM policies, or enforce quotas. See each service's <strong>Limitations</strong> section for the
+exact boundary.</p>
+<p><strong>When should I use CloudStub?</strong> For fast, containerless JVM integration tests where you assert on
+what your code did against AWS (the order reached the queue, the item was written), not on AWS
+internals. For behavior CloudStub explicitly does not simulate, test against real AWS.</p>
+<p><strong>How do I reset state between tests or runs?</strong> <code>POST /api/reset</code> clears all state and request
+history; <code>POST /api/reset?service=sqs</code> clears one service. In embedded mode, a fresh CloudStub
+instance per test class is the simplest reset. State is in-memory by default and lost on stop unless a
+store directory is configured.</p>
+<p><strong>How do I debug a request that is not matching?</strong> Enable DEBUG logging and watch for the
+<code>WARN Unmatched request</code> line: it prints the method, URL, <code>X-Amz-Target</code>, and <code>Content-Type</code>, which
+tells you whether the service module is loaded and which stub should have matched. The REST API
+(<code>GET /api/history</code>) and the <a href="../console/">Console</a> show recent requests as well.</p>
+<h2 id="getting-help">Getting help</h2>
+<h3 id="collect-debug-information">Collect debug information</h3>
+<p>Before filing an issue, gather:</p>
+<ol>
+<li>CloudStub version (<code>java -jar cloudstub-local.jar --version</code>, or the dependency version in your
+   build).</li>
+<li>Java version (<code>java -version</code>) and the AWS SDK v2 version.</li>
+<li>DEBUG logs covering the failing request (see below).</li>
+<li>A minimal reproduction: the client call and the observed vs expected response.</li>
+</ol>
+<h3 id="enable-debug-logging">Enable DEBUG logging</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Standalone</label><label for="__tabbed_2_2">Embedded (Logback)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>java -Dcloudstub.debug=true -jar cloudstub-local.jar --services=sqs
+</span></code></pre></div>
+<p>or <code>CLOUDSTUB_DEBUG=true</code>.</p>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">&lt;logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;io.cloudstub&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;DEBUG&quot;</span><span class="nt">/&gt;</span>
+</span></code></pre></div>
+</div>
+</div>
+</div>
+<p>See <a href="../logging/">Logging</a> for the full level reference.</p>
+<h3 id="file-an-issue">File an issue</h3>
+<p>Report bugs and request features on the
+<a href="https://github.com/cloudstub/cloudstub/issues">GitHub issue tracker</a>, using the bug, feature, or
+documentation issue form. Include the debug information above and a minimal reproduction.</p>
 
 
 
