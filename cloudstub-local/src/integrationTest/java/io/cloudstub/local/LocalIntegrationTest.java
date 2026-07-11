@@ -25,6 +25,7 @@ import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.ListTopicsResponse;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
+import software.amazon.awssdk.services.ssm.SsmClient;
 
 class LocalIntegrationTest {
 
@@ -34,7 +35,7 @@ class LocalIntegrationTest {
     @BeforeAll
     static void startServer() throws Exception {
         // Services are opt-in: declare the services the tests below exercise.
-        process = LocalProcess.start(PORT, "--services=sqs,sns,secretsmanager,dynamodb,lambda");
+        process = LocalProcess.start(PORT, "--services=sqs,sns,secretsmanager,dynamodb,lambda,ssm");
     }
 
     @AfterAll
@@ -198,6 +199,29 @@ class LocalIntegrationTest {
             assertTrue(
                     "{\"ping\":true}".equals(response.payload().asUtf8String()),
                     "Invoke must echo the request payload");
+        }
+    }
+
+    @Test
+    void ssmParameterIsStateBackedByLocalProcess() {
+        try (SsmClient ssm =
+                SsmClient.builder()
+                        .endpointOverride(URI.create("http://localhost:" + PORT))
+                        .region(Region.US_EAST_1)
+                        .credentialsProvider(
+                                StaticCredentialsProvider.create(
+                                        AwsBasicCredentials.create("test", "test")))
+                        .build()) {
+
+            // Unique name: the standalone server persists state to .cloudstub, so a fixed name
+            // would return a stale value on a re-run.
+            String name = "/local/param-" + java.util.UUID.randomUUID();
+            ssm.putParameter(b -> b.name(name).value("local-value"));
+
+            assertTrue(
+                    "local-value".equals(ssm.getParameter(b -> b.name(name)).parameter().value()),
+                    "parameter written over the AWS protocol must be returned by the standalone"
+                            + " server");
         }
     }
 }

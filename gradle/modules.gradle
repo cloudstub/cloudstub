@@ -3,7 +3,7 @@
 
 // Every service module — all are policed by the isolation guard regardless of publish status.
 ext.serviceModules = ['cloudstub-sqs', 'cloudstub-sns', 'cloudstub-secretsmanager',
-                      'cloudstub-s3', 'cloudstub-dynamodb', 'cloudstub-lambda']
+                      'cloudstub-s3', 'cloudstub-dynamodb', 'cloudstub-lambda', 'cloudstub-ssm']
 
 // Modules whose primary published artifact is the shadow (fat) JAR.
 ext.shadowModules = ['cloudstub-core', 'cloudstub-local', 'cloudstub-codegen']
@@ -13,4 +13,4 @@ ext.toolModules = ['cloudstub-local', 'cloudstub-codegen']
 
 // Services rolled out so far; add the next one here (and its pomInfo) when its publishing is validated.
 ext.publishedServices = ['cloudstub-sqs', 'cloudstub-s3', 'cloudstub-sns', 'cloudstub-secretsmanager',
-                         'cloudstub-dynamodb', 'cloudstub-lambda']
+                         'cloudstub-dynamodb', 'cloudstub-lambda', 'cloudstub-ssm']
