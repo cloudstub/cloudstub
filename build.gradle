@@ -44,6 +44,22 @@ subprojects {
         mavenCentral()
     }
 
+    // Security-patched versions of the WireMock/Jetty transitives that get bundled into fat JARs.
+    // Applied to every subproject, not just cloudstub-core, so any module that re-bundles these (the
+    // standalone cloudstub-local shadow JAR resolves them independently of core's shaded artifact)
+    // ships the patched versions.
+    configurations.all {
+        resolutionStrategy {
+            force 'net.minidev:json-smart:2.6.0'
+            eachDependency { details ->
+                if (details.requested.group in ['org.eclipse.jetty', 'org.eclipse.jetty.http2']
+                        && details.requested.version.startsWith('11.0.')) {
+                    details.useVersion '11.0.26'
+                }
+            }
+        }
+    }
+
     dependencies {
         testImplementation platform(libs.junit.bom)
         testImplementation libs.junit.jupiter
