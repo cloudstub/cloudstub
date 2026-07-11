@@ -104,3 +104,4 @@ CloudStub starts in under 200 ms. No containers, no credentials, no network.
 - [Fault Injection](fault-injection.md): simulate throttling, timeouts, and network brownouts
 - [Standalone Mode](standalone.md): run CloudStub as a long-lived local development server instead of embedding it in tests
 - [SDK v1 Support](sdk-v1.md): redirect AWS SDK **v1** clients to CloudStub while you migrate to v2
+- [Troubleshooting & Known Issues](troubleshooting.md): fixes for common startup, port, and integration problems

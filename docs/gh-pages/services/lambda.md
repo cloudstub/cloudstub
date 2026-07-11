@@ -174,3 +174,5 @@ State-backed operations return live data from the shared state store:
   every normal S3 bucket and key is unaffected. The one exception: an S3 bucket named exactly like a
   Lambda API date prefix (`2015-03-31`, `2016-08-19`, `2017-03-31`) with a key path matching a Lambda
   route is shadowed by the Lambda stub. Use a different bucket name.
+
+See also: [Troubleshooting](../troubleshooting.md) for common integration problems and workarounds.

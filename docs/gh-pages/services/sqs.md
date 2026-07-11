@@ -156,4 +156,5 @@ does not clear messages.
 - Message attributes, system attributes, and delay seconds are not stored or returned.
 - The SQS Query API (queue URLs as HTTP endpoints with `?Action=…`) is not supported; CloudStub
   serves SQS over the JSON / `X-Amz-Target` protocol only.
-```
+
+See also: [Troubleshooting](../troubleshooting.md) for common integration problems and workarounds.

@@ -174,3 +174,5 @@ platform-endpoint, SMS-sandbox, phone-number, and data-protection-policy operati
 - Resource tagging (`TagResource`, `UntagResource`, `ListTagsForResource`) is a placeholder.
 - Platform applications/endpoints, the SMS sandbox, phone-number opt-out, and data-protection
   policies are acknowledged but not simulated.
+
+See also: [Troubleshooting](../troubleshooting.md) for common integration problems and workarounds.

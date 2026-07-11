@@ -53,6 +53,7 @@ nav:
       - Amazon SSM: services/ssm.md
   - Module Authoring: module-authoring.md
   - CloudStub Codegen: codegen.md
+  - Troubleshooting: troubleshooting.md
   - Changelog: changelog.md
   - Javadoc: javadoc/index.html
 

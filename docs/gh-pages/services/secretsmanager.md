@@ -150,3 +150,5 @@ they do not read or mutate state: `CancelRotateSecret`, `DeleteResourcePolicy`, 
 - Rotation, cross-region replication, resource policies, and KMS encryption are placeholders.
 - `SecretBinary` is not stored; only `SecretString` round-trips.
 - `BatchGetSecretValue` honors only `SecretIdList`; the `Filters` parameter is ignored.
+
+See also: [Troubleshooting](../troubleshooting.md) for common integration problems and workarounds.
