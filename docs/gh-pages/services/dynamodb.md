@@ -184,3 +184,5 @@ they do not read or mutate state: `UpdateTable`, `DescribeLimits`, `DescribeTime
   and time-to-live expiry are not simulated.
 - Provisioned-throughput and capacity accounting are not simulated: `ConsumedCapacity` is not
   returned and requests are never throttled.
+
+See also: [Troubleshooting](../troubleshooting.md) for common integration problems and workarounds.

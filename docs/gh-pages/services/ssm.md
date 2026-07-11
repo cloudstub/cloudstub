@@ -170,4 +170,5 @@ State-backed operations return live data from the shared state store:
   client's configured region.
 - Operations outside the Parameter Store surface (documents, maintenance windows, patch baselines,
   automation, sessions, and so on) are not registered and return HTTP 404.
-```
+
+See also: [Troubleshooting](../troubleshooting.md) for common integration problems and workarounds.

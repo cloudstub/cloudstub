@@ -138,3 +138,8 @@ The generated output is a starting point, not a finished module. Always review a
 
 5. **Enforce module isolation.** Confirm that `build.gradle` uses `compileOnly` for `cloudstub-core` and declares no
    dependencies on other `cloudstub-*` modules.
+
+## Troubleshooting
+
+For validation errors, generation failures, `-SNAPSHOT` core versions, and module-discovery
+problems, see the [Codegen troubleshooting section](troubleshooting.md#codegen-troubleshooting).
