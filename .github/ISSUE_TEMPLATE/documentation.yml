@@ -1,0 +1,32 @@
+name: Documentation issue
+description: Report missing, unclear, or incorrect documentation
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for problems with the documentation itself (the docs site, README, or Javadoc),
+        not for bugs in CloudStub's runtime behavior.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is missing, unclear, or incorrect?
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: Where in the docs (URL or file path), or state that it is missing entirely.
+      placeholder: https://cloudstub.github.io/cloudstub/... or README.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: improvement
+    attributes:
+      label: Suggested improvement
+      description: How it could be corrected or clarified.

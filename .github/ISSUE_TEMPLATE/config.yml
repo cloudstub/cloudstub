@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://cloudstub.github.io/cloudstub
+    about: Usage guides, module reference, and the REST/CLI API. Check here before filing a usage question.
+  - name: Runnable examples
+    url: https://github.com/cloudstub/cloudstub-showcase
+    about: Standalone example projects showing CloudStub in real test suites.

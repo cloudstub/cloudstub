@@ -1,0 +1,72 @@
+name: Feature request
+description: Suggest a new capability, service module, or improvement
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement. If you are requesting a new AWS service module or a
+        specific AWS behavior, please be concrete about which operations and semantics you need.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear description of the feature or change.
+    validations:
+      required: true
+
+  - type: textarea
+    id: usecase
+    attributes:
+      label: Use case
+      description: What are you trying to do, and why does the current behavior fall short?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of request is this?
+      options:
+        - New AWS service module
+        - New operation or behavior in an existing module
+        - Core engine / SPI
+        - Standalone server or CLI
+        - Codegen tool
+        - JUnit extension / fault injection
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: service
+    attributes:
+      label: AWS service / operations
+      description: If this concerns a specific service, name it and the operations you need (e.g. "SSM GetParametersByPath").
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How you think it should work, if you have an idea. Optional.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches or workarounds you have tried or thought about. Optional.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Examples, links, or references that help explain the request.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true

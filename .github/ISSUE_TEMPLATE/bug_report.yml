@@ -1,0 +1,136 @@
+name: Bug report
+description: Report incorrect or unexpected CloudStub behavior
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please fill in the sections below so the
+        problem can be reproduced and triaged quickly. For usage questions rather than bugs,
+        see the [documentation](https://cloudstub.github.io/cloudstub).
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear description of the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps, ideally a small code or CLI snippet, that reproduce the problem.
+      placeholder: |
+        1. Register the CloudStub extension with `.withModules("sqs")`
+        2. Send a message with the AWS SDK v2 SqsClient
+        3. Call ReceiveMessage
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: CloudStub version
+      description: The `io.github.cloudstub` artifact version, or the standalone jar version (`--version`).
+      placeholder: 0.1.0-beta.8
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: How are you running CloudStub?
+      options:
+        - Embedded (JUnit extension / CloudStub API in a JVM)
+        - Standalone server (cloudstub-local jar)
+        - Both
+        - Codegen tool (cloudstub-codegen)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: services
+    attributes:
+      label: Affected service module(s)
+      description: Select every module involved. Leave empty if the problem is in the core engine or launcher.
+      multiple: true
+      options:
+        - sqs
+        - sns
+        - s3
+        - secretsmanager
+        - dynamodb
+        - lambda
+        - ssm
+        - core / engine (not a specific service)
+        - not sure
+
+  - type: input
+    id: java
+    attributes:
+      label: Java version
+      description: Output of `java -version` (Java 17 is the minimum supported).
+      placeholder: "17.0.11"
+    validations:
+      required: true
+
+  - type: input
+    id: sdk
+    attributes:
+      label: AWS SDK
+      description: Which AWS SDK and version your code uses.
+      placeholder: AWS SDK v2 2.46.21
+
+  - type: input
+    id: build
+    attributes:
+      label: Build tool
+      description: Gradle or Maven and its version (if relevant).
+      placeholder: Gradle 8.14.4
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 15.5 / Ubuntu 24.04 / Windows 11
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or stack traces
+      description: Paste any error output. This is automatically formatted as code.
+      render: shell
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else that might help, e.g. whether it works against real AWS.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+        - label: I confirmed the behavior is not one of the documented deferred behaviors (see the README / docs).
+          required: false
