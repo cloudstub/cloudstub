@@ -1,6 +1,6 @@
 [versions]
 wiremock = "3.13.1"
-jackson  = "2.22.0"
+jackson  = "2.22.2"
 smithy   = "1.50.0"
 awssdk   = "2.46.21"
 awssdkv1 = "1.12.770"
